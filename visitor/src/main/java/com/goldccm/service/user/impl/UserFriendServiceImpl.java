@@ -40,7 +40,7 @@ public class UserFriendServiceImpl extends BaseServiceImpl implements IUserFrien
         String fromSql = " from " + TableList.USER_FRIEND + " uf " +
                 " left join " + TableList.USER + " u on uf.friendId=u.id" +
                 " left join " + TableList.COMPANY + " c on c.id=u.companyId"+
-                " where uf.userId = '"+userId+"' and uf.applyType=1 ";
+                " where uf.userId = '"+userId+"' and uf.applyType=1 and uf.applyType=2 ";
         List<Map<String,Object>> list = this.findList(columnSql,fromSql);
         return list != null && !list.isEmpty()
                 ? ResultData.dataResult("success","获取通讯录记录成功",list)
