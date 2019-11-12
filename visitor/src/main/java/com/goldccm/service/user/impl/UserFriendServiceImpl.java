@@ -35,6 +35,7 @@ public class UserFriendServiceImpl extends BaseServiceImpl implements IUserFrien
             if (userId==null){
             return  Result.unDataResult(ConsantCode.FAIL,"缺少用户参数!");
         }
+            //需要改为查看状态为1或2的
         String columnSql = "select uf.id ufId,u.id,u.realName,u.phone,u.orgId,u.province,u.city,u.area,u.addr,u.idHandleImgUrl,u.companyId,u.niceName,u.headImgUrl,uf.remark,c.companyName";
         String fromSql = " from " + TableList.USER_FRIEND + " uf " +
                 " left join " + TableList.USER + " u on uf.friendId=u.id" +
