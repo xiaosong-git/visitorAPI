@@ -125,6 +125,8 @@ public class TableList {
     public static final String WK_USER_GROUP_RLAT = "tbl_wk_user_group_rlat";
     //白名单
     public static final String WK_WHITE_LIST = "tbl_wk_white_list";
+    //打卡记录
+    public static final String WK_RECORD = "tbl_wk_record";
 
 
 

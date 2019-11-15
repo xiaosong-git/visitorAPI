@@ -90,6 +90,11 @@ public class IWebSoketHandle extends AbstractWebSocketHandler {
         int type=0;
         //解析消息
         try {
+            //增加心跳检测
+           if( "ping".equals(message.getPayload().toString())){
+               session.sendMessage(new TextMessage("pong"));
+              return  ;
+           }
             JSONObject msg = JSON.parseObject(message.getPayload().toString());
 
             System.out.println(msg);

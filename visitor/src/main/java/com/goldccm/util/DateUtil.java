@@ -352,4 +352,18 @@ public class DateUtil {
         returnStr = f.format(date);
         return returnStr;
     }
+    //某天的unix值
+    public static long StrToUnix(String date) throws ParseException {
+        Date unixDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(date);
+        return unixDate.getTime()/1000;
+    }
+    //下一天的unix值
+    public static long NextStrToUnix(String date) throws ParseException {
+        Date unixDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(date);
+        Calendar c = Calendar.getInstance();
+        c.setTime(unixDate);
+        c.add(Calendar.DAY_OF_MONTH,1);     //利用Calendar 实现 Date日期+1天
+        Date nextDate = c.getTime();
+        return nextDate.getTime()/1000;
+    }
 }

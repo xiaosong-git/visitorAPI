@@ -114,7 +114,7 @@ public class DESUtil {
 
     public static void main(String[] args) {
         String key = "iB4drRzSrC";
-        String str = "412728199303080831";
+        String str = "350121199306180330";
         encode(key,str);
         System.out.println(str);
         System.out.println( encode(key,str));

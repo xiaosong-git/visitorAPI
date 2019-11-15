@@ -33,7 +33,7 @@ public class UserFriendController extends BaseController {
      * @param request
      * @return
      */
-    @AuthCheckAnnotation(checkLogin = true,checkVerify = true, checkRequestLegal = true)
+    @AuthCheckAnnotation(checkLogin = false,checkVerify = true, checkRequestLegal = true)
     @RequestMapping("/findUserFriend")
     @ResponseBody
     public Result findUserFriend(HttpServletRequest request){
@@ -69,7 +69,7 @@ public class UserFriendController extends BaseController {
      * @param request
      * @return
      */
-    @AuthCheckAnnotation(checkLogin = true,checkVerify = true, checkRequestLegal = true)
+    @AuthCheckAnnotation(checkLogin = false,checkVerify = true, checkRequestLegal = true)
     @RequestMapping("/findRealName")
     @ResponseBody
     public Result findRealName(HttpServletRequest request){
@@ -87,7 +87,7 @@ public class UserFriendController extends BaseController {
      * @param request
      * @return
      */
-    @AuthCheckAnnotation(checkLogin = true,checkVerify = true, checkRequestLegal = true)
+    @AuthCheckAnnotation(checkLogin = false,checkVerify = true, checkRequestLegal = true)
     @RequestMapping("/addUserFriend")
     @ResponseBody
     public Result addUserFriend(HttpServletRequest request){
@@ -106,7 +106,7 @@ public class UserFriendController extends BaseController {
      * @param request
      * @return
      */
-    @AuthCheckAnnotation(checkLogin = true,checkVerify = true, checkRequestLegal = true)
+    @AuthCheckAnnotation(checkLogin = false,checkVerify = true, checkRequestLegal = true)
     @RequestMapping("/deleteUserFriend")
     @ResponseBody
     public Result deleteUserFriend(HttpServletRequest request){
@@ -140,7 +140,7 @@ public class UserFriendController extends BaseController {
      * @param request
      * @return
      */
-    @AuthCheckAnnotation(checkLogin = true,checkVerify = false, checkRequestLegal = true)
+    @AuthCheckAnnotation(checkLogin = false,checkVerify = false, checkRequestLegal = true)
     @RequestMapping("/beAgreeingFriendList")
     @ResponseBody
     public Result beAgreeingFriendList(HttpServletRequest request){
@@ -161,7 +161,7 @@ public class UserFriendController extends BaseController {
      * @param request
      * @return
      */
-    @AuthCheckAnnotation(checkLogin = true,checkVerify = true, checkRequestLegal = true)
+    @AuthCheckAnnotation(checkLogin = false,checkVerify = true, checkRequestLegal = true)
     @RequestMapping("/agreeFriend")
     @ResponseBody
     public Result agreeFriend(HttpServletRequest request){

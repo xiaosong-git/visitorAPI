@@ -1336,8 +1336,8 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 	}
 	/**
 	 * 查看权限并转发给管理员
-	 * @param visitor 被访者
-	 * @param visitorBy 访问者
+	 * @param visitor 被访者姓名
+	 * @param visitorBy 访问者姓名
 	 * @param companyId 被访者公司
 	 * @param startDate 开始时间
 	 * @return
@@ -1349,9 +1349,9 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 	public Result forwarding(String visitor, String visitorBy, String companyId, String startDate) throws Exception {
 		// 被访者无管理权限查询出该公司的所有管理人员
 		String deviceToken=null;
-			String columnSql = " select * ";
-			String fromSql = "  from " + TableList.USER + " where  companyId = '" + companyId
-					+ "' and role = 'manage'";
+			String columnSql = " select u.* ";
+			String fromSql = "  from " + TableList.USER + " u left join "+TableList.COMPANY_USER+" cu on u.id=cu.userId  where  cu.companyId = '" + companyId
+					+ "' and role = 'manage' and currentStatus='normal'";
 			List<Map<String, Object>> list = this.findList(columnSql, fromSql);
 			if (list==null||list.isEmpty()){
 				return  Result.unDataResult("fail", "该公司没有管理者，无法推送审核信息");
@@ -1450,6 +1450,7 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 		Integer recordUserId = BaseUtil.objToInteger(visitorRecord.get("userId"),0);
 		//访客信息
 		Map<String, Object> userUser = userService.getUserByUserId(recordUserId);
+		String visitor = userUser.get("realName").toString();
 		String wxOpenId = BaseUtil.objToStr(userUser.get("wx_open_id"), "");
 		saveMap.put("answerContent",answerContent);
 		//websocket聊天信息
@@ -1545,8 +1546,8 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 			update = update(TableList.VISITOR_RECORD, saveMap);
 			if (update > 0) {
 
-				//推送管理员,让管理员进行审核，
-				Result forwarding = forwarding(String.valueOf(userId), String.valueOf(recordUserId), String.valueOf(companyId), startDate);
+				//推送管理员,让管理员进行审核，用户名
+				Result forwarding = forwarding(visitor, visitorBy, String.valueOf(companyId), startDate);
 				if("fail".equals(forwarding.getVerify().get("sign"))){
 					return forwarding;
 				}

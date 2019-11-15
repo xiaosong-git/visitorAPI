@@ -3,10 +3,13 @@ package com.goldccm.service.checkInWork.impl;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.goldccm.model.compose.Result;
+import com.goldccm.model.compose.ResultData;
 import com.goldccm.model.compose.TableList;
 import com.goldccm.persist.base.impl.BaseDaoImpl;
 import com.goldccm.service.base.impl.BaseServiceImpl;
 import com.goldccm.service.checkInWork.CheckInWorkService;
+import com.goldccm.util.BaseUtil;
+import com.goldccm.util.DateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +18,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
-import java.util.Map;
+import java.text.Format;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * @program: visitor
@@ -32,7 +37,7 @@ public class CheckInWorkServiceImpl  extends BaseServiceImpl implements CheckInW
     /**
      * 1、插入tbl_wk_group规则字段，得到规则id。字段：id，company_id,group_type，group_name，sync_holidays，need_photo，note_can_use_local_pic，allow_checkin_offworkday，allow_apply_offworkday
      * 2、根据规则id插入规则相关打卡日期表tbl_wk_checkindate，打卡时间表tbl_wk_checkintime，打卡日期时间关系表：tbl_wk_date_time_rlat地址表tbl_wk_loc_infos。特殊日期表tbl_wk_spe_days
-     * 3、
+     * 3、修改旧规则时，需要新增一个新规则，保存旧规则，保存修改时间，以便进行判断
      * @param request
      * @return
      */
@@ -193,5 +198,188 @@ public class CheckInWorkServiceImpl  extends BaseServiceImpl implements CheckInW
         }
         return Result.unDataResult("test","success");
     }
+    /**
+     *  获取单人打卡数据
+     * @param paramMap 传入用户id，用户公司
+     * @return Result 用户最后一条打卡记录，当前打卡规则
+     * @throws Exception
+     * @author cwf
+     * @date 2019/11/13 17:20
+     */
+    @Override
+    public Result gainWorkOne(Map<String, Object> paramMap) throws ParseException {
+
+        Long userId = BaseUtil.objToLong(paramMap.get("userId"), null);
+        Long companyId = BaseUtil.objToLong(paramMap.get("companyId"), null);
+        String date = BaseUtil.objToStr(paramMap.get("date"), null);
+        if (userId==null||companyId==null||date==null){
+            return Result.unDataResult("fail","缺少参数！");
+        }
+
+        //获取打卡规则
+        Map<String, Object> groupMap = findFirstBySql("select user_id,wg.* from " + TableList.WK_GROUP + " wg \n" +
+                "left join " + TableList.WK_USER_GROUP_RLAT+
+                " wugr on wugr.group_id=wg.id where user_id=" + userId + " and company_id=" + companyId + " ORDER BY wg.id desc");
+        Long groupId=BaseUtil.objToLong(groupMap.get("id"),null);
+        if (groupId==null){
+            return Result.unDataResult("fail","未找到用户规则");
+        }else{
+
+            //获取白名单,如果用户是白名单内，不需要打卡，返回
+            Map<String, Object> white = findFirstBySql("select * from " + TableList.WK_WHITE_LIST + " where user_id=" + userId + " and group_id=" + groupId);
+            if (white!=null){
+                //返回信息 code=201=白名单
+               return Result.ResultCode("success","用户在白名单内","201");
+            }
+            //获取打卡时间
+            String coloumSql="select id,workdays,flex_time,noneed_offwork,limit_aheadtime";
+            String fromSql=" from "+TableList.WK_CHECKINDATE+" where group_id="+groupId;
+            List<Map<String, Object>> checkDateList = findList(coloumSql, fromSql);
+            Map<String, Object> checkDateMap;
+            Map<String, Object> checkTimeMap;
+            List<Map<String, Object>> dateList;
+            Object checdDateId = null;
+            for (int i=0 ;i<checkDateList.size();i++ ) {
+                //打卡日期数据
+                checkDateMap = checkDateList.get(i);
+                checdDateId = checkDateMap.get("id");
+                //打卡日期id不为空
+                if (checdDateId != null) {
+//                    fromSql = "select GROUP_CONCAT(inter) inter from (\n" +
+//                            "select dtr.date_id,CONCAT(work_sec,',',off_work_sec) inter from " + TableList.WK_CHECKINTIME + " wt left join " + TableList.WK_DATE_TIME_RLAT +
+//                            " dtr on wt.id=dtr.time_id where dtr.date_id=" + checdDateId+")x";
+//                    Map<String, Object> interval = findFirstBySql(fromSql);
+//                    checkDateList.get(i).put("interval",interval.get("inter"));
+                    coloumSql="select work_sec,off_work_sec ";
+                    fromSql =" from "+TableList.WK_CHECKINTIME+" " +
+                            "wt left join "+TableList.WK_DATE_TIME_RLAT+" " +
+                            "dtr on wt.id=dtr.time_id where dtr.date_id="+checdDateId;
+                    dateList = findList(coloumSql, fromSql);
+                    checkDateList.get(i).put("interval",dateList);
+                    System.out.println(coloumSql+fromSql);
+                }
+            }
+            //获取特殊日期
+            coloumSql=" select id,timestamp,type,notes ";
+            fromSql=" from "+TableList.WK_SPE_DAYS+" where group_id="+groupId;
+            List<Map<String, Object>> speDaysList =findList(coloumSql,fromSql);
+            for (int i=0 ;i<speDaysList.size();i++ ) {
+                //打卡日期数据
+                checkDateMap = speDaysList.get(i);
+                checdDateId = checkDateMap.get("id");
+                //打卡日期id不为空
+                if (checdDateId != null) {
+//                    fromSql = "select GROUP_CONCAT(inter) inter from (\n" +
+//                            "select dtr.spe_id,CONCAT(work_sec,',',off_work_sec) inter from " + TableList.WK_CHECKINTIME+
+//                            " wt left join "+ TableList.WK_SPE_DAYS_TIME_RLAT +
+//                            " dtr on wt.id=dtr.time_id where dtr.spe_id=" + checdDateId+")x";
+//                    Map<String, Object> interval = findFirstBySql(fromSql);
+//                    String[] inters = BaseUtil.objToStr(interval.get("inter"), ",").split(",");
+//                    speDaysList.get(i).put("interval",interval.get("inter"));
+                    //查询需要打卡的时间 当日零点开始的秒数
+                    coloumSql="select work_sec,off_work_sec ";
+                    fromSql =" from "+TableList.WK_CHECKINTIME+" " +
+                            "wt left join "+TableList.WK_SPE_DAYS_TIME_RLAT+" " +
+                            "str on wt.id=str.time_id where str.spe_id="+checdDateId;
+                    dateList = findList(coloumSql, fromSql);
+                    speDaysList.get(i).put("interval",dateList);
+                    System.out.println(coloumSql+fromSql);
+                }
+            }
+            //获取地址信息
+            coloumSql="select lat,lng,loc_title,loc_detail,distance ";
+            fromSql=" from "+TableList.WK_LOC_INFOS+" where group_id="+groupId;
+            List<Map<String, Object>> locInfosList = findList(coloumSql, fromSql);
+
+            //时间转unix
+            long unixTimestamp = DateUtil.StrToUnix(date);
+            long nextUnixTimestamp = DateUtil.NextStrToUnix(date);
+            System.out.println(unixTimestamp);
+            System.out.println(nextUnixTimestamp);
+            //当天打卡记录 有效记录未筛选
+            coloumSql="select * ";
+            fromSql=" from " + TableList.WK_RECORD +" where group_id=" + groupId + " and user_id=" + userId +
+                    " and checkin_time between "+unixTimestamp+ " and "+nextUnixTimestamp;
+            List<Map<String, Object>>  dayWork = findList(coloumSql,fromSql);
+
+            groupMap.put("dayWork",dayWork);
+            groupMap.put("spe_days",speDaysList);
+            groupMap.put("checkInDate",checkDateList);
+            groupMap.put("loc_infos",locInfosList);
+            return ResultData.dataResult("success","测试",groupMap);
+        }
+    }
+    /**
+     * 打卡
+     * @param paramMap
+     * @return com.goldccm.model.compose.Result
+     * @throws Exception
+     * @author cwf
+     * @date 2019/11/15 13:38
+     */
+    @Override
+    public Result saveWork(Map<String, Object> paramMap) {
+        Map<String, Object> saveMap=paramMap;
+//        System.out.println("--------------");
+        saveMap.entrySet().removeIf(m ->
+                m.getValue()==null ||"".equals(m.getValue())&&
+                        !"user_id".equals(m.getKey())&&
+                        !"group_id".equals(m.getKey())&&
+                        !"checkin_type".equals(m.getKey())&&
+                        !"exception_type".equals(m.getKey())&&
+                        !"checkin_time".equals(m.getKey())&&
+                        !"location_title".equals(m.getKey())&&
+                        !"location_detail".equals(m.getKey())&&
+                        !"wifi_name".equals(m.getKey())&&
+                        !"wifi_mac".equals(m.getKey())&&
+                        !"checkin_divice".equals(m.getKey())&&
+                        !"notes".equals(m.getKey())&&
+                        !"mediaids".equals(m.getKey())&&
+                        !"lng".equals(m.getKey())&&
+                        !"exp1".equals(m.getKey())&&
+                        !"exp2".equals(m.getKey())&&
+                        !"exp3".equals(m.getKey())
+        );
+        int save = save(TableList.WK_RECORD, saveMap);
+        //判断上一条是否作废 比如更新下班卡  前端+后端判断
+
+        if (save>0){
+            return Result.unDataResult("success","打卡成功");
+        }
+        return Result.unDataResult("fail","打卡失败");
+    }
+    /** 
+     * 月统计 日历
+     * 统计这个月的每一天是否有异常，前端显示红点--有异常，白点--正常
+     * @param paramMap	 
+     * @return com.goldccm.model.compose.Result 
+     * @throws Exception    
+     * @author cwf 
+     * @date 2019/11/15 15:28
+     */
+    @Override
+    public Result gainMonthStatistics(Map<String, Object> paramMap) {
+        /**
+         *         统计某个月每一天的异常情况
+         *         1、查询规则
+         *         查看规则是否变化，根据规则表的变动时间进行查询
+         *         2、比对规则
+         *
+         */
+
+        return null;
+    }
+
+//    public static void main(String[] args) throws ParseException {
+//        //时间转unix
+//        Long timestamp = Long.parseLong("1492617611")*1000;
+//        String date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(timestamp));
+//        System.out.println(date);
+//        //unix转时间
+//        Date date1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(date);
+//        long unixTimestamp = date1.getTime()/1000;
+//        System.out.println(unixTimestamp);
+//
+//    }
 
 }
