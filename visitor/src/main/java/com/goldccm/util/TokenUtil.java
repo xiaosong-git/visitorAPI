@@ -12,10 +12,10 @@ public class TokenUtil {
      */
 
     public static void main(String[] args) throws Exception{
-        String userId = "45";
+        String userId = "834";
         String factor = "20191014173123";
-        String token = "100205e1-df64-4ff6-a6ce-c9c702e2ef4d";
-        String threshold = "42334AC3B414DAFE516B33B6C9802191";
+        String token = "7f0b25d8-86d0-445a-b346-7eae009dfd65";
+        String threshold = "5B6FD21A29F863AC3561FB4913FCFD3E";
         System.out.println(TokenUtil.checkRequestLegal(userId, factor,token,threshold));
     }
 
@@ -29,7 +29,7 @@ public class TokenUtil {
         StringBuffer sb = new StringBuffer();
         sb.append(userId.substring(6, 12)).append(currentDate.substring(2, 14)).append(token.substring(5,10));
         String key = MD5Util.MD5(sb.toString()).toUpperCase();
-//        System.out.println("key:"+key);
+        System.out.println("key:"+key);
         return key.equals(threshold);
     }
 

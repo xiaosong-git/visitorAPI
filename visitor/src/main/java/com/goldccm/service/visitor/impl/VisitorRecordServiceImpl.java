@@ -581,6 +581,7 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 		}
 		// 判断上位机是否正常
 		String orgSql = " select * from " + TableList.ORG + " where org_code = '" + orgCode + "'";
+        System.out.println(orgSql);
 		Map<String, Object> org = findFirstBySql(orgSql);
 		if (org == null) {
 			return Result.unDataResult("fail", "数据异常!");
@@ -588,6 +589,7 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 		String orgId = org.get("id").toString();
 		String pospSql = " select * from " + TableList.POSP + " where orgId = '" + orgId + "' and pospCode ='"
 				+ pospCode + "' and cstatus='normal'";
+        System.out.println(pospSql);
 		Map<String, Object> posp = findFirstBySql(pospSql);
 		if (posp == null) {
 			return Result.unDataResult("fail", "无此上位机编码" + pospCode + "或者无此大楼编码" + orgCode);
@@ -595,11 +597,14 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 
 		String maxIdSql = " select * from " + TableList.VISITOR_RECORD_MAXID + " where pospId = '" + posp.get("id")
 				+ "'";
+        System.out.println(maxIdSql);
 		Map<String, Object> maxId = findFirstBySql(maxIdSql);
 		PageModel pageModel;
 		Date date = new Date();
 		String today = new SimpleDateFormat("yyyy-MM-dd HH:mm").format(date);
+		System.out.println("maxID=:"+maxId.get("maxVisitorId"));
 		if (maxId == null || maxId.isEmpty() || maxId.get("maxVisitorId") == null) {
+			System.out.println("111");
 			// 增量问题
 			String columnSql = "select vr.id visitId,vr.visitDate,vr.visitTime,vr.orgCode,vr.dateType,vr.startDate,vr.endDate,u.realName userRealName,u.idType userIdType,u.idNO userIdNO,u.soleCode soleCode,u.idHandleImgUrl idHandleImgUrl,c.companyFloor companyFloor,v.realName vistorRealName,v.idType vistorIdType,v.idNO visitorIdNO,o.province province,o.city city";
 			String fromSql = " from " + TableList.VISITOR_RECORD + " vr " + " left join " + TableList.USER
@@ -609,7 +614,9 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 					+ " and (vr.dateType='Indefinite' or (vr.dateType='limitPeriod' and " + "vr.startDate<= '" + today
 					+ "' and vr.endDate>='" + today + "')) order by vr.id";
 			pageModel = this.findPage(columnSql, fromSql, pageNum, pageSize);
+            System.out.println(columnSql+fromSql);
 			if (pageModel.getRows() != null && !pageModel.getRows().isEmpty()) {
+				System.out.println("22222");
 				String sql = " select vr.*  from " + TableList.VISITOR_RECORD
 						+ " vr where vr.cstatus='applySuccess' and vr.orgCode = '" + orgCode
 						+ "' and (vr.dateType='Indefinite' or (vr.dateType='limitPeriod' and vr.startDate<= '" + today
@@ -667,6 +674,7 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 					 * jdbcTemplate.queryForList(sql);
 					 */
 					if (list.size() > 0) {
+						System.out.println("33333");
 						Map<String, Object> maxVisitorId = list.get(list.size() - 1);
 						Map<String, Object> maxVisitor = new HashMap<String, Object>();
 						maxVisitor.put("pospId", posp.get("id"));
@@ -676,6 +684,7 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 				}
 			}
 		} else {
+			System.out.println("4444");
 			String columnSql = "select vr.id visitId,vr.visitDate,vr.visitTime,vr.orgCode,vr.dateType,vr.startDate,vr.endDate,u.realName userRealName,u.idType userIdType,u.idNO userIdNO,u.soleCode soleCode,u.idHandleImgUrl idHandleImgUrl,c.companyFloor companyFloor,v.realName vistorRealName,v.idType vistorIdType,v.idNO visitorIdNO,o.province province,o.city city";
 			String fromSql = " from " + TableList.VISITOR_RECORD + " vr " + " left join " + TableList.USER
 					+ " v on vr.visitorId=v.id" + " left join " + TableList.USER + " u on vr.userId=u.id" + " left join " +TableList.COMPANY +" c on vr.companyId=c.id"
@@ -686,6 +695,7 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 			System.out.println(columnSql+fromSql);
 			pageModel = this.findPage(columnSql, fromSql, pageNum, pageSize);
 			if (pageModel.getRows() != null && !pageModel.getRows().isEmpty()) {
+				System.out.println("55555");
 				String sql = " select vr.*  from " + TableList.VISITOR_RECORD + " vr where vr.id>"
 						+ maxId.get("maxVisitorId") + " and vr.cstatus='applySuccess' and vr.orgCode = '" + orgCode
 						+ "' and (vr.dateType='Indefinite' or (vr.dateType='limitPeriod' and vr.startDate<= '" + today

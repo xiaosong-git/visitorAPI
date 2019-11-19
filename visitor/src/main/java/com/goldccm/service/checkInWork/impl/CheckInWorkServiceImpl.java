@@ -348,8 +348,10 @@ public class CheckInWorkServiceImpl  extends BaseServiceImpl implements CheckInW
         }
         return Result.unDataResult("fail","打卡失败");
     }
-    /** 
-     * 月统计 日历
+
+
+    /**
+     * 日历 个人日打卡记录
      * 统计这个月的每一天是否有异常，前端显示红点--有异常，白点--正常
      * @param paramMap	 
      * @return com.goldccm.model.compose.Result 
@@ -358,7 +360,7 @@ public class CheckInWorkServiceImpl  extends BaseServiceImpl implements CheckInW
      * @date 2019/11/15 15:28
      */
     @Override
-    public Result gainMonthStatistics(Map<String, Object> paramMap) {
+    public Result gainCalendarStatistics(Map<String, Object> paramMap) {
         /**
          *         统计某个月每一天的异常情况
          *         1、查询规则
@@ -369,6 +371,40 @@ public class CheckInWorkServiceImpl  extends BaseServiceImpl implements CheckInW
 
         return null;
     }
+    //失效sql
+    public  void effective(){
+
+    }
+    /**
+     * 管理员 查看的月统计，月报
+     * 日统计，一、上下班统计：1、迟到分钟数 2、早退分钟数 3、旷工分钟数 4、缺卡分钟数 5、地点异常数 6设备异常数
+     *        二、假勤统计：1、打卡补卡 2、外勤 3、外出 4、出差 、5、年假 6、事假 7、病假 8、调休假 9、婚假 10、产假 11、陪产假 12、其他
+     * 备注：当天没有打卡记录为旷工，当天有部分打卡为缺卡。
+     * @param paramMap
+     * @return com.goldccm.model.compose.Result
+     * @throws Exception
+     * @author cwf
+     * @date 2019/11/19 10:04
+     */
+    public Result gainMonthStatistics(Map<String, Object> paramMap){
+
+        return null;
+    }
+    /**
+     * 请假系统
+     * @param paramMap
+     * @return com.goldccm.model.compose.Result
+     * @throws Exception
+     * @author cwf
+     * @date 2019/11/19 15:14
+     */
+    public Result applyLeave(Map<String, Object> paramMap){
+        //订单号 需要新建函数next_trans_num() 传入paramName
+        String sql ="SELECT CONCAT(right(DATE_FORMAT(now(),'%Y%m%d') ,8),  LPAD((SELECT next_trans_num('leaveRecordSequence')), 4, '0'))";
+        return null;
+    }
+
+
 
 //    public static void main(String[] args) throws ParseException {
 //        //时间转unix

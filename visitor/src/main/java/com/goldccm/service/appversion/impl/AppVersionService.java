@@ -28,11 +28,12 @@ public class AppVersionService extends BaseServiceImpl implements IAppVersionSer
      * @Date 2017/4/11 14:12
      */
     private Map<String,Object> getVersion(String appType, String channel){
-        Integer apiNewAuthCheckRedisDbIndex = Integer.valueOf(paramService.findValueByName("apiNewAuthCheckRedisDbIndex"));//存储在缓存中的位置35
+        // update by cwf  2019/11/19 17:44 Reason:版本信息改回为旧redis apiAuthCheckRedisDbIndex
+        Integer apiAuthCheckRedisDbIndex = Integer.valueOf(paramService.findValueByName("apiAuthCheckRedisDbIndex"));//存储在缓存中的位置35
         Map<String,Object> appVersion = null;
         String key = "appVersion_android_"+appType+"_"+channel;
         //redis修改
-        String json = RedisUtil.getStrVal(key, apiNewAuthCheckRedisDbIndex);
+        String json = RedisUtil.getStrVal(key, apiAuthCheckRedisDbIndex);
         if(StringUtils.isNotBlank(json)){
             System.out.println("---从缓存获取版本号----："+json);
             appVersion = JSON.parseObject(json, Map.class);
@@ -42,7 +43,7 @@ public class AppVersionService extends BaseServiceImpl implements IAppVersionSer
             appVersion = this.findFirstBySql(sql);
             System.out.println("---从数据库获取版本号----："+appVersion);
             //redis修改
-            RedisUtil.setStr(key, JSON.toJSONString(appVersion), apiNewAuthCheckRedisDbIndex, null);
+            RedisUtil.setStr(key, JSON.toJSONString(appVersion), apiAuthCheckRedisDbIndex, null);
         }
         return appVersion;
     }
@@ -53,18 +54,19 @@ public class AppVersionService extends BaseServiceImpl implements IAppVersionSer
      * @Date 2017/4/11 14:12
      */
     private Map<String,Object> getIOSVersion(String appType,String channel){
-        Integer apiNewAuthCheckRedisDbIndex = Integer.valueOf(paramService.findValueByName("apiNewAuthCheckRedisDbIndex"));//存储在缓存中的位置
+        // update by cwf  2019/11/19 17:44 Reason:版本信息改回为旧redis apiAuthCheckRedisDbIndex
+        Integer apiAuthCheckRedisDbIndex = Integer.valueOf(paramService.findValueByName("apiAuthCheckRedisDbIndex"));//存储在缓存中的位置
         Map<String,Object> appVersion = null;
         String key = "appVersion_ios_" + appType+"_"+channel;
         //redis修改
-        String json = RedisUtil.getStrVal(key, apiNewAuthCheckRedisDbIndex);
+        String json = RedisUtil.getStrVal(key, apiAuthCheckRedisDbIndex);
         if(StringUtils.isNotBlank(json)){
             appVersion = JSON.parseObject(json, Map.class);
         }else{
             String sql = " select * from tbl_app_version where appType = '" + appType + "' and channel='"+channel+"'" ;
             appVersion = this.findFirstBySql(sql);
             //redis修改
-            RedisUtil.setStr(key, JSON.toJSONString(appVersion), apiNewAuthCheckRedisDbIndex, null);
+            RedisUtil.setStr(key, JSON.toJSONString(appVersion), apiAuthCheckRedisDbIndex, null);
         }
         return appVersion;
     }

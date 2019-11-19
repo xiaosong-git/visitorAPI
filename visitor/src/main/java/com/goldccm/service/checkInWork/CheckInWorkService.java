@@ -22,4 +22,6 @@ public interface CheckInWorkService extends IBaseService {
     Result saveWork(Map<String, Object> paramMap);
 
     Result gainMonthStatistics(Map<String, Object> paramMap);
+
+    Result gainCalendarStatistics(Map<String, Object> paramMap);
 }

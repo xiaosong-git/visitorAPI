@@ -73,18 +73,23 @@ public class AuthCheckInteceptor extends HandlerInterceptorAdapter {
             String userIdStr = request.getParameter("userId");
             String requestVer = request.getParameter("requestVer");//发送请求的APP版本
             if(StringUtils.isNotBlank(token) && StringUtils.isNotBlank(userIdStr)){
-                Integer apiAuthCheckRedisDbIndex = Integer.valueOf(paramService.findValueByName("apiAuthCheckRedisDbIndex"));//app存储在缓存中的位置11
+                //新redis
+//                Integer apiAuthCheckRedisDbIndex = Integer.valueOf(paramService.findValueByName("apiAuthCheckRedisDbIndex"));//app存储在缓存中的位置11
                 Integer apiNewAuthCheckRedisDbIndex = Integer.valueOf(paramService.findValueByName("apiNewAuthCheckRedisDbIndex"));//新存储在缓存中的位置35
                 String userToken = null;
                 String tokenKey = userIdStr+"_token";
                 //redis修改
-                userToken = RedisUtil.getStrVal(tokenKey, apiAuthCheckRedisDbIndex);
+                userToken = RedisUtil.getStrVal(tokenKey, apiNewAuthCheckRedisDbIndex);
                 Map<String,Object> user = null;
                 if(StringUtils.isBlank(userToken)){
                     //缓存中不存在Token，就从数据库中查询
                     user = userService.findById(TableList.USER,Integer.parseInt(userIdStr));
                     userToken = user.get("token")+"";
                 }
+
+                System.out.println("是否token正确："+token.equals(userToken));
+                System.out.println("userId："+userIdStr);
+                System.out.println("token："+token+", userToken"+userToken);
 
                 if(token.equals(userToken)){
                     /**

@@ -440,7 +440,6 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
         map.put("merchantNo", merchantNo);
         map.put("productCode", productCode);
         map.put("userName", userName);//加密
-        map.put("certNo", certNo);// 加密);
         map.put("dateTime", dateTime);
         map.put("photo", photo);//加密
         map.put("sign", sign);
@@ -700,6 +699,7 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
                 }
                 //更新缓存中的Token,实名
                 String token = BaseUtil.objToStr(user.get("token"), null);
+                logger.info("登入人为:{}，token：{}",token,userId);
                 String isAuth = BaseUtil.objToStr(user.get("isAuth"), null);
                 updateRedisTokenAndAuth(BaseUtil.objToStr(user.get("id"), null), token, isAuth);
                 /** update by cwf  2019/9/24 10:08 Reason:添加储存设备号用来推送消息
