@@ -33,7 +33,6 @@ public class Result {
     public Map getVerify() {
         return verify;
     }
-
     public void setVerify(Map verify) {
         this.verify = verify;
     }

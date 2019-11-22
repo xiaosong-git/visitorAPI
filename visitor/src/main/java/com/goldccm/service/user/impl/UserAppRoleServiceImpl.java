@@ -63,7 +63,7 @@ public class UserAppRoleServiceImpl extends BaseServiceImpl implements IUserAppR
         //获取基础用户权限
         String fromSql="  from "+TableList.APP_MENU+" m " +
                 "left join \n" +
-                TableList.APP_USER_ROLE_MENU+" urm on m.id=urm.menu_id where urm.role_id=5";
+                TableList.APP_USER_ROLE_MENU+" urm on m.id=urm.menu_id where urm.role_id=0";
         //大楼id sql
         String orgSql="";
         if (orgId!=null){

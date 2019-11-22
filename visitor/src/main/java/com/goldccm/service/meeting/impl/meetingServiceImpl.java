@@ -421,5 +421,84 @@ public class meetingServiceImpl extends BaseServiceImpl implements IMeetingServi
         return save>0?Result.success():Result.fail() ;
     }
 
+    /**
+     * 根据大楼编码获取会议室预定信息
+     * @param paramMap
+     * @return
+     */
+    @Override
+    public Result getFromOrgCode(Map<String, Object> paramMap,Integer pageNum,Integer pageSize) {
+        String orgCode= BaseUtil.objToStr(paramMap.get("orgCode"),"");
+        if (pageNum != 1) {
+            return Result.unDataResult("fail", "页数不对!");
+        }
+        if ("".equals(orgCode)){
+            return Result.unDataResult("fail","缺少大楼编码");
+        }
+        Result isPosp=isPosp(paramMap);
+        String sign = BaseUtil.objToStr(isPosp.getVerify().get("sign"),"fail");
+        if ("fail".equals(sign)){
+            return isPosp;
+        }
+
+        //record_status 1 预定未付款 2 已付款可退款 3 已付款不可退款 4 已退款
+        String coloumSql="select rar.room_id,apply_userid,u.soleCode ,u.realName ,apply_date,apply_start_time,apply_end_time,rar.id record_id,record_status,price,\n" +
+                "room_addr,room_open_time,room_close_time,room_status,room_orgcode,room_mode,isFlag ";
+        String fromSql="from "+TableList.ROOM_APPLY_RECORD+" rar left join "+TableList.SHARE_ROOM+" sr on rar.room_id=sr.id\n" +
+                "left join "+TableList.USER+" u on u.id =rar.apply_userid  \n" +
+                "where room_orgcode ='"+orgCode+"' and record_status <>1 AND isFlag='F' and apply_date >=DATE_FORMAT(SYSDATE(),'%Y-%m-%d')";
+        logger.info("根据大楼编号获取会议室sql:\n{}",coloumSql+fromSql);
+        PageModel page = findPage(coloumSql, fromSql, pageNum, pageSize);
+        return ResultData.dataResult("success","获取大楼会议室预定信息成功",page);
+    }
+    /**
+     * 确认拉取会议室预定信息
+     * 修改isflag 并存入上位机编号
+     * @param paramMap
+     * @author cwf
+     * @date 2019/11/21 11:00
+     */
+    @Override
+    public Result getFromOrgCodeConfirm(Map<String, Object> paramMap) {
+        String idStr = BaseUtil.objToStr(paramMap.get("idStr"), "");
+        Result isPosp=isPosp(paramMap);
+        if ("".equals(idStr)){
+            return Result.unDataResult("fail","缺少id字符串");
+        }
+
+        String sign = BaseUtil.objToStr(isPosp.getVerify().get("sign"),"fail");
+        if ("fail".equals(sign)){
+            return isPosp;
+        }
+        String desc = BaseUtil.objToStr(isPosp.getVerify().get("desc"),"0");
+        int update = deleteOrUpdate("update " + TableList.ROOM_APPLY_RECORD + " set isFlag='T',ext1='"+desc+"' where id in (" + idStr + ")");
+        if (update>0){
+            return Result.success();
+        }
+        return Result.fail();
+    }
+    public Result isPosp(Map<String, Object> paramMap){
+        String orgCode= BaseUtil.objToStr(paramMap.get("orgCode"),"");
+        String pospCode= BaseUtil.objToStr(paramMap.get("pospCode"),"");
+        if ("".equals(pospCode)){
+            return Result.unDataResult("fail", "上位机编号缺失!");
+        }
+        // 判断上位机是否正常
+        String orgSql = " select * from " + TableList.ORG + " where org_code = '" + orgCode + "'";
+        System.out.println(orgSql);
+        Map<String, Object> org = findFirstBySql(orgSql);
+        if (org == null) {
+            return Result.unDataResult("fail", "数据异常!");
+        }
+        String orgId = org.get("id").toString();
+        String pospSql = " select * from " + TableList.POSP + " where orgId = '" + orgId + "' and pospCode ='"
+                + pospCode + "' and cstatus='normal'";
+        System.out.println(pospSql);
+        Map<String, Object> posp = findFirstBySql(pospSql);
+        if (posp == null) {
+            return Result.unDataResult("fail", "无此上位机编码" + pospCode + "或者无此大楼编码" + orgCode);
+        }
+        return Result.unDataResult("success",pospCode);
+    }
 
 }

@@ -345,6 +345,27 @@ public class DateUtil {
         return false;
     }
 
+
+        /**
+        * 根据一个日期，返回是星期几的字符串
+        * @param sdate
+        * @return
+        */
+    public static int getWeek(String sdate) throws ParseException {
+        // 再转换为时间
+        DateFormat format1 = new SimpleDateFormat("yyyy-MM-dd");
+        Date date = format1.parse(sdate);
+        Calendar c = Calendar.getInstance();
+        c.setTime(date);
+        new SimpleDateFormat("EEEE").format(c.getTime());
+         int hour=c.get(Calendar.DAY_OF_WEEK);
+//         hour中存的就是星期几了，其范围 1~7
+//         1=星期日 7=星期六，其他类推
+//        new SimpleDateFormat("EEEE").format(c.getTime());
+        return hour-1;
+//        
+    }
+
     public static String getSystemTimeFourteen() {
         String returnStr = null;
         SimpleDateFormat f = new SimpleDateFormat("yyyyMMddHHmmss");

@@ -59,7 +59,7 @@ public class UserController extends BaseController {
      * @param request
      * @return
      */
-    @AuthCheckAnnotation(checkLogin = true,checkVerify = false, checkRequestLegal = true)
+    @AuthCheckAnnotation(checkLogin = true,checkVerify = true, checkRequestLegal = true)
     @RequestMapping("/getUser")
     @ResponseBody
     public Result getUser(HttpServletRequest request){

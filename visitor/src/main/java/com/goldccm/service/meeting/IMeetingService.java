@@ -1,4 +1,5 @@
 package com.goldccm.service.meeting;
+
 import com.goldccm.model.compose.Result;
 import com.goldccm.service.base.IBaseService;
 
@@ -94,4 +95,8 @@ public interface IMeetingService extends IBaseService {
     Map<String, Object> findByUserId(Integer userId);
 
     Result addRoom(Map<String, Object> paramMap);
+
+    Result getFromOrgCode(Map<String, Object> paramMap,Integer pageNum, Integer pageSize);
+
+    Result getFromOrgCodeConfirm(Map<String, Object> paramMap);
 }

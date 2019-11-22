@@ -127,6 +127,12 @@ public class TableList {
     public static final String WK_WHITE_LIST = "tbl_wk_white_list";
     //打卡记录
     public static final String WK_RECORD = "tbl_wk_record";
+    //请假记录
+    public static final String WK_LEAVE_RECORD = "tbl_wk_leave_record";
+    //流程节点
+    public static final String FLOW_NODE = "tbl_fl_node";
+    //流程审批人
+    public static final String FLOW_AUDIT = "tbl_fl_audit";
 
 
 

@@ -440,6 +440,7 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
         map.put("merchantNo", merchantNo);
         map.put("productCode", productCode);
         map.put("userName", userName);//加密
+        map.put("certNo", certNo);// 加密);
         map.put("dateTime", dateTime);
         map.put("photo", photo);//加密
         map.put("sign", sign);

@@ -192,4 +192,46 @@ public class MeetingController extends BaseController {
             return Result.unDataResult("fail", "系统异常");
         }
     }
+    /**
+     * 获取从大楼编码获取会议室预定信息
+     * @param request
+     * @return com.goldccm.model.compose.Result
+     * @throws Exception
+     * @author chenwf
+     * @date 2019/8/5 17:34
+     */
+    @AuthCheckAnnotation(checkLogin = false, checkVerify = true, checkRequestLegal = true)
+    @RequestMapping("/getFromOrgCode/{pageNum}/{pageSize}")
+    @ResponseBody
+    public Result getFromOrgCode(HttpServletRequest request, @PathVariable Integer pageNum, @PathVariable Integer pageSize){
+
+        try {
+            Map<String,Object> paramMap = getParamsToMap(request);
+            return meetingService.getFromOrgCode(paramMap,pageNum,pageSize);
+        }catch (Exception e){
+            e.printStackTrace();
+            return Result.unDataResult("fail", "系统异常");
+        }
+    }
+    /**
+     * 确认拉取会议室预定信息
+     * @param request id字符串，上位机编号
+     * @return com.goldccm.model.compose.Result
+     * @throws Exception
+     * @author chenwf
+     * @date 2019/8/5 17:34
+     */
+    @AuthCheckAnnotation(checkLogin = false, checkVerify = true, checkRequestLegal = true)
+    @RequestMapping("/getFromOrgCodeConfirm")
+    @ResponseBody
+    public Result getFromOrgCodeConfirm(HttpServletRequest request){
+
+        try {
+            Map<String,Object> paramMap = getParamsToMap(request);
+            return meetingService.getFromOrgCodeConfirm(paramMap);
+        }catch (Exception e){
+            e.printStackTrace();
+            return Result.unDataResult("fail", "系统异常");
+        }
+    }
 }

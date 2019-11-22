@@ -594,7 +594,7 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 		if (posp == null) {
 			return Result.unDataResult("fail", "无此上位机编码" + pospCode + "或者无此大楼编码" + orgCode);
 		}
-
+//		System.out.println(posp.get("id"));
 		String maxIdSql = " select * from " + TableList.VISITOR_RECORD_MAXID + " where pospId = '" + posp.get("id")
 				+ "'";
         System.out.println(maxIdSql);
@@ -602,9 +602,9 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 		PageModel pageModel;
 		Date date = new Date();
 		String today = new SimpleDateFormat("yyyy-MM-dd HH:mm").format(date);
-		System.out.println("maxID=:"+maxId.get("maxVisitorId"));
+//		System.out.println("maxID=:"+BaseUtil.objToStr(maxId.get("maxVisitorId"),null));
 		if (maxId == null || maxId.isEmpty() || maxId.get("maxVisitorId") == null) {
-			System.out.println("111");
+//			System.out.println("111");
 			// 增量问题
 			String columnSql = "select vr.id visitId,vr.visitDate,vr.visitTime,vr.orgCode,vr.dateType,vr.startDate,vr.endDate,u.realName userRealName,u.idType userIdType,u.idNO userIdNO,u.soleCode soleCode,u.idHandleImgUrl idHandleImgUrl,c.companyFloor companyFloor,v.realName vistorRealName,v.idType vistorIdType,v.idNO visitorIdNO,o.province province,o.city city";
 			String fromSql = " from " + TableList.VISITOR_RECORD + " vr " + " left join " + TableList.USER
@@ -614,9 +614,9 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 					+ " and (vr.dateType='Indefinite' or (vr.dateType='limitPeriod' and " + "vr.startDate<= '" + today
 					+ "' and vr.endDate>='" + today + "')) order by vr.id";
 			pageModel = this.findPage(columnSql, fromSql, pageNum, pageSize);
-            System.out.println(columnSql+fromSql);
+//            System.out.println(columnSql+fromSql);
 			if (pageModel.getRows() != null && !pageModel.getRows().isEmpty()) {
-				System.out.println("22222");
+//				System.out.println("22222");
 				String sql = " select vr.*  from " + TableList.VISITOR_RECORD
 						+ " vr where vr.cstatus='applySuccess' and vr.orgCode = '" + orgCode
 						+ "' and (vr.dateType='Indefinite' or (vr.dateType='limitPeriod' and vr.startDate<= '" + today
@@ -674,7 +674,7 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 					 * jdbcTemplate.queryForList(sql);
 					 */
 					if (list.size() > 0) {
-						System.out.println("33333");
+//						System.out.println("33333");
 						Map<String, Object> maxVisitorId = list.get(list.size() - 1);
 						Map<String, Object> maxVisitor = new HashMap<String, Object>();
 						maxVisitor.put("pospId", posp.get("id"));
@@ -684,7 +684,7 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 				}
 			}
 		} else {
-			System.out.println("4444");
+//			System.out.println("4444");
 			String columnSql = "select vr.id visitId,vr.visitDate,vr.visitTime,vr.orgCode,vr.dateType,vr.startDate,vr.endDate,u.realName userRealName,u.idType userIdType,u.idNO userIdNO,u.soleCode soleCode,u.idHandleImgUrl idHandleImgUrl,c.companyFloor companyFloor,v.realName vistorRealName,v.idType vistorIdType,v.idNO visitorIdNO,o.province province,o.city city";
 			String fromSql = " from " + TableList.VISITOR_RECORD + " vr " + " left join " + TableList.USER
 					+ " v on vr.visitorId=v.id" + " left join " + TableList.USER + " u on vr.userId=u.id" + " left join " +TableList.COMPANY +" c on vr.companyId=c.id"
@@ -692,10 +692,10 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 					+ " and vr.cstatus='applySuccess' and vr.orgCode = '" + orgCode
 					+ "' and (vr.dateType='Indefinite' or (vr.dateType='limitPeriod' and vr.startDate<= '" + today
 					+ "' and vr.endDate>='" + today + "')) order by vr.id";
-			System.out.println(columnSql+fromSql);
+//			System.out.println(columnSql+fromSql);
 			pageModel = this.findPage(columnSql, fromSql, pageNum, pageSize);
 			if (pageModel.getRows() != null && !pageModel.getRows().isEmpty()) {
-				System.out.println("55555");
+//				System.out.println("55555");
 				String sql = " select vr.*  from " + TableList.VISITOR_RECORD + " vr where vr.id>"
 						+ maxId.get("maxVisitorId") + " and vr.cstatus='applySuccess' and vr.orgCode = '" + orgCode
 						+ "' and (vr.dateType='Indefinite' or (vr.dateType='limitPeriod' and vr.startDate<= '" + today
@@ -1443,7 +1443,12 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 		String startDate = BaseUtil.objToStr(visitorRecord.get("startDate"),"");
 		String endDate = BaseUtil.objToStr(visitorRecord.get("endDate"),"");
 		Integer visitorId = BaseUtil.objToInteger(visitorRecord.get("visitorId"),0);
-		if (visitorId!=userId){
+
+//		System.out.println("visitorId ："+visitorId);
+//		System.out.println("userId ："+userId);
+
+		if (!visitorId.equals(userId)){
+			System.out.println("被访问者错误");
 			return Result.unDataResult("fail", "被访问者错误!");
 		}
 		Map<String, Object> visitorUser = findById(TableList.USER, userId);
@@ -1497,10 +1502,10 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 			if (companyId!=0) {
 				orgComMap= findFirstBySql("select org_code,org_name,accessType,companyName,c.addr,roleType from  "+TableList.ORG+" o " +
 						"left join "+TableList.COMPANY+" c on c.orgId=o.id left join "+TableList.COMPANY_USER+" cu on cu.companyId=c.id " +
-						" where c.id=" + companyId+" and userId="+userId);
+						" where c.id=" + companyId+" and userId="+userId+" and cu.currentStatus ='normal'  and cu.status ='applySuc' ");
 				System.out.println("select org_code,org_name,accessType,companyName,c.addr,roleType from  "+TableList.ORG+" o " +
 						"left join "+TableList.COMPANY+" c on c.orgId=o.id left join "+TableList.COMPANY_USER+" cu on cu.companyId=c.id " +
-						" where c.id=" + companyId+" and userId="+userId);
+						" where c.id=" + companyId+" and userId="+userId+" and cu.`currentStatus` ='normal' and cu.status ='applySuc' ");
 			}
 			if (orgComMap==null||orgComMap.isEmpty()){
 				 return Result.unDataResult("fail", "用户不存在该公司");
@@ -1552,7 +1557,6 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 				}
 			}
 			//同意审核，权限不足，save保存了公司与大楼信息
-			//设置TableList.VISITOR_RECORD
 			update = update(TableList.VISITOR_RECORD, saveMap);
 			if (update > 0) {
 

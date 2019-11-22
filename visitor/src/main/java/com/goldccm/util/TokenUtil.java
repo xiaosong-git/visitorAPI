@@ -12,10 +12,10 @@ public class TokenUtil {
      */
 
     public static void main(String[] args) throws Exception{
-        String userId = "834";
-        String factor = "20191014173123";
-        String token = "7f0b25d8-86d0-445a-b346-7eae009dfd65";
-        String threshold = "5B6FD21A29F863AC3561FB4913FCFD3E";
+        String userId = "3";
+        String factor = "20191122144629";
+        String token = "fcbd8c2e-1a41-4521-adcd-1d4d2a0fb15f";
+        String threshold = "51203126179E3D38B47288CC53F6B43E";
         System.out.println(TokenUtil.checkRequestLegal(userId, factor,token,threshold));
     }
 

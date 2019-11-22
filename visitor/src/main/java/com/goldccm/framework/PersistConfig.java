@@ -31,18 +31,22 @@ public class PersistConfig {
         DruidDataSource dataSource = new DruidDataSource();
         dataSource.setDriverClassName("com.mysql.jdbc.Driver");
         if(Constant.IS_DEVELOP){  //开发模式
-            dataSource.setUrl("jdbc:mysql://rm-bp1v30gvxn3h81ytx.mysql.rds.aliyuncs.com:3306/visitor?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&autoReconnect=true");
-            dataSource.setUsername("xiaosong");
-            dataSource.setPassword("Xsafe!@1v$Lq");
-//         dataSource.setUrl("jdbc:mysql://localhost:3306/visitor?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&autoReconnect=true");
-//         dataSource.setUsername("root");
-//         dataSource.setPassword("root");
+//            dataSource.setUrl("jdbc:mysql://rm-bp1v30gvxn3h81ytx.mysql.rds.aliyuncs.com:3306/visitor?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&autoReconnect=true");
+//            dataSource.setUsername("xiaosong");
+//            dataSource.setPassword("Xsafe!@1v$Lq");
+         dataSource.setUrl("jdbc:mysql://localhost:3306/visitor?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&autoReconnect=true");
+         dataSource.setUsername("root");
+         dataSource.setPassword("root");
 //            dataSource.setUrl("jdbc:mysql://134.175.44.10:3306/vistor?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&autoReconnect=true");
 //            dataSource.setUsername("test");
 //            dataSource.setPassword("pd123456");
 //            dataSource.setUrl("jdbc:mysql://47.106.82.190:3306/visitor?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&autoReconnect=true");
 //            dataSource.setUsername("root");
 //            dataSource.setPassword("root");
+            //测试
+//            dataSource.setUrl("jdbc:mysql://192.168.1.54:3306/visitor?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&autoReconnect=true");
+//            dataSource.setUsername("root");
+//            dataSource.setPassword("flzxsqc!11");
         }
         dataSource.setMaxActive(170);
         dataSource.setInitialSize(5);//50
