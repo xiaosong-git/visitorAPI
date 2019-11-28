@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
@@ -188,11 +189,13 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
                 /** update by cwf  2019/9/24 10:08 Reason:添加储存设备号用来推送消息
                  */
                 updateDeviceToken(userId,paramMap);
+
                 //获取密钥
                 String workKey = keyService.findKeyByStatus(TableList.KEY_STATUS_NORMAL);
                 if(workKey != null){
                     user.put("workKey",workKey);
                 }
+
                 /**
                  * 获取用户的公告
                  */
@@ -232,6 +235,7 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
                         RedisUtil.setStr(userId+"_noticeUser",redisValue , apiNewAuthCheckRedisDbIndex, expire*60);
                     }
                 }
+
                 result.put("notices",notices);
                 result.put("user",user);
                 String  applyType="";
@@ -249,18 +253,22 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
                     }
                 }
                 }
+
                 user.put("applyType",applyType);
                 user.put("companyName",companyName);
                 //增加获取orgCode
                 String orgCode = BaseUtil.objToStr(orgService.findOrgCodeByUserId(userId),"无");
                 user.put("orgCode",orgCode);
+
                 return ResultData.dataResult("success","登录成功",result);
             }else{
+
                 //返回登录失败原因
                 String handleCause = userAccount.get("handleCause").toString();
                 return  Result.unDataResult("fail",handleCause);
             }
         }else {
+
             Long leftInputNum = passwordService.addErrInputNum(userId.toString(),Status.PWD_TYPE_SYS);
             return  Result.unDataResult("fail","密码错误:剩余" + leftInputNum + "次输入机会");
         }
@@ -275,7 +283,7 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
             return Result.unDataResult("fail","手机号已经被注册");
         }
         boolean flag = codeService.verifyCode(phone,code,1);
-        if(!flag){
+       if(!flag){
             return Result.unDataResult("fail","验证码错误");
         }
         paramMap.remove("code");
@@ -357,11 +365,13 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
             }
 
             try{
-                //实人认证
-                String photoResult = phoneResult(idNoMW, realName, idHandleImgUrl);
-                if (!"success".equals(photoResult)){
-                    return Result.unDataResult("fail", photoResult);
-                }
+                //实人认证  update by cwf  2019/11/25 11:30 Reason:先查询本地库是否有实名认证 如果没有 则调用CTID认证
+               if(!localPhoneResult(idNO,realName)){
+                   String photoResult = phoneResult(idNoMW, realName, idHandleImgUrl);
+                   if (!"success".equals(photoResult)){
+                       return Result.unDataResult("fail", photoResult);
+                   }
+               }
             }catch (Exception e){
                 e.printStackTrace();
                 return Result.unDataResult("fail", "图片上传出错!");
@@ -407,6 +417,10 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
                 Map<String, Object> resultMap = new HashMap<String, Object>();
                 resultMap.put("isAuth", isAuth);
                 Map<String, Object> userMap = this.findById(TableList.USER, userId);
+                // update by cwf  2019/11/25 16:33 Reason:如果本地实名不存在则插入本地
+                int authSave = deleteOrUpdate("insert into " + TableList.USER_AUTH + "(userId,idNO,realName,idHandleImgUrl,authDate) " +
+                        "values('"+userId+"','"+idNO+"','"+realName+"','"+idHandleImgUrl+"',SYSDATE())");
+                logger.info("插入本地实人："+authSave);
                 resultMap.put("isSetTransPwd", BaseUtil.objToStr(userMap.get("isSetTransPwd"),"F"));
                 resultMap.put("validityDate",validityDate);
                 return ResultData.dataResult("success", "实名认证成功", resultMap);
@@ -456,7 +470,15 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
             return resultMap.get("message").toString();
         }
     }
-
+    public boolean localPhoneResult(String idNO,String realName) throws Exception{
+            String sql="select distinct userId from "+TableList.USER_AUTH +" where idNo='"+idNO+"' and realName='"+realName+"'";
+        Map<String, Object> local = findFirstBySql(sql);
+        if (local!=null){
+            logger.info("本地实人认证成功！");
+            return true;
+        }
+        return false;
+    }
 
 
     @Override
@@ -508,7 +530,7 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
         String  code = BaseUtil.objToStr(paramMap.get("code"),null); //验证码
         String  phone = BaseUtil.objToStr(paramMap.get("phone"),null); //银行预留手机号
         boolean flag = codeService.verifyCode(phone,code,1);//3魔板
-        if(!flag){
+       if(!flag){
             return Result.unDataResult("fail","验证码错误");
         }
         Map<String,Object> user = this.getUserByPhone(phone);
@@ -532,7 +554,7 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
         String  code = BaseUtil.objToStr(paramMap.get("code"),null); //验证码
         String  phone = BaseUtil.objToStr(paramMap.get("phone"),null); //银行预留手机号
         boolean flag = codeService.verifyCode(phone,code,1);
-        if(!flag){
+       if(!flag){
             return Result.unDataResult("fail","验证码错误");
         }
         String  newPassword = BaseUtil.objToStr(paramMap.get("newPassword"),null);
@@ -755,12 +777,10 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
                 String  applyType="";
                 String  companyName="";
                 if (user.get("companyId")!=null){
-                    Map<String,Object> conpany =this.findById(TableList.COMPANY,Integer.parseInt(user.get("companyId").toString()));
-                    if (conpany.get("applyType")!=null){
-                        applyType = conpany.get("applyType").toString();
-                    }
-                    if (conpany.get("companyName")!=null){
-                        companyName = conpany.get("companyName").toString();
+                    Map<String,Object> company =this.findById(TableList.COMPANY,Integer.parseInt(user.get("companyId").toString()));
+                    if (company!=null){
+                        applyType = BaseUtil.objToStr(company.get("applyType"),"");
+                        companyName = BaseUtil.objToStr(company.get("companyName"),"");
                     }
                 }
                 user.put("companyName",companyName);
@@ -950,7 +970,12 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
         String fromSql = "from "+ TableList.USER+" where  phone='"+phone+"'";
         return baseDao.findExist(fromSql);
     }
-    // update by cwf  2019/10/8 9:15 Reason:增加查询是否为好友
+
+     /**
+     *  update by cwf  2019/10/8 9:15 Reason:增加查询是否为好友
+     *  update by cwf  2019/11/26 10:19 Reason: 增加实名与手机号查询，查询好友真实姓名如果相同则返回姓名。不同则返回脱敏姓名
+      *
+     */
     @Override
     public Result findIsUserByPhone(Map<String, Object> paramMap)  throws Exception{
         long startTime=System.currentTimeMillis();
@@ -985,7 +1010,7 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
         // update by cwf  2019/11/8 15:44 Reason:查询是否存在用户，并显示是否为好友
         String columsql="select *,(select  applyType from "+ TableList.USER_FRIEND +" uf where uf.friendId=u.id and uf.userId="+userId+" ) applyType," +
                 "(select  remark from "+ TableList.USER_FRIEND +" uf where uf.friendId=u.id and uf.userId="+userId+" ) remark";
-        String sql = " from "+ TableList.USER +"  u where phone in ("+newPhones+")";
+        String sql = " from "+ TableList.USER +"  u where phone in ("+newPhones+") and isAuth='T'";
         logger.info(columsql+sql);
         List <Map<String, Object>> list=findList(columsql,sql);
         long endTime=System.currentTimeMillis();
@@ -1004,6 +1029,8 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
         return  update>0?Result.success():Result.fail();
     }
 
+
+
     /**
      * 如果有deviceToken则保存，如果没有则不变
      * @param userId
@@ -1016,7 +1043,7 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
         System.out.println("设备号"+deviceToken);
         Map<String, Object> save=new HashMap<>();
         save.put("id",userId);
-        if (deviceToken!=null){
+        if (deviceToken!=null&&!"".equals(deviceToken)){
             save.put("deviceToken",deviceToken);
             if (deviceType!=""){
                 save.put("deviceType",deviceType);
@@ -1033,4 +1060,43 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
         return null;
     }
 
+    /**
+     * 修改小松员工的实名状态
+     * @param paramMap
+     * @return
+     */
+    @Override
+    public Result modify(Map<String, Object> paramMap) {
+        Long phone = BaseUtil.objToLong(paramMap.get("phone"), null);
+        String realName = BaseUtil.objToStr(paramMap.get("realName"), null);
+        String isAuth = BaseUtil.objToStr(paramMap.get("isAuth"), null);
+        if (phone==null||realName==null){
+            return Result.unDataResult("fail","空phone或realName");
+        }
+        Map<String, Object> user = findFirstBySql("select * from " + TableList.USER + " where phone=" + phone+" and realName='"+realName+"'");
+        if (user==null||"刘春雨".equals(user.get("realName").toString())
+                ||"宋炜".equals(user.get("realName").toString())
+                ||"徐素芬".equals(user.get("realName").toString())){
+            return Result.unDataResult("fail","不是小松员工,无法操作！");
+        }
+        Object id = user.get("id");
+        //g区一号楼小松安信
+        Map<String, Object> isCompany = findFirstBySql("select cu.* FROM " + TableList.COMPANY_USER + " cu left JOIN  " + TableList.COMPANY + " c  on " +
+                "cu.`companyId` =c.id WHERE c.`id` =18  and currentStatus='normal' and userId=" + id);
+        if (isCompany==null||isCompany.isEmpty()){
+            return Result.unDataResult("fail","不是小松员工,无法操作！");
+        }
+        Map<String, Object> newParamMap=new HashMap<>();
+        newParamMap.put("id",id);
+        newParamMap.put("isAuth",isAuth);
+        newParamMap.put("idNo","test");
+        int update = update(TableList.USER, newParamMap);
+        String key = id + "_isAuth";
+        Integer apiNewAuthCheckRedisDbIndex = Integer.valueOf(paramService.findValueByName("apiNewAuthCheckRedisDbIndex"));//存储在缓存中的位置
+        //redis修改
+        String s = RedisUtil.setStr(key, isAuth, apiNewAuthCheckRedisDbIndex, null);
+        System.out.println(update+" s: "+s);
+
+        return Result.unDataResult("数据库更新成功状态："+update,"redis修改状态："+s);
+    }
 }

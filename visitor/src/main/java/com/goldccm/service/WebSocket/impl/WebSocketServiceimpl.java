@@ -288,7 +288,7 @@ public class WebSocketServiceimpl extends BaseServiceImpl implements IWebSocketS
                         //发送推送
                         Map<String, Object> toUserMap = findById(TableList.USER, (int) toUserId);
                         String deviceToken = BaseUtil.objToStr(toUserMap.get("deviceToken"), null);
-                        if(deviceToken!=null){
+                        if(deviceToken!=null&&!"".equals(deviceToken)){
                         String deviceType = BaseUtil.objToStr(toUserMap.get("deviceType"), "0");
                         String isOnlineApp = BaseUtil.objToStr(toUserMap.get("isOnlineApp"), "T");
                         String notification_title="您有一条聊天消息需处理！";

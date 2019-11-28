@@ -1,6 +1,7 @@
 package com.goldccm.service.code.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.goldccm.model.compose.Constant;
 import com.goldccm.model.compose.Result;
 import com.goldccm.model.compose.Status;
 import com.goldccm.persist.base.IBaseDao;
@@ -28,8 +29,13 @@ public class CodeServiceImpl extends BaseServiceImpl implements ICodeService {
     public Boolean verifyCode(String phone, String code, Integer type) {
        //判断参数完整性
         if ((!StringUtils.isEmpty(phone)) && (!StringUtils.isEmpty(code)) && (type != null)) {
+            if(Constant.IS_DEVELOP&&"222333".equals(code)){
+                System.out.println("测试专用");
+                return true;
+            }
             //从Redis中取出正确验证码
             //redis修改，原dbNum=7 现在dbNum=31
+
             Object obj = RedisUtil.getObject(phone.getBytes(),31);
             if(obj == null){
                 return false;

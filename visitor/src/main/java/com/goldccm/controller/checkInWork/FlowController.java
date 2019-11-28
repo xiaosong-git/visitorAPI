@@ -21,7 +21,7 @@ import java.util.Map;
  **/
 @Controller
 @RequestMapping("/flow")
-public class flowController extends BaseController {
+public class FlowController extends BaseController {
 
     @Autowired
     private FlowService flowService;

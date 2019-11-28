@@ -387,7 +387,7 @@ public class meetingServiceImpl extends BaseServiceImpl implements IMeetingServi
                 Map<String, Object> userUser = userService.getUserByUserId(managerId);
                 if (userUser!=null){
                 String deviceToken = BaseUtil.objToStr(userUser.get("deviceToken"), null);
-                if (deviceToken != null) {
+                if (deviceToken != null&&!"".equals(deviceToken)) {
                     String isOnlineApp = BaseUtil.objToStr(userUser.get("isOnlineApp"), "T");
                     String notification_title = "房间取消预定通知";
                     String msg_content = "【朋悦比邻】您好，您管理的大楼有房间被取消预定！，请登入app查收!";

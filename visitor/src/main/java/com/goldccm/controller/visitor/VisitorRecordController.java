@@ -99,23 +99,23 @@ public class VisitorRecordController extends BaseController {
         }
     }
 
-    /**
-     * 发起访问请求
-     * @param request
-     * @return
-     */
-    @AuthCheckAnnotation(checkLogin = true,checkVerify = true, checkRequestLegal = true)
-    @RequestMapping("/visitRequest")
-    @ResponseBody
-    public Result visitRequest(HttpServletRequest request){
-        try {
-            Map<String,Object> paramMap = getParamsToMap(request);
-            return visitorRecordService.visitRequest(paramMap);
-        }catch (Exception e){
-            e.printStackTrace();
-            return Result.unDataResult("fail", "系统异常");
-        }
-    }
+//    /**
+//     * 发起访问请求
+//     * @param request
+//     * @return
+//     */
+//    @AuthCheckAnnotation(checkLogin = true,checkVerify = true, checkRequestLegal = true)
+//    @RequestMapping("/visitRequest")
+//    @ResponseBody
+//    public Result visitRequest(HttpServletRequest request){
+//        try {
+//            Map<String,Object> paramMap = getParamsToMap(request);
+//            return visitorRecordService.visitRequest(paramMap);
+//        }catch (Exception e){
+//            e.printStackTrace();
+//            return Result.unDataResult("fail", "系统异常");
+//        }
+//    }
 
     /**
      * 访问我公司的其他人
@@ -139,7 +139,8 @@ public class VisitorRecordController extends BaseController {
      * @param request
      * @return
      */
-    @AuthCheckAnnotation(checkLogin = true,checkVerify = false, checkRequestLegal = true)
+    //checkLogin需要为true
+    @AuthCheckAnnotation(checkLogin = false,checkVerify = false, checkRequestLegal = true)
     @RequestMapping("/visit")
     @ResponseBody
     public Result visit(HttpServletRequest request){

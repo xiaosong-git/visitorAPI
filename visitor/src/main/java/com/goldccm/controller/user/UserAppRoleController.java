@@ -39,6 +39,7 @@ public class UserAppRoleController extends BaseController {
     @AuthCheckAnnotation(checkLogin = false,checkVerify = false)
     @RequestMapping("/getRoleMenu")
     @ResponseBody
+
     public Result getRoleMenu(HttpServletRequest request){
         try {
             Map<String,Object> paramMap = getParamsToMap(request);

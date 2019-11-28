@@ -113,7 +113,7 @@ public class Base64 {
 	}
 
 	public static void main(String[] args) throws Exception {
-		String aa ="697";
+		String aa ="1024";
 		String bb =Base64.encode(aa.getBytes("UTF-8"));
 		String cc = new String(Base64.decode("W+ael+emj11bNjg2XVsyMDE5LTEwLTA5IDE1OjE1XVsyMDE5LTExLTA5IDE1OjE1XQ=="),"UTF-8");
 		System.out.println(bb);

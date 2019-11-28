@@ -69,7 +69,7 @@ public class CompanyUserServiceImpl extends BaseServiceImpl implements ICompanyU
                 ? Result.unDataResult("success","修改成功")
                 : Result.unDataResult("fail","修改失败");
     }
-
+    //前端删除公司后会暂留一段时间？
     @Override
     public Result findApplySuc(Map<String, Object> paramMap) throws Exception {
         Integer userId = BaseUtil.objToInteger(paramMap.get("userId"), null);

@@ -77,9 +77,9 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 		return pageModel != null ? ResultData.dataResultCount("success", "获取成功", pageModel,count)
 				: ResultData.dataResult("success", "暂无数据", new PageModel(pageNum, pageSize));
 	}
-
+	//查看访问我的公司的人
 	@Override
-	public Result visitMyCompany(Map<String, Object> paramMap, Integer pageNum, Integer pageSize) throws Exception {
+		public Result visitMyCompany(Map<String, Object> paramMap, Integer pageNum, Integer pageSize) throws Exception {
 
 		Integer userId = BaseUtil.objToInteger(paramMap.get("userId"), null);
 		if (userId == null) {
@@ -112,6 +112,7 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 				+ " where vr.visitorId in (" + userUrl
 				+ ") and vr.cstatus='applyConfirm' and vr.orgCode is not null and vr.companyId  = '" + user.get("companyId") + "' order by cstatus,visitDate desc,visitTime desc";
 		PageModel pageModel = this.findPage(columnSql, fromSql, pageNum, pageSize);
+		logger.info(columnSql+fromSql);
 		Map<String, Object> countMap = findFirstBySql("select count(*) num from "+ TableList.VISITOR_RECORD +"  where visitorId in("+userUrl+") and cstatus='applyConfirm' and endDate>SYSDATE() and orgCode is not null and companyId  = '" + user.get("companyId") + "'");
 		String count=BaseUtil.objToStr(countMap.get("num"),"0");
 		return pageModel != null ? ResultData.dataResultCount("success", "获取成功", pageModel,count)
@@ -171,7 +172,7 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 //				this.update(TableList.VISITOR_RECORD, visitorCancle);
 //
 //
-//				if (deviceToken!=null) {
+//				if (deviceToken!=null&&!"".equals(deviceToken)) {
 //                    String notification_title = "访客-访问过期提醒";
 //                    String msg_content = "【朋悦比邻】您好，您有一条预约访客申请已过期无效，请重新发起!";
 //                    String deviceType = BaseUtil.objToStr(userUser.get("deviceType"), "0");
@@ -251,7 +252,7 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 //			}
 //			//友盟连接成功
 //			boolean isYmSuc=false;
-//			if (deviceToken!=null) {
+//			if (deviceToken!=null&&!"".equals(deviceToken)) {
 //				String deviceType = BaseUtil.objToStr(userUser.get("deviceType"), "0");
 //				isYmSuc=shortMessageService.YMNotification(deviceToken,deviceType,notification_title,msg_content,isOnlineApp);
 //			}
@@ -305,7 +306,7 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 				this.update(TableList.VISITOR_RECORD, visitorCancle);
 
 
-				if (deviceToken!=null) {
+				if (deviceToken!=null&&!"".equals(deviceToken)) {
                     String notification_title = "访客-访问过期提醒";
                     String msg_content = "【朋悦比邻】您好，您有一条预约访客申请已过期无效，请重新发起!";
                     String deviceType = BaseUtil.objToStr(userUser.get("deviceType"), "0");
@@ -370,6 +371,7 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 						Map<String, Object> orgMap= findFirstBySql("select org_name,accessType from " + TableList.ORG + " where org_code='" + visitor.get("orgCode") + "'");
 						orgName =BaseUtil.objToStr(orgMap.get("org_name"),"无");
 						accessType =BaseUtil.objToStr(orgMap.get("accessType"),"0");
+						logger.info("进出方式："+accessType);
 					}
 					map.put("orgName",orgName);
 					map.put("companyName",BaseUtil.objToStr(company.get("companyName"),"0"));
@@ -387,12 +389,13 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 			}
 			//友盟连接成功
 			boolean isYmSuc=false;
-			if (deviceToken!=null) {
+			if (deviceToken!=null&&!"".equals(deviceToken)) {
 				String deviceType = BaseUtil.objToStr(userUser.get("deviceType"), "0");
 				isYmSuc=shortMessageService.YMNotification(deviceToken,deviceType,notification_title,msg_content,isOnlineApp);
 			}
 			// 消息推送不成功时，以短信的方式提醒用户
 			if (!isYmSuc) {
+
 				codeService.sendMsg(phone, 3, visitorResult, visitorBy, visitorDateTime, null);
 			}
 			return Result.unDataResult("success", "审核成功");
@@ -446,131 +449,140 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 		return pageModel != null ? ResultData.dataResult("success", "获取成功", pageModel)
 				: ResultData.dataResult("success", "暂无数据", new PageModel(pageNum, pageSize));
 	}
-	//访客访问
+//	//访客访问
+//	@Override
+//	public Result visitRequest(Map<String, Object> paramMap) throws Exception {
+//		Integer userId = BaseUtil.objToInteger(paramMap.get("userId"), null);
+//		Integer visitorId = BaseUtil.objToInteger(paramMap.get("visitorId"), null);
+//		Integer companyId = BaseUtil.objToInteger(paramMap.get("companyId"), null);
+//		String reason = BaseUtil.objToStr(paramMap.get("reason"), null);
+//		String dateType = BaseUtil.objToStr(paramMap.get("dateType"), null);
+//		String startDate = BaseUtil.objToStr(paramMap.get("startDate"), null);
+//		String endDate = BaseUtil.objToStr(paramMap.get("endDate"), null);
+//		String orgCode = BaseUtil.objToStr(paramMap.get("orgCode"), null);
+//		String cstatus = "applyConfirm";
+//
+//		Map<String, Object> save = new HashMap<String, Object>();
+//		Date date = new Date();
+//		save.put("visitDate", new SimpleDateFormat("yyyy-MM-dd").format(date));
+//		save.put("visitTime", new SimpleDateFormat("HH:mm:ss").format(date));
+//
+//		if (visitorId != null) {
+//			save.put("visitorId", visitorId);
+//		}
+//		if (userId != null) {
+//			save.put("userId", userId);
+//		}
+//		Map<String, Object> repeat = findByRepeat(userId, visitorId,  cstatus);
+//		if (repeat != null) {
+//			if(repeat.containsKey("endDate")) {
+//				SimpleDateFormat df=new SimpleDateFormat("yyyy-MM-dd HH:mm");
+//				Date de =new Date();
+//				Date d1 = df.parse(df.format(de));
+//				Date d2 = df.parse(repeat.get("endDate").toString());
+//				if(d1.getTime()<=d2.getTime()) {
+//					return Result.unDataResult("fail", "已经向此人提交过申请，请勿重复提交!");
+//				}else {
+//					Map<String, Object> record = new HashMap<String, Object>();
+//					record.put("id", repeat.get("id"));
+//					record.put("cstatus","Cancle");
+//					Integer num=this.update(TableList.VISITOR_RECORD,record);
+//					if(num<=0) {
+//						return Result.unDataResult("fail", "上条访问申请未过期，请联系客服!");
+//					}
+//				}
+//			}
+//		}
+//		if (!StringUtils.isBlank(reason)) {
+//			save.put("reason", reason);
+//		}
+//		save.put("cstatus", cstatus);
+//		if (!StringUtils.isBlank(dateType)) {
+//			save.put("dateType", dateType);
+//		}
+//		if (!StringUtils.isBlank(startDate)) {
+//			save.put("startDate", startDate);
+//		}
+//		if (!StringUtils.isBlank(endDate)) {
+//			save.put("endDate", endDate);
+//		}
+//		if (companyId != null) {
+//			save.put("companyId", companyId);
+//		}
+//		/*
+//		 * Map<String,Object> user = findById(TableList.USER, visitorId);
+//		 * Map<String,Object> org = findById(TableList.ORG,
+//		 * Integer.parseInt(user.get("orgId").toString())); String orgCode =
+//		 * org.get("org_code").toString();
+//		 */
+//		save.put("orgCode", orgCode);
+//		save.put("recordType", "1");
+//		// update by cwf  2019/11/25 17:50 Reason:vitype=A
+//		save.put("vitype", "A");
+//		Integer saveResult = this.save(TableList.VISITOR_RECORD, save);
+//		if (saveResult > 0) {
+//
+//			String visitorDateTime = "";
+//			if ("Indefinite".equals(dateType)) {
+//				visitorDateTime = "无期限";
+//			} else {
+//				System.out.println("startDate:" + startDate);
+//				visitorDateTime = startDate;
+//			}
+//			// 访客信息phone
+//			Map<String, Object> userUser = userService.getUserByUserId(userId);
+//			String visitor = BaseUtil.objToStr(userUser.get("realName"),null);
+//
+//			// 被访者信息visitorBy
+//			Map<String, Object> visitorUser = userService.getUserByUserId(visitorId);
+//			String visitorBy = BaseUtil.objToStr(visitorUser.get("realName"),null);
+//			String phone = BaseUtil.objToStr(visitorUser.get("phone"),null);
+//			String deviceToken = BaseUtil.objToStr(visitorUser.get("deviceToken"),null);
+//			Map<String, Object> conpany = this.findById(TableList.COMPANY,
+//					Integer.parseInt(visitorUser.get("companyId").toString()));
+//			if (conpany.get("applyType").toString().equals("manage")
+//					&& !("manage").equals(visitorUser.get("role").toString())) {
+//				System.out.println("你没有审核权限!");
+//			} else if (conpany.get("applyType").toString().equals("front")
+//					&& ("staff").equals(visitorUser.get("role").toString())) {
+//				System.out.println("你没有审核权限!");
+//			} else {
+//				// 被访者有管理权限
+//				String notification_title = "访客-审核通知";
+//				String msg_content = "【朋悦比邻】您好，您有一条预约访客需审核，访问者:" + visitor + "，被访者:" + visitorBy + ",访问时间:"
+//						+ visitorDateTime;
+//
+//				boolean isYmSuc=false;
+//				//友盟的token
+//				if (deviceToken!=null&&!"".equals(deviceToken)) {
+//					String deviceType = BaseUtil.objToStr(visitorUser.get("deviceType"), "0");
+//					String isOnlineApp = BaseUtil.objToStr(visitorUser.get("isOnlineApp"),"T");
+//					isYmSuc=shortMessageService.YMNotification(deviceToken,deviceType,notification_title,msg_content,isOnlineApp);
+//				}// 被访者
+//				if (!isYmSuc) {
+//					codeService.sendMsg(phone, 5, null, null, visitorDateTime, visitor);
+//				}
+//				return Result.unDataResult("success", "发起请求成功");
+//			}
+////			// 被访者无管理权限查询出该公司的所有管理人员
+//			 return  forwarding(visitor, visitorBy, BaseUtil.objToStr(visitorUser.get("companyId"), "0"), startDate);
+//
+//		}
+//		return Result.unDataResult("fail", "发起请求失败");
+//	}
+
+//	@Override
+//	public Map<String, Object> findByRepeat(Integer userId, Integer visitorId, Integer companyId, String cstatus)
+//			throws Exception {
+//		String sql = " select * from " + TableList.VISITOR_RECORD + " where userId = '" + userId + "' and visitorId ='"
+//				+ visitorId + "' and companyId = '" + companyId + "' and cstatus ='" + cstatus + "'";
+//		return findFirstBySql(sql);
+//	}
 	@Override
-	public Result visitRequest(Map<String, Object> paramMap) throws Exception {
-		Integer userId = BaseUtil.objToInteger(paramMap.get("userId"), null);
-		Integer visitorId = BaseUtil.objToInteger(paramMap.get("visitorId"), null);
-		Integer companyId = BaseUtil.objToInteger(paramMap.get("companyId"), null);
-		String reason = BaseUtil.objToStr(paramMap.get("reason"), null);
-		String dateType = BaseUtil.objToStr(paramMap.get("dateType"), null);
-		String startDate = BaseUtil.objToStr(paramMap.get("startDate"), null);
-		String endDate = BaseUtil.objToStr(paramMap.get("endDate"), null);
-		String orgCode = BaseUtil.objToStr(paramMap.get("orgCode"), null);
-		String cstatus = "applyConfirm";
-
-		Map<String, Object> save = new HashMap<String, Object>();
-		Date date = new Date();
-		save.put("visitDate", new SimpleDateFormat("yyyy-MM-dd").format(date));
-		save.put("visitTime", new SimpleDateFormat("HH:mm:ss").format(date));
-
-		if (visitorId != null) {
-			save.put("visitorId", visitorId);
-		}
-		if (userId != null) {
-			save.put("userId", userId);
-		}
-		Map<String, Object> repeat = findByRepeat(userId, visitorId, companyId, cstatus);
-		if (repeat != null) {
-			if(repeat.containsKey("endDate")) {
-				SimpleDateFormat df=new SimpleDateFormat("yyyy-MM-dd HH:mm");
-				Date de =new Date();
-				Date d1 = df.parse(df.format(de));
-				Date d2 = df.parse(repeat.get("endDate").toString());
-				if(d1.getTime()<=d2.getTime()) {
-					return Result.unDataResult("fail", "已经向此人提交过申请，请勿重复提交!");
-				}else {
-					Map<String, Object> record = new HashMap<String, Object>();
-					record.put("id", repeat.get("id"));
-					record.put("cstatus","Cancle");
-					Integer num=this.update(TableList.VISITOR_RECORD,record);
-					if(num<=0) {
-						return Result.unDataResult("fail", "上条访问申请未过期，请联系客服!");
-					}
-				}
-			}
-		}
-		if (!StringUtils.isBlank(reason)) {
-			save.put("reason", reason);
-		}
-		save.put("cstatus", cstatus);
-		if (!StringUtils.isBlank(dateType)) {
-			save.put("dateType", dateType);
-		}
-		if (!StringUtils.isBlank(startDate)) {
-			save.put("startDate", startDate);
-		}
-		if (!StringUtils.isBlank(endDate)) {
-			save.put("endDate", endDate);
-		}
-		if (companyId != null) {
-			save.put("companyId", companyId);
-		}
-		/*
-		 * Map<String,Object> user = findById(TableList.USER, visitorId);
-		 * Map<String,Object> org = findById(TableList.ORG,
-		 * Integer.parseInt(user.get("orgId").toString())); String orgCode =
-		 * org.get("org_code").toString();
-		 */
-		save.put("orgCode", orgCode);
-		save.put("recordType", "1");
-		Integer saveResult = this.save(TableList.VISITOR_RECORD, save);
-		if (saveResult > 0) {
-
-			String visitorDateTime = "";
-			if ("Indefinite".equals(dateType)) {
-				visitorDateTime = "无期限";
-			} else {
-				System.out.println("startDate:" + startDate);
-				visitorDateTime = startDate;
-			}
-			// 访客信息phone
-			Map<String, Object> userUser = userService.getUserByUserId(userId);
-			String visitor = BaseUtil.objToStr(userUser.get("realName"),null);
-
-			// 被访者信息visitorBy
-			Map<String, Object> visitorUser = userService.getUserByUserId(visitorId);
-			String visitorBy = BaseUtil.objToStr(visitorUser.get("realName"),null);
-			String phone = BaseUtil.objToStr(visitorUser.get("phone"),null);
-			String deviceToken = BaseUtil.objToStr(visitorUser.get("deviceToken"),null);
-			Map<String, Object> conpany = this.findById(TableList.COMPANY,
-					Integer.parseInt(visitorUser.get("companyId").toString()));
-			if (conpany.get("applyType").toString().equals("manage")
-					&& !("manage").equals(visitorUser.get("role").toString())) {
-				System.out.println("你没有审核权限!");
-			} else if (conpany.get("applyType").toString().equals("front")
-					&& ("staff").equals(visitorUser.get("role").toString())) {
-				System.out.println("你没有审核权限!");
-			} else {
-				// 被访者有管理权限
-				String notification_title = "访客-审核通知";
-				String msg_content = "【朋悦比邻】您好，您有一条预约访客需审核，访问者:" + visitor + "，被访者:" + visitorBy + ",访问时间:"
-						+ visitorDateTime;
-
-				boolean isYmSuc=false;
-				//友盟的token
-				if (deviceToken!=null) {
-					String deviceType = BaseUtil.objToStr(visitorUser.get("deviceType"), "0");
-					String isOnlineApp = BaseUtil.objToStr(visitorUser.get("isOnlineApp"),"T");
-					isYmSuc=shortMessageService.YMNotification(deviceToken,deviceType,notification_title,msg_content,isOnlineApp);
-				}// 被访者
-				if (!isYmSuc) {
-					codeService.sendMsg(phone, 5, null, null, visitorDateTime, visitor);
-				}
-				return Result.unDataResult("success", "发起请求成功");
-			}
-//			// 被访者无管理权限查询出该公司的所有管理人员
-			 return  forwarding(visitor, visitorBy, BaseUtil.objToStr(visitorUser.get("companyId"), "0"), startDate);
-
-		}
-		return Result.unDataResult("fail", "发起请求失败");
-	}
-
-	@Override
-	public Map<String, Object> findByRepeat(Integer userId, Integer visitorId, Integer companyId, String cstatus)
+	public Map<String, Object> findByRepeat(Integer userId, Integer visitorId,String cstatus)
 			throws Exception {
 		String sql = " select * from " + TableList.VISITOR_RECORD + " where userId = '" + userId + "' and visitorId ='"
-				+ visitorId + "' and companyId = '" + companyId + "' and cstatus ='" + cstatus + "'";
+				+ visitorId + "' and cstatus ='" + cstatus + "'";
 		return findFirstBySql(sql);
 	}
 
@@ -930,51 +942,97 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 	@Override
 	public Result visit (Map<String, Object> paramMap) throws Exception {
 		Integer userId = BaseUtil.objToInteger(paramMap.get("userId"), null);
-		String phone = BaseUtil.objToStr(paramMap.get("phone"), null);
-		if (userId == null||phone==null) {
+		String phone = BaseUtil.objToStr(paramMap.get("phone"), "");
+		String realName = BaseUtil.objToStr(paramMap.get("realName"), "");
+		String startDate = BaseUtil.objToStr(paramMap.get("startDate"), "");
+		String endDate = BaseUtil.objToStr(paramMap.get("endDate"), "");
+		String reason = BaseUtil.objToStr(paramMap.get("reason"), "");
+		if (userId == null||"".equals(phone)||"".equals(realName)) {
 			return Result.unDataResult(ConsantCode.FAIL, "缺少用户参数!");
 		}
 		if (userService.checkPhone(phone)==null){
 			return Result.unDataResult(ConsantCode.FAIL, "未找到手机号!");
 		}
-		Map<String, Object> findPhoneAndReal=userService.FindFriendByPhoneAndRealName((String)paramMap.get("phone"),(String)paramMap.get("realName"));
-		if(findPhoneAndReal==null){
+		String sql ="select id,realName,deviceToken,deviceType,isOnlineApp from "+TableList.USER+" " +
+				"where phone='"+phone+"' and realName='"+realName+"'";
+		logger.info("被访者sql：{}",sql);
+		Map<String, Object> visitorBy=findFirstBySql(sql);
+		sql="select realName from "+TableList.USER+" where id ="+userId;
+		logger.info("访者sql：{}",sql);
+		Map<String, Object> user=findFirstBySql(sql);
+		//访问者姓名
+		String userName=BaseUtil.objToStr(user.get("realName"),"");
+		if(visitorBy==null){
 			return Result.unDataResult("fail","用户姓名与手机不匹配!");
 		}
-		Integer visitorId = BaseUtil.objToInteger(findPhoneAndReal.get("id"), null);
-		Integer orgId = BaseUtil.objToInteger(findPhoneAndReal.get("orgId"), null);
-		String orgCode=null;
-		if (orgId!=null){
-			Map<String, Object> orgMap =   baseDao.findById(TableList.ORG,orgId);
-			orgCode = BaseUtil.objToStr(orgMap.get("org_code"), null);
+		//被访者id
+		Integer visitorId = BaseUtil.objToInteger(visitorBy.get("id"), null);
+		String deviceToken = BaseUtil.objToStr(visitorBy.get("deviceToken"), "");
+		String deviceType = BaseUtil.objToStr(visitorBy.get("deviceType"), "");
+		String isOnlineApp = BaseUtil.objToStr(visitorBy.get("isOnlineApp"), "");
+		//被访者姓名
+		String visitorByName = BaseUtil.objToStr(visitorBy.get("realName"), null);
+		if (userId.equals(visitorId)){
+			return Result.unDataResult("fail","请不要对自己发起访问！");
 		}
-		Integer companyId = BaseUtil.objToInteger(findPhoneAndReal.get("companyId"), null);
-		paramMap.put("visitorId",visitorId);
-		paramMap.put("companyId",companyId);
-		paramMap.put("cstatus","applyConfirm");
-		paramMap.put("visitDate",DateUtil.getCurDate());
-		paramMap.put("visitTime",DateUtil.getCurTime());
-		paramMap.put("orgCode",orgCode);
-		paramMap.remove("threshold");
-		paramMap.remove("token");
-		paramMap.remove("factor");
-		Map<String, Object> repeat = findByRepeat(userId,visitorId,companyId,"applyConfirm");
-		if (repeat != null) {
-			return Result.unDataResult("fail","已经提交过申请！");
+
+		Map<String, Object> repeat = findByRepeat(userId,visitorId,"applyConfirm");
+
+
+		if (repeat!=null) {
+
+			if (!"".equals(endDate)) {
+				SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+				Date de = new Date();
+				Date d1 = df.parse(df.format(de));
+				Date d2 = df.parse(endDate);
+				if (d1.getTime() <= d2.getTime()) {
+					return Result.unDataResult("fail","已经向此人提交过申请，请勿重复提交!");
+				} else {
+					String repeatId = BaseUtil.objToStr(repeat.get("id"), "");
+					//如果时间过期，则状态改为取消
+					Map<String, Object> visitRecord = new HashMap<>();
+					visitRecord.put("id",repeatId);
+					visitRecord.put("cstatus","Cancle");
+					Integer num = update(TableList.VISITOR_RECORD,visitRecord);
+					if (num <= 0) {
+						return Result.unDataResult("fail","上条访问申请未过期，请联系客服!");
+					}
+				}
+			}
 		}
-		//记录邀约记录
-		int saveVisitRecord =saveVisitRecord(paramMap);
-		//获取访客在线情况
-		System.out.println(Constant.SESSIONS);
-		if(Constant.SESSIONS.get(visitorId)!=null){
-			//发送给用户
-			System.out.println(visitorId);
-			return  webSocketService.sendVisitRcord(Constant.SESSIONS.get(visitorId),paramMap);
+		Map<String, Object> visitRecord =new HashMap<>();
+		Date date = new Date();
+		visitRecord.put("userId",userId);
+		visitRecord.put("visitorId",visitorId);
+		visitRecord.put("cstatus","applyConfirm");
+		visitRecord.put("visitDate",new SimpleDateFormat("yyyy-MM-dd").format(date));
+		visitRecord.put("visitTime",new SimpleDateFormat("yyyy-MM-dd").format(date));
+		visitRecord.put("reason",reason);
+		visitRecord.put("startDate",startDate);
+		visitRecord.put("endDate",endDate);
+		visitRecord.put("vitype","F");
+		visitRecord.put("recordType",1);
+		//记录访问记录
+		int saveVisitRecord =save(TableList.VISITOR_RECORD,visitRecord);
+		if (saveVisitRecord>0) {
+			String notification_title = "访客-审核通知";
+			String msg_content = "【朋悦比邻】您好，您有一条预约访客需审核，访问者:" + userName + "，被访者:" + visitorByName + ",访问时间:"
+					+ startDate;
+			boolean isYmSuc = false;
+			if (deviceToken != null && !"".equals(deviceToken)) {
+				isYmSuc = shortMessageService.YMNotification(deviceToken, deviceType, notification_title, msg_content, isOnlineApp);
+				logger.info("发送友盟推送成功{}", visitorByName);
+			}
+			if (!isYmSuc) {
+				codeService.sendMsg(phone, 5, null, null, startDate, userName);
+				logger.info(visitorByName + "：发送短信推送成功");
+			}
+			return Result.unDataResult("sucess","申请成功");
 		}else {
-			//友盟推送
-			System.out.println("用户不在线："+visitorId);
+			return Result.unDataResult("fail","申请失败");
 		}
-		return Result.unDataResult("sucess","申请成功");
+
 	}
 	/**
 	 *回应邀约/访问
@@ -1041,7 +1099,7 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 					String deviceToken = BaseUtil.objToStr(toUser.get("deviceToken"), null);
 					String msg_content = "【朋悦比邻】您好，您有一条预约回应，请登入app查收!";
 					boolean isYmSuc=false;
-					if (deviceToken!=null) {
+					if (deviceToken!=null&&!"".equals(deviceToken)) {
 						String deviceType = BaseUtil.objToStr(toUser.get("deviceType"), "0");
 						String isOnlineApp = BaseUtil.objToStr(toUser.get("isOnlineApp"),"T");
 						isYmSuc=shortMessageService.YMNotification(deviceToken,deviceType,notification_title,msg_content,isOnlineApp);
@@ -1214,7 +1272,7 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 			String msg_content = "【朋悦比邻】您好，您有一条预约访客申请，请登入app查收!";
 			String deviceToken = BaseUtil.objToStr(userMap.get("deviceToken"), null);
 			boolean isYmSuc=false;
-			if (deviceToken!=null) {
+			if (deviceToken!=null&&!"".equals(deviceToken)) {
 				String deviceType = BaseUtil.objToStr(userMap.get("deviceType"), "0");
 				String isOnlineApp = BaseUtil.objToStr(userMap.get("isOnlineApp"),"T");
 				isYmSuc=shortMessageService.YMNotification(deviceToken,deviceType,notification_title,msg_content,isOnlineApp);
@@ -1378,7 +1436,7 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 				String msg_content = "【朋悦比邻】您好，您有一条预约访客需审核，访问者:" + visitor + "，被访者:" + visitorBy + ",访问时间:"
 						+ startDate;
 				boolean isYmSuc=false;
-				if (deviceToken!=null) {
+				if (deviceToken!=null&&!"".equals(deviceToken)) {
 					String deviceType = BaseUtil.objToStr(list.get(i).get("deviceType"), "0");
 					String isOnlineApp = BaseUtil.objToStr(list.get(i).get("isOnlineApp"),"T");
 					isYmSuc=shortMessageService.YMNotification(deviceToken,deviceType,notification_title,msg_content,isOnlineApp);
@@ -1430,7 +1488,7 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 	//被访者修改公司并同意拒绝，判断权限
 	@Override
 	public Result modifyCompanyFromId(Map<String, Object> paramMap) throws Exception {
-
+		logger.info("modifyCompanyFromId");
 		Integer id=BaseUtil.objToInteger(paramMap.get("id"),0);
 		Integer userId=BaseUtil.objToInteger(paramMap.get("userId"),0);
 		Integer companyId=BaseUtil.objToInteger(paramMap.get("companyId"),0);
@@ -1473,6 +1531,7 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 		Map<String, String> wxMap = new HashMap<>();
 		String visitorResult="拒绝访问";
 		if ("applyFail".equals(cstatus)){
+			logger.info("拒绝访问");
 			saveMap.put("cstatus",cstatus);
 			saveMap.put("replyDate",DateUtil.getCurDate());
 			saveMap.put("replyTime",DateUtil.getCurTime());
@@ -1498,6 +1557,7 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 			}
 			//保存公司，并审核，审核失败则推送
 		}else {
+			logger.info("同意访问");
 			Map<String, Object> orgComMap=new HashMap<>();
 			if (companyId!=0) {
 				orgComMap= findFirstBySql("select org_code,org_name,accessType,companyName,c.addr,roleType from  "+TableList.ORG+" o " +
@@ -1516,7 +1576,8 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 			String addr = BaseUtil.objToStr(orgComMap.get("addr"), "无");
 			String companyFloor = BaseUtil.objToStr(orgComMap.get("companyFloor"), "无");
 			String roleType = BaseUtil.objToStr(orgComMap.get("roleType"), "无");
-			String accessType = BaseUtil.objToStr(visitorRecord.get("accessType"),"0");
+			String accessType = BaseUtil.objToStr(orgComMap.get("accessType"),"0");
+			logger.info("accessType="+accessType);
 			saveMap.put("companyId",companyId);
 			saveMap.put("orgCode",orgCode);
 			//有管理权限
@@ -1572,6 +1633,7 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 		}
 //		//推送处理
 	public void visitPush(Map<String, Object> visitorRecord, Map<String, Object> userUser, Map<String, Object> visitorUser, Map<String, Object> saveMap, JSONObject msg, String visitorResult, Map<String, String> wxMap) throws Exception {
+		logger.info("visitPush");
 		Long toUserId = BaseUtil.objToLong(visitorRecord.get("userId"), (long) 0);
 		String viType = BaseUtil.objToStr(visitorRecord.get("vitype"),"");
 		String startDate = BaseUtil.objToStr(visitorRecord.get("startDate"),  "");
@@ -1595,7 +1657,7 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 					update(TableList.VISITOR_RECORD,saveMap);
 				}else{
 					//不在线发送推送给用户
-					if (deviceToken!=null) {
+					if (deviceToken!=null&&"".equals(deviceToken)) {
 						String notification_title = "访客-访问提醒";
 						String msg_content = "【朋悦比邻】您好，您有一条预约访客申请已回复，请进入app查看!";
 						String deviceType = BaseUtil.objToStr(userUser.get("deviceType"), "0");
@@ -1614,6 +1676,7 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 					codeService.sendMsg(phone, 3, visitorResult, visitorBy, startDate, null);
 				}else {
 					//审核结果发送给访问者微信公众号
+					logger.info("wxUrl="+ParamDef.findDirByName("wxUrl"));
 					String s = HttpClientUtil.sendPost(ParamDef.findDirByName("wxUrl"), wxMap, "application/x-www-form-urlencoded");
 					//如果微信推送失败，则切换短信推送
 				}

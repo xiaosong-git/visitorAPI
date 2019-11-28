@@ -62,13 +62,13 @@ public interface IVisitorRecordService extends IBaseService {
      */
     Result peopleIInterviewedRecord(Map<String, Object> paramMap, Integer pageNum, Integer pageSize) throws Exception;
 
-
-    /**
-     * 添加访问请求
-     * @return
-     * @throws Exception
-     */
-    Result visitRequest(Map<String, Object> paramMap) throws Exception;
+//
+//    /**
+//     * 添加访问请求
+//     * @return
+//     * @throws Exception
+//     */
+//    Result visitRequest(Map<String, Object> paramMap) throws Exception;
 
     /**
      * 查询是否已经提交访问
@@ -81,7 +81,8 @@ public interface IVisitorRecordService extends IBaseService {
      * @throws Exception
      *
      */
-    Map<String,Object> findByRepeat(Integer userId,Integer visitorId, Integer companyId,String cstatus) throws Exception;
+    Map<String,Object> findByRepeat(Integer userId,Integer visitorId,String cstatus) throws Exception;
+//    Map<String,Object> findByRepeat(Integer userId,Integer visitorId, Integer companyId,String cstatus) throws Exception;
 
     /**
      * 批量获取授权访问

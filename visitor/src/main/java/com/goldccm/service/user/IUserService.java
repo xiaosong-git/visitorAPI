@@ -250,4 +250,6 @@ public interface IUserService extends IBaseService {
      * @date 2019/9/24 16:49
      */
     Result appQuit(Map<String, Object> paramMap);
+    //改变用户的实人认证状态
+    Result modify(Map<String, Object> paramMap);
 }

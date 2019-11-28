@@ -243,10 +243,11 @@ public class CheckInWorkServiceImpl  extends BaseServiceImpl implements CheckInW
             Object checdDateId = null;
             List<Map<String, Object>> dateList;
             //时间转unix
-            long unixTimestamp = DateUtil.StrToUnix(date);
-            long nextUnixTimestamp = DateUtil.NextStrToUnix(date);
-            System.out.println(unixTimestamp);
-            System.out.println(nextUnixTimestamp);
+//            long unixTimestamp = DateUtil.StrToUnix(date);
+//            long nextUnixTimestamp = DateUtil.NextStrToUnix(date);
+//            System.out.println(unixTimestamp);
+//            System.out.println(nextUnixTimestamp);
+
             //获取地址信息
             coloumSql="select lat,lng,loc_title,loc_detail,distance ";
             fromSql=" from "+TableList.WK_LOC_INFOS+" where group_id="+groupId;
@@ -254,8 +255,10 @@ public class CheckInWorkServiceImpl  extends BaseServiceImpl implements CheckInW
 
             //当天打卡记录 有效记录未筛选
             coloumSql="select * ";
+            String date1 = DateUtil.getDate(date);
+            String date2 = DateUtil.NextDate(date);
             fromSql=" from " + TableList.WK_RECORD +" where group_id=" + groupId + " and user_id=" + userId +
-                    " and checkin_time between "+unixTimestamp+ " and "+nextUnixTimestamp;
+                    " and checkin_time between "+ date1 + " and "+DateUtil.NextDate(date);
             List<Map<String, Object>>  dayWork = findList(coloumSql,fromSql);
             groupMap.put("dayWork",dayWork);
             //插入地址信息
@@ -263,9 +266,10 @@ public class CheckInWorkServiceImpl  extends BaseServiceImpl implements CheckInW
             for (int i=0 ;i<speDaysList.size();i++ ) {
                 //打卡日期数据
                 checkDateMap = speDaysList.get(i);
+                
                 checdDateId = checkDateMap.get("id");
                 //需要打卡的日期type=1并且时间为今天
-                if ("1".equals(BaseUtil.objToStr(checkDateMap.get("type"),""))&&unixTimestamp==BaseUtil.objToLong(checkDateMap.get("timestamp"),null)){
+                if ("1".equals(BaseUtil.objToStr(checkDateMap.get("type"),""))&&date1.equals(BaseUtil.objToLong(checkDateMap.get("timestamp"),null))){
                     //查询需要打卡的时间 当日零点开始的秒数
                     coloumSql="select work_sec,off_work_sec,remind_work_sec,remind_off_work_sec ";
                     fromSql =" from "+TableList.WK_CHECKINTIME+" " +
@@ -278,7 +282,7 @@ public class CheckInWorkServiceImpl  extends BaseServiceImpl implements CheckInW
                     groupMap.put("interval",dateList);
                     return ResultData.dataResult("success","获取打卡规则成功",groupMap);
                     //如果type=2 当天不需要打卡
-                }else if ("2".equals(BaseUtil.objToStr(checkDateMap.get("type"),""))&&unixTimestamp==BaseUtil.objToLong(checkDateMap.get("timestamp"),null)){
+                }else if ("2".equals(BaseUtil.objToStr(checkDateMap.get("type"),""))&&date2.equals(BaseUtil.objToLong(checkDateMap.get("timestamp"),null))){
                     return Result.ResultCode("success","不需要打卡的日期","202");
                 }
             }

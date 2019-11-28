@@ -31,7 +31,7 @@ public class QuartzJob implements Job {
         public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
             SpringBeanAutowiringSupport.processInjectionBasedOnCurrentContext(this);
 
-            logger.info("——————定时器——————");
+//            logger.info("——————定时器——————");
             alipayService.timeOut();
 
         }

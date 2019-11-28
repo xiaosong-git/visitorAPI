@@ -27,11 +27,6 @@
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
-            <artifactId>spring-test</artifactId>
-            <version>4.1.6.RELEASE</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
             <version>4.2.6.RELEASE</version>
         </dependency>
@@ -80,6 +75,17 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-messaging</artifactId>
             <version>4.2.6.RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjrt</artifactId>
+            <version>1.8.9</version>
+        </dependency>
+        <dependency>
+        <groupId>org.aspectj</groupId>
+        <artifactId>aspectjweaver</artifactId>
+        <version>1.8.9</version>
+        <scope>runtime</scope>
         </dependency>
         <!-- 阿里巴巴数据源 -->
         <dependency>
@@ -228,7 +234,7 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
-            <version>4.0.0.RELEASE</version>
+            <version>4.2.6.RELEASE</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -236,9 +242,14 @@
             <artifactId>alipay-sdk-java</artifactId>
             <version>4.5.0.ALL</version>
         </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <version>4.2.6.RELEASE</version>
+        </dependency>
 
 
-<!--        <dependency>-->
+        <!--        <dependency>-->
 <!--            <groupId>yop-java-sdk-2.2.9</groupId>-->
 <!--            <artifactId>yop-java-sdk-2.2.9</artifactId>-->
 <!--            <scope>system</scope>-->

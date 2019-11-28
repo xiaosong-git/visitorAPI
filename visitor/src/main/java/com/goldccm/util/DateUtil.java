@@ -162,88 +162,88 @@ public class DateUtil {
         return last;
     }
 
-    public static void main(String[] args) throws Exception {
-        Integer maxCount = 3;
-        List<Long> list = new ArrayList<Long>();
-        list.add(1L);
-        list.add(1L);
-        list.add(1L);
-
-        list.add(2L);
-        list.add(2L);
-        list.add(2L);
-
-        list.add(3L);
-        list.add(3L);
-        list.add(3L);
-
-        list.add(4L);
-
-        list.add(5L);
-
-        /**
-         * 记录每天的笔数
-         */
-        Map<Long, Integer> map = new HashMap<Long, Integer>();
-        for (int i=0; i<list.size(); i++){
-            Long key = list.get(i);
-            Integer val = map.get(key);
-            if(val == null){
-                map.put(key, 1);
-            }else{
-                map.put(key, ++val);
-            }
-        }
-
-        Iterator<Long> iterator = map.keySet().iterator();
-        while (iterator.hasNext()){
-            Long key = iterator.next();
-            Integer val = map.get(key);
-            if(val >= maxCount){
-                iterator.remove();
-            }
-        }
-
-
-
-        /**
-         * 剔除节假日，存入removeList
-         */
-        List<Long> removeList = new ArrayList<Long>();
-        Iterator<Long> it = list.iterator();
-        while (it.hasNext()){
-            Long value = it.next();
-            if(value == 3L){
-                map.remove(value);
-                removeList.add(value);
-                it.remove();
-            }
-        }
-
-        /**
-         * dayList存放着可供安排的日期
-         */
-        List<Long> dayList = new ArrayList<Long>();
-        for(Map.Entry<Long, Integer> m : map.entrySet()){
-            dayList.add(m.getKey());
-        }
-
-
-        /**
-         * 将节假日的计划重新分配
-         */
-        for (int i=0; i<removeList.size(); i++){
-            list.add(dayList.get(i % dayList.size()));
-        }
-
-        /**
-         * 查看重分配结果
-         */
-        Collections.sort(list);
-        for (int i=0; i<list.size(); i++){
-            System.out.println(list.get(i));
-        }
-    }
+//    public static void main(String[] args) throws Exception {
+//        Integer maxCount = 3;
+//        List<Long> list = new ArrayList<Long>();
+//        list.add(1L);
+//        list.add(1L);
+//        list.add(1L);
+//
+//        list.add(2L);
+//        list.add(2L);
+//        list.add(2L);
+//
+//        list.add(3L);
+//        list.add(3L);
+//        list.add(3L);
+//
+//        list.add(4L);
+//
+//        list.add(5L);
+//
+//        /**
+//         * 记录每天的笔数
+//         */
+//        Map<Long, Integer> map = new HashMap<Long, Integer>();
+//        for (int i=0; i<list.size(); i++){
+//            Long key = list.get(i);
+//            Integer val = map.get(key);
+//            if(val == null){
+//                map.put(key, 1);
+//            }else{
+//                map.put(key, ++val);
+//            }
+//        }
+//
+//        Iterator<Long> iterator = map.keySet().iterator();
+//        while (iterator.hasNext()){
+//            Long key = iterator.next();
+//            Integer val = map.get(key);
+//            if(val >= maxCount){
+//                iterator.remove();
+//            }
+//        }
+//
+//
+//
+//        /**
+//         * 剔除节假日，存入removeList
+//         */
+//        List<Long> removeList = new ArrayList<Long>();
+//        Iterator<Long> it = list.iterator();
+//        while (it.hasNext()){
+//            Long value = it.next();
+//            if(value == 3L){
+//                map.remove(value);
+//                removeList.add(value);
+//                it.remove();
+//            }
+//        }
+//
+//        /**
+//         * dayList存放着可供安排的日期
+//         */
+//        List<Long> dayList = new ArrayList<Long>();
+//        for(Map.Entry<Long, Integer> m : map.entrySet()){
+//            dayList.add(m.getKey());
+//        }
+//
+//
+//        /**
+//         * 将节假日的计划重新分配
+//         */
+//        for (int i=0; i<removeList.size(); i++){
+//            list.add(dayList.get(i % dayList.size()));
+//        }
+//
+//        /**
+//         * 查看重分配结果
+//         */
+//        Collections.sort(list);
+//        for (int i=0; i<list.size(); i++){
+//            System.out.println(list.get(i));
+//        }
+//    }
     /**
      * 获取银行的账单日、还款日（例如输入20,10 → 2017-05-20, 2017-06-10）
      *
@@ -386,5 +386,25 @@ public class DateUtil {
         c.add(Calendar.DAY_OF_MONTH,1);     //利用Calendar 实现 Date日期+1天
         Date nextDate = c.getTime();
         return nextDate.getTime()/1000;
+    }
+    public static String getDate(String date) {
+        String returnStr = null;
+        SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd");
+        returnStr = f.format(date);
+        return returnStr;
+    }
+    public static String NextDate(String date) throws ParseException {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        Date unixDate = formatter.parse(date);
+        Calendar c = Calendar.getInstance();
+        c.setTime(unixDate);
+        c.add(Calendar.DAY_OF_MONTH,1);     //利用Calendar 实现 Date日期+1天
+        Date nextDate = c.getTime();
+        String day=formatter.format(nextDate);
+        return day;
+    }
+
+    public static void main(String[] args) throws ParseException {
+        System.out.println(NextDate("2019-11-26 11:22:33"));
     }
 }

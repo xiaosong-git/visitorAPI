@@ -45,49 +45,38 @@ public class UserAppRoleServiceImpl extends BaseServiceImpl implements IUserAppR
         String companyId = BaseUtil.objToStr(user.get("companyId"),null);
         //查找自己的大楼id
         String orgId = BaseUtil.objToStr(user.get("orgId"),null);
-        String comOrgId=null;
+        Integer comOrgId=null;
+
         //查找公司的大楼id
          if(companyId!=null){
             Map<String, Object> company = findById(TableList.COMPANY, BaseUtil.objToInteger(companyId,0));
             if (company!=null) {
-                comOrgId = BaseUtil.objToStr(company.get("orgId"), null);
+                comOrgId = BaseUtil.objToInteger(company.get("orgId"), null);
             }
         }
-
         String columSql="select DISTINCT m.id,m.menu_code,m.menu_name,m.menu_url,m.sid,sstatus ";
-        //3、获取个人的app角色权限
-        String userSql="from " + TableList.APP_MENU + " am   \n" +
-                "left join " + TableList.APP_USER_ROLE_MENU + " urm on   urm.menu_id=am.id \n"+
-                "where exists (select urr.role_id from "+TableList.APP_USER_ROLE_R+" urr " +
-                "where  urm.role_id =urr.role_id and user_id="+userId+")\n";
-        //获取基础用户权限
+//        //3、获取个人的app角色权限
+//        //获取基础用户权限
         String fromSql="  from "+TableList.APP_MENU+" m " +
                 "left join \n" +
-                TableList.APP_USER_ROLE_MENU+" urm on m.id=urm.menu_id where urm.role_id=0";
-        //大楼id sql
-        String orgSql="";
-        if (orgId!=null){
-            orgSql+=orgId+",";
+                TableList.APP_USER_ROLE_MENU+" urm on m.id=urm.menu_id ";
+        String suffix=" left join " +TableList.APP_USER_ROLE +" ur on ur.id=urm.role_id and urm.isOpen='T'"+
+        " where ur.role_name='访客'";
+        String union="";
+        //查找orgRole
+        if (comOrgId!=null) {
+            Map<String, Object> org = findById(TableList.ORG, comOrgId);
+            if (org!=null) {
+                String appRole = BaseUtil.objToStr(org.get("approle"), "");
+                if (!"".equals(appRole)) {
+                    union = " union " + columSql + fromSql + " where urm.role_id=" + appRole+" and urm.isOpen='T' ";
+                }
+            }
         }
-         if (comOrgId!=null){
-            orgSql+=comOrgId+",";
-        }
-        if (orgId!=null||comOrgId!=null){
-            //拼接orgid的sql
-            orgSql= orgSql.substring(0,orgSql.length()-1);
-            //1、获取登入人大楼的app菜单权限 2、获取个人所在大楼的app角色权限
-            fromSql = " from (select DISTINCT m.id,m.menu_code,m.menu_name,m.menu_url,m.sid,sstatus" +
-                    " from " + TableList.APP_MENU + " m left join " + TableList.APP_USER_ROLE_MENU + " org " +
-                    "on org.menu_id=m.id " +
-                    "where org.role_id in(select role_id from\n" +
-                    TableList.APP_ORG_ROLE_R+" where org_id in ("+orgSql+")) and\n" +
-                    "exists(\n" +
-                    "select am.id "+userSql +
-                    "and m.id=am.id )" +
-                    "union all " +columSql+ fromSql+")m";
-        }
-        System.out.println(columSql+fromSql);
-        List <Map<String, Object>> list= findList(columSql, fromSql);
+        String order=" order by id";
+        logger.info("访客权限："+columSql+fromSql+suffix+union+order);
+//        //大楼id sql
+        List <Map<String, Object>> list= findList(columSql, fromSql+suffix+union);
         return (list==null||list.isEmpty())?Result.unDataResult("success","暂无数据"):ResultData.dataResult("success","获取app权限菜单成功",list);
     }
 }

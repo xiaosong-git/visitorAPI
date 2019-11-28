@@ -15,7 +15,7 @@ public interface IAppVersionService extends IBaseService {
      * @Author Bzk
      * @Date 2017/4/11 14:12
      */
-    public Result updateAndroid(String appType, String channel,Integer versionNum);
+    Result updateAndroid(String appType, String channel,Integer versionNum);
 
     /**
      * 更新IOS
@@ -23,6 +23,6 @@ public interface IAppVersionService extends IBaseService {
      * @return
      * @throws Exception
      */
-    public Result updateIos(String appType,Map<String,Object> paramMap) throws Exception;
+    Result updateIos(String appType,Map<String,Object> paramMap) throws Exception;
 
 }

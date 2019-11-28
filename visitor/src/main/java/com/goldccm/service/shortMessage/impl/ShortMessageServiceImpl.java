@@ -48,8 +48,10 @@ public class ShortMessageServiceImpl extends BaseServiceImpl implements IShortMe
         boolean IOS=false;
         boolean android=false;
         if (isOnline!="F"){
+            //发送ios推送
         if (Constant.DEVICE_IOS.equals(deviceType)) {
              IOS = YMNotification.httpToYMIOS(deviceToken,notification_title , msg_content);
+             //发送安卓推送
         } else if (Constant.DEVICE_ANDRIOD.equals(deviceType)) {
             android = YMNotification.httpToYMAndroid(deviceToken, notification_title, msg_content);
         }else {//没有Type时都发送
@@ -57,10 +59,7 @@ public class ShortMessageServiceImpl extends BaseServiceImpl implements IShortMe
              android = YMNotification.httpToYMAndroid(deviceToken, notification_title, msg_content);
         }
         }
-        if (IOS||android){
-            return true;
-        }
-        return false;
+        return IOS||android;
     }
 
 }

@@ -107,6 +107,8 @@ public class TableList {
     public static final String APP_USER_ROLE_MENU= "tbl_app_user_role_menu";
     //APP用户角色关系
     public static final String APP_USER_ROLE_R= "tbl_app_user_role_relation";
+    //APP用户角色关系
+    public static final String APP_USER_ROLE= "tbl_app_user_role";
     //打卡规则表
     public static final String WK_GROUP= "tbl_wk_group";
     //打卡日期
@@ -133,7 +135,8 @@ public class TableList {
     public static final String FLOW_NODE = "tbl_fl_node";
     //流程审批人
     public static final String FLOW_AUDIT = "tbl_fl_audit";
-
+    //本地实人认证表
+    public static final String USER_AUTH = "tbl_user_auth";
 
 
 }

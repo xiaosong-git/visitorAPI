@@ -86,19 +86,18 @@ public class IWebSoketHandle extends AbstractWebSocketHandler {
      */
     @Override
     public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
-        log.info("处理要发送的消息");
+        String msgStr = message.getPayload().toString();
+        log.info("处理要发送的消息：{}",msgStr);
+
         int type=0;
         //解析消息
         try {
             //增加心跳检测
-           if( "ping".equals(message.getPayload().toString())){
+           if( "ping".equals(msgStr)){
                session.sendMessage(new TextMessage("pong"));
               return  ;
            }
-            JSONObject msg = JSON.parseObject(message.getPayload().toString());
-
-            System.out.println(msg);
-
+            JSONObject msg = JSON.parseObject(msgStr);
              type= msg.getInteger("type");
             if (Constant.MASSEGETYPE_NOMAL==type){
                 webSocketService.dealChat(session,msg);
@@ -111,7 +110,7 @@ public class IWebSoketHandle extends AbstractWebSocketHandler {
             }
         }catch (Exception e){
             e.printStackTrace();
-            log.info("发送数据报错.....");
+            log.info("发送数据报错.....{}",msgStr);
             session.sendMessage(new TextMessage(Result.ResultCodeType("fail","发送失败","-1",type)));
             return;
         }
