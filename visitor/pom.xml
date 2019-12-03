@@ -247,8 +247,26 @@
             <artifactId>spring-test</artifactId>
             <version>4.2.6.RELEASE</version>
         </dependency>
-
-
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-core</artifactId>
+            <version>2.0.5.RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-net</artifactId>
+            <version>2.0.5.RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>io.projectreactor.spring</groupId>
+            <artifactId>reactor-spring-context</artifactId>
+            <version>2.0.5.RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+            <version>4.1.32.Final</version>
+        </dependency>
         <!--        <dependency>-->
 <!--            <groupId>yop-java-sdk-2.2.9</groupId>-->
 <!--            <artifactId>yop-java-sdk-2.2.9</artifactId>-->

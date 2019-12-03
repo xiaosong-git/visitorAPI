@@ -1,7 +1,8 @@
 package com.goldccm.websocket;
 
 import com.goldccm.service.user.IUserService;
-import com.goldccm.util.BaseUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -15,7 +16,7 @@ import java.util.Map;
 
 
 public class IWebSoketHandleInterceptor implements HandshakeInterceptor {
-
+    Logger logger = LoggerFactory.getLogger(IWebSoketHandleInterceptor.class);
     @Autowired
     private IUserService userService;
     @Override
@@ -33,13 +34,13 @@ public class IWebSoketHandleInterceptor implements HandshakeInterceptor {
                 if (user.isEmpty()||user==null){
                     return false;
                 }
-                System.out.println("userId:"+userId+ ", token:"+token);
+               logger.info("userId:"+userId+ ", token:"+token);
                 //将ID作为在线条件插入session
                 attributes.put("userId", userId);
             }
 
         }catch (Exception e ){
-            System.out.println("用户连接失败");
+           logger.info("用户连接失败");
             return false;
         }
 

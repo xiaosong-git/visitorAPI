@@ -79,7 +79,7 @@ public class meetingServiceImpl extends BaseServiceImpl implements IMeetingServi
                 "GROUP BY sr.id ,apply_date";
 //        List list=findList("select apply_date,sr.*,GROUP_CONCAT(time_interval) time_interval ",sql);
         List list=findList("select * ",sql);
-        System.out.println(sql);
+       logger.info(sql);
         return list.isEmpty()? ResultData.dataResult("success", "暂无预定数据", list):
                 ResultData.dataResult("success", "获取成功", list);
     }
@@ -137,8 +137,8 @@ public class meetingServiceImpl extends BaseServiceImpl implements IMeetingServi
             //时间换算
             String start_time=String.valueOf(apply_start_time).replaceAll("\\.0",":00").replaceAll("\\.5",":30");
             String end_time=String.valueOf(apply_end_time).replaceAll("\\.0",":00").replaceAll("\\.5",":30");
-            System.out.println(start_time);
-            System.out.println(end_time);
+           logger.info(start_time);
+           logger.info(end_time);
 
 //            System.out.println(start_time+","+end_time);
             Integer managerId=  BaseUtil.objToInteger(room.get("room_manager"),null);
@@ -194,7 +194,7 @@ public class meetingServiceImpl extends BaseServiceImpl implements IMeetingServi
                 "left join "+TableList.BILL_DETAI+" bd on rar.trade_no=bd.trade_no " +
                 "where  apply_userid = "+userId+"" +
                 sqlRecords+and+"  order by rar.create_time desc ";
-        System.out.println(coloumSql+fromsql);
+       logger.info(coloumSql+fromsql);
         PageModel pageModel = this.findPage(coloumSql, fromsql, pageNum, pageSize);
         return ResultData.dataResult("success", "获取成功", pageModel);
     }
@@ -442,8 +442,8 @@ public class meetingServiceImpl extends BaseServiceImpl implements IMeetingServi
         }
 
         //record_status 1 预定未付款 2 已付款可退款 3 已付款不可退款 4 已退款
-        String coloumSql="select rar.room_id,apply_userid,u.soleCode ,u.realName ,apply_date,apply_start_time,apply_end_time,rar.id record_id,record_status,price,\n" +
-                "room_addr,room_open_time,room_close_time,room_status,room_orgcode,room_mode,isFlag ";
+        String coloumSql="select rar.room_id,apply_userid,u.soleCode ,u.realName ,apply_date,apply_start_time,apply_end_time,rar.id record_id,record_status,\n" +
+                "room_addr,room_open_time,room_close_time,room_status,room_mode,isFlag,u.idNo ";
         String fromSql="from "+TableList.ROOM_APPLY_RECORD+" rar left join "+TableList.SHARE_ROOM+" sr on rar.room_id=sr.id\n" +
                 "left join "+TableList.USER+" u on u.id =rar.apply_userid  \n" +
                 "where room_orgcode ='"+orgCode+"' and record_status <>1 AND isFlag='F' and apply_date >=DATE_FORMAT(SYSDATE(),'%Y-%m-%d')";

@@ -128,7 +128,7 @@ public class GreetingController {
     }
 
     public static void main(String[] args) {
-        Principal principal =new UserPrincipal("jirry");
+        Principal principal =new UserPrincipal("jerry");
 
     }
 }

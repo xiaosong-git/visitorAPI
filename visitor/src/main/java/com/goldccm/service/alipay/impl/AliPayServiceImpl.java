@@ -47,12 +47,12 @@ public class AliPayServiceImpl extends BaseServiceImpl implements IAliPayService
         String user_id=request.getParameter("user_id");
         String apply_id=request.getParameter("apply_id");
         //商品的标题/交易标题/订单标题/订单关键字等。 如大乐透
-        System.out.println("subject:"+subject);
+        logger.info("subject:"+subject);
         //对一笔交易的具体描述信息。如果是多种商品，请将商品描述字符串累加传给body。 如Iphone6 16G
-        System.out.println("body:"+body);
+        logger.info("body:"+body);
         //订单总金额，单位为元，精确到小数点后两位，取值范围[0.01,100000000]
-        System.out.println("total_amount:"+total_amount);
-        System.out.println("apply_id:"+apply_id);
+        logger.info("total_amount:"+total_amount);
+        logger.info("apply_id:"+apply_id);
         //实例化客户端
         AlipayClient alipayClient = new DefaultAlipayClient(ParamDef.findAliByName("UNIFIED_ORDER_URL"),
                 ParamDef.findAliByName("APP_ID"),
@@ -74,15 +74,15 @@ public class AliPayServiceImpl extends BaseServiceImpl implements IAliPayService
         //商户网站唯一订单号 如70501111111S001111119
         Long tradeSuffix=System.currentTimeMillis();
         String tradeNo=user_id+tradeSuffix.toString();
-        System.out.println(tradeNo+","+user_id);
-        logger.debug("生成订单号：{},用户id={}",tradeNo,user_id);
+        logger.info(tradeNo+","+user_id);
+        logger.info("生成订单号：{},用户id={}",tradeNo,user_id);
         model.setOutTradeNo(tradeNo);
         //该笔订单允许的最晚付款时间，逾期将关闭交易。取值范围：1m～15d。m-分钟，h-小时，d-天，1c-当天（1c-当天的情况下，无论交易何时创建，都在0点关闭）。 该参数数值不接受小数点， 如 1.5h，可转换为 90m。
         //注：若为空，则默认为15d。
         model.setTimeoutExpress("1m");
 //        model.setTimeExpire("1m");
 //        model.setTimeExpire(ParamDef.findAliByName("TIMEOUT_EXPRESS"));
-        System.out.println(ParamDef.findAliByName("TIMEOUT_EXPRESS"));
+        logger.info(ParamDef.findAliByName("TIMEOUT_EXPRESS"));
         //订单总金额，单位为元，精确到小数点后两位，取值范围[0.01,100000000]
         model.setTotalAmount(total_amount);
         //销售产品码，商家和支付宝签约的产品码，为固定值 QUICK_MSECURITY_PAY
@@ -105,8 +105,8 @@ public class AliPayServiceImpl extends BaseServiceImpl implements IAliPayService
         String checkSql="select bd.trade_no,bd.response_body from "+TableList.ROOM_APPLY_RECORD+" rar left join " +
                 TableList.BILL_DETAI+" bd on bd.trade_no=rar.trade_no where rar.trade_no >0 and rar.id="+apply_id;
         Map<String, Object> check = findFirstBySql(checkSql);
-        System.out.println("checksql: "+checkSql);
-        System.out.println("check: "+check);
+        logger.info("checksql: "+checkSql);
+        logger.info("check: "+check);
         try {
             if (check!=null) {
                 if (check.containsKey("response_body")) {
@@ -122,7 +122,7 @@ public class AliPayServiceImpl extends BaseServiceImpl implements IAliPayService
             //这里和普通的接口调用不同，使用的是sdkExecute
             AlipayTradeAppPayResponse response = alipayClient.sdkExecute(aliRequest);
             saveMap.put("response_body", response.getBody());
-            System.out.println(response.getBody());//就是orderString 可以直接给客户端请求，无需再做处理。
+            logger.info(response.getBody());//就是orderString 可以直接给客户端请求，无需再做处理。
             save(TableList.BILL_DETAI,saveMap);
             return ResultData.dataResult("success","获取订单成功",response.getBody());
         } catch (AlipayApiException e) {
@@ -145,7 +145,7 @@ public class AliPayServiceImpl extends BaseServiceImpl implements IAliPayService
      */
     @Override
     public String paynotify(Map requestParams) {
-        System.out.println("支付宝支付结果通知"+requestParams.toString());
+        logger.info("支付宝支付结果通知"+requestParams.toString());
         //获取支付宝POST过来反馈信息
         Map<String,String> params = new HashMap<>();
 
@@ -156,19 +156,19 @@ public class AliPayServiceImpl extends BaseServiceImpl implements IAliPayService
             for (int i = 0; i < values.length; i++) {
                 valueStr = (i == values.length - 1) ? valueStr + values[i]
                         : valueStr + values[i] + ",";
-                System.out.println(name+"   , values["+i+"]  "+values[i]);
+               logger.info(name+"   , values["+i+"]  "+values[i]);
             }
             //乱码解决，这段代码在出现乱码时使用。
             //valueStr = new String(valueStr.getBytes("ISO-8859-1"), "utf-8");
             params.put(name, valueStr);
-            System.out.println(valueStr);
+           logger.info(valueStr);
 
         }
         //切记alipaypublickey是支付宝的公钥，请去open.alipay.com对应应用下查看。
         //boolean AlipaySignature.rsaCheckV1(Map<String, String> params, String publicKey, String charset, String sign_type)
         try {
             boolean flag = AlipaySignature.rsaCheckV1(params,  ParamDef.findAliByName("ALIPAY_PUBLIC_KEY"), ParamDef.findAliByName("CHARSET"), "RSA2");
-            System.out.println("flag:"+flag);
+           logger.info("flag:"+flag);
             if(flag){
                 logger.info("支付宝回调签名认证成功");
                 // 按照支付结果异步通知中的描述，对支付结果中的业务内容进行1\2\3\4二次校验，
@@ -237,7 +237,6 @@ public class AliPayServiceImpl extends BaseServiceImpl implements IAliPayService
         try {
 
             int update = deleteOrUpdate(updateSql);
-            System.out.println(update);
             logger.info("alipay update: "+update);
             if (update<=0){
                 logger.info("alipay updateSql fail");
@@ -308,10 +307,10 @@ public class AliPayServiceImpl extends BaseServiceImpl implements IAliPayService
             return null;
         }
         if(response.isSuccess()){
-            System.out.println("调用成功");
+           logger.info("调用成功");
             return response;
         } else {
-            System.out.println("调用失败");
+           logger.info("调用失败");
             return null;
         }
 
@@ -383,7 +382,7 @@ public class AliPayServiceImpl extends BaseServiceImpl implements IAliPayService
         } catch (AlipayApiException e) {
             e.printStackTrace();
         }
-        System.out.print(response.getBody());
+       logger.info(response.getBody());
         return response;
     }
     //工具类文字转数字

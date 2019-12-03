@@ -56,7 +56,7 @@ public class WebSocketServiceimpl extends BaseServiceImpl implements IWebSocketS
         }
         return Result.success();
     }
-
+    @Override
     public int saveMessage(Long fromUserId, Long toUserId, String content, Long type) throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put("id", 0);
@@ -70,13 +70,13 @@ public class WebSocketServiceimpl extends BaseServiceImpl implements IWebSocketS
 
         return baseDao.save(TableList.USER_MESSAGE, params);
     }
-
+    @Override
     public Result gainMessagefromDb(WebSocketSession session, Long toUserId) throws Exception {
         //从数据库获取离线消息
         List<Map<String, Object>> msgList = getMsgByToUserId(toUserId);
         System.out.println(msgList);
         if (msgList == null) {
-            return Result.unDataResult("sucess", "无聊天记录需要获取");
+            return Result.unDataResult("success", "无聊天记录需要获取");
         }
         JSONObject obj = new JSONObject();
         for (Map<String, Object> msgMap : msgList) {
@@ -94,6 +94,14 @@ public class WebSocketServiceimpl extends BaseServiceImpl implements IWebSocketS
             obj.put("nickName",nickName);
             obj.put("headImgUrl",headImgUrl);
             obj.put("idHandleImgUrl",idHandleImgUrl);
+            Integer type = BaseUtil.objToInteger(msgMap.get("type"), 0);
+            if (type==4){
+                String sql="select count(*) c from "+TableList.USER_FRIEND+" where friendId="+toUserId+" and applyType=0";
+                Map<String, Object> count = findFirstBySql(sql);
+                if (count!=null){
+                    obj.put("count",count.get("c"));
+                }
+            }
             obj.remove("id");
             System.out.println(obj.toJSONString());
             //发送给session连接者
@@ -158,7 +166,7 @@ public class WebSocketServiceimpl extends BaseServiceImpl implements IWebSocketS
         List<Map<String, Object>> msgList = getVisitRecordByVisitorId(userId);
         if (msgList == null||msgList.isEmpty()) {
             System.out.println("无访问记录需要获取");
-            return Result.unDataResult("sucess", "无访问记录需要获取");
+            return Result.unDataResult("success", "无访问记录需要获取");
         }
         System.out.println(msgList);
         JSONObject obj = new JSONObject();
@@ -218,7 +226,7 @@ public class WebSocketServiceimpl extends BaseServiceImpl implements IWebSocketS
             }
 
         }
-        return Result.unDataResult("sucess", "访问记录获取成功");
+        return Result.unDataResult("success", "访问记录获取成功");
     }
     @Override
     public Result sendVisitRcord(WebSocketSession session,Map<String, Object> paramMap) throws Exception{
@@ -233,7 +241,7 @@ public class WebSocketServiceimpl extends BaseServiceImpl implements IWebSocketS
                 System.out.println(obj.toJSONString());
                 session.sendMessage(new TextMessage(obj.toJSONString()));
 
-        return Result.unDataResult("sucess", "发送记录成功");
+        return Result.unDataResult("success", "发送记录成功");
     }
 
     @Override
@@ -252,7 +260,6 @@ public class WebSocketServiceimpl extends BaseServiceImpl implements IWebSocketS
         //判断
         JSONObject obj = new JSONObject();
         try {
-            if (msg.getInteger("type").equals(Constant.MASSEGETYPE_NOMAL)) {
                 System.out.println("查询在线情况+" + Constant.SESSIONS.get(toUserId));
 //                for (Map.Entry<Object, WebSocketSession> entry : Constant.SESSIONS.entrySet()) {
 //                    System.out.println("key= " + entry.getKey() + " and value= " + entry.getValue());
@@ -275,13 +282,19 @@ public class WebSocketServiceimpl extends BaseServiceImpl implements IWebSocketS
                     obj.put("headImgUrl",headImgUrl);
                     obj.put("idHandleImgUrl",idHandleImgUrl);
                     obj.put("orgId",orgId);
+                    if (type==4){
+                        String sql="select count(*) c from "+TableList.USER_FRIEND+" where friendId="+toUserId+" and applyType=0";
+                        Map<String, Object> count = findFirstBySql(sql);
+                        if (count!=null){
 
+                            obj.put("count",count.get("c"));
+                        }
+                    }
                     sendMessageToUser(Constant.SESSIONS.get(toUserId), fromUserId, (long)toUserId, content,(long) type, new TextMessage(obj.toJSONString()));
 
                     session.sendMessage(new TextMessage(Result.ResultCodeType("success","发送成功","200",type)));
                     //用户不在线，插入数据库
                 } else {
-
                     int istrue = saveMessage(fromUserId, toUserId, content, (long)type);
                     if (istrue>0){
                         session.sendMessage(new TextMessage(Result.ResultCodeType("success","发送成功","200",type)));
@@ -291,7 +304,10 @@ public class WebSocketServiceimpl extends BaseServiceImpl implements IWebSocketS
                         if(deviceToken!=null&&!"".equals(deviceToken)){
                         String deviceType = BaseUtil.objToStr(toUserMap.get("deviceType"), "0");
                         String isOnlineApp = BaseUtil.objToStr(toUserMap.get("isOnlineApp"), "T");
-                        String notification_title="您有一条聊天消息需处理！";
+                            String notification_title="您有一条聊天消息需处理！";
+                            if (type==4){
+                                notification_title="您有一条好友申请需处理！";
+                            }
                         shortMessageService.YMNotification(deviceToken,deviceType,notification_title,content,isOnlineApp);
                         }
                     }else {
@@ -299,7 +315,7 @@ public class WebSocketServiceimpl extends BaseServiceImpl implements IWebSocketS
                     }
                     log.info("插入成功,当前id" + istrue);
                 }
-            }
+
         }catch (Exception e){
             e.printStackTrace();
         }

@@ -17,7 +17,7 @@ import java.util.Map;
 
 
 public class IWebSoketHandle extends AbstractWebSocketHandler {
-    Logger log = LoggerFactory.getLogger(IWebSoketHandle.class);
+    Logger logger = LoggerFactory.getLogger(IWebSoketHandle.class);
 
     @Autowired
     public IWebSocketService webSocketService;
@@ -34,7 +34,7 @@ public class IWebSoketHandle extends AbstractWebSocketHandler {
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         session.sendMessage(new TextMessage(message.asBytes()));
 
-        System.out.println("客户发送信息："+message.asBytes());
+       logger.info("客户发送信息："+message.asBytes());
     }
     /**
      *  连接成功后获取用户消息
@@ -46,7 +46,7 @@ public class IWebSoketHandle extends AbstractWebSocketHandler {
      */
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-        log.info("链接成功......");
+        logger.info("链接成功......");
 
         //当前登入人ID
        try {
@@ -60,17 +60,17 @@ public class IWebSoketHandle extends AbstractWebSocketHandler {
 
            Constant.SESSIONS.put(userId,session);
            for (Map.Entry<Object, WebSocketSession> entry: Constant.SESSIONS.entrySet()){
-               System.out.println("当前在线：user: "+entry.getKey()+" value: "+entry.getValue());
+              logger.info("当前在线：user: "+entry.getKey()+" value: "+entry.getValue());
            }
            //获取当前登入人：userId的离线消息
            webSocketService.gainMessagefromDb(session,userId);
            //获取当前登入人：userId的邀约消息
-           System.out.println("准备进入拉取离线邀约消息");
+          logger.info("准备进入拉取离线邀约消息");
            webSocketService.gainVisitRcordfromDb(session,userId);
 
        }catch (Exception e){
            e.printStackTrace();
-           log.info("初始化数据报错.....");
+           logger.info("初始化数据报错.....");
            return;
        }
 
@@ -87,7 +87,7 @@ public class IWebSoketHandle extends AbstractWebSocketHandler {
     @Override
     public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
         String msgStr = message.getPayload().toString();
-        log.info("处理要发送的消息：{}",msgStr);
+
 
         int type=0;
         //解析消息
@@ -97,9 +97,10 @@ public class IWebSoketHandle extends AbstractWebSocketHandler {
                session.sendMessage(new TextMessage("pong"));
               return  ;
            }
+            logger.info("处理要发送的消息：{}",msgStr);
             JSONObject msg = JSON.parseObject(msgStr);
              type= msg.getInteger("type");
-            if (Constant.MASSEGETYPE_NOMAL==type){
+            if (Constant.MASSEGETYPE_NOMAL==type||4==type){
                 webSocketService.dealChat(session,msg);
             }
             //申请访问
@@ -110,7 +111,7 @@ public class IWebSoketHandle extends AbstractWebSocketHandler {
             }
         }catch (Exception e){
             e.printStackTrace();
-            log.info("发送数据报错.....{}",msgStr);
+            logger.info("发送数据报错.....{}",msgStr);
             session.sendMessage(new TextMessage(Result.ResultCodeType("fail","发送失败","-1",type)));
             return;
         }
@@ -163,7 +164,7 @@ public class IWebSoketHandle extends AbstractWebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
 
-        System.out.println(session.getAttributes().get("userId")+"客户连接关闭");
+       logger.info(session.getAttributes().get("userId")+"客户连接关闭");
         Constant.SESSIONS.remove(session.getAttributes().get("userId"));
     }
 

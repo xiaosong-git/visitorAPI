@@ -114,11 +114,12 @@ public class DESUtil {
 
     public static void main(String[] args) {
         String key = "iB4drRzSrC";
-        String str = "350121199306180330";
-        encode(key,str);
+        String str = "C2BB3553446EB52102CC9CC2E842608C376DAB836573D7A9";
+//        encode(key,str);
         System.out.println(str);
-        System.out.println( encode(key,str));
-        System.out.println( decode(key,encode(key,str)));
+//        System.out.println( encode(key,str));
+        System.out.println( decode(key,str));
+//        System.out.println( decode(key,encode(key,str)));
 
     }
 }

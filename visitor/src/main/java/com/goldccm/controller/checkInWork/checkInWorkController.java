@@ -109,4 +109,26 @@ public class checkInWorkController extends BaseController {
         }
 
     }
+
+    /**
+     * 统计
+     * @Author cwf
+     * @Date 2019/11/4 21:33
+     */
+    @AuthCheckAnnotation(checkLogin = false)
+    @RequestMapping("/effective")
+    @ResponseBody
+    public Result effective(HttpServletRequest request){
+        try {
+            Map<String,Object> paramMap = getParamsToMap(request);
+
+            return checkInWorkService.effective(paramMap);
+
+        }catch (Exception e){
+            e.printStackTrace();
+
+            return Result.unDataResult("fail","未知错误，请联系管理员！");
+        }
+
+    }
 }

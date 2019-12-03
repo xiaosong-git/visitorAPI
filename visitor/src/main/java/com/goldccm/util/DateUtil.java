@@ -387,12 +387,12 @@ public class DateUtil {
         Date nextDate = c.getTime();
         return nextDate.getTime()/1000;
     }
-    public static String getDate(String date) {
-        String returnStr = null;
+    public static String getDate(String date) throws ParseException {
         SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd");
-        returnStr = f.format(date);
-        return returnStr;
+        Date strDate = f.parse(date);
+        return f.format(strDate);
     }
+
     public static String NextDate(String date) throws ParseException {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         Date unixDate = formatter.parse(date);
@@ -403,8 +403,21 @@ public class DateUtil {
         String day=formatter.format(nextDate);
         return day;
     }
+    public static String NextMinu(String date) throws ParseException {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date minu = formatter.parse(date);
+        Calendar c = Calendar.getInstance();
+        c.setTime(minu);
+        c.add(Calendar.MINUTE,1);     //利用Calendar 实现 分钟+1分钟
+        Date nextMinu = c.getTime();
+        String day=formatter.format(nextMinu);
+        return day;
+    }
 
     public static void main(String[] args) throws ParseException {
-        System.out.println(NextDate("2019-11-26 11:22:33"));
+        String x = NextMinu("2019-11-20 00:00:00");
+        System.out.println(x.substring(11));
+        System.out.println(x.substring(0,10));
+//        System.out.println(getDate("2019-11-20 00:00:00").substring(10,14));
     }
 }

@@ -39,6 +39,7 @@ public class CheckInWorkServiceImpl  extends BaseServiceImpl implements CheckInW
      * 2、根据规则id插入规则相关打卡日期表tbl_wk_checkindate，打卡时间表tbl_wk_checkintime，打卡日期时间关系表：tbl_wk_date_time_rlat地址表tbl_wk_loc_infos。特殊日期表tbl_wk_spe_days
      * 3、修改旧规则时，需要新增一个新规则，保存旧规则，保存修改时间，以便进行判断
      * 4、同一个用户，只对最新规则进行判断
+     *  新增打卡时间限制，并且中午下班打卡时间限制不得与中午上班打卡时间限制有交叉？·
      * @param request
      * @return
      */
@@ -46,16 +47,28 @@ public class CheckInWorkServiceImpl  extends BaseServiceImpl implements CheckInW
     @Override
     public Result saveGroup(HttpServletRequest request) {
         Map<String,Object> saveMap=new HashMap<>();
-        saveMap.put("company_id",request.getParameter("company_id"));
-        saveMap.put("group_type",request.getParameter("group_type"));
-        saveMap.put("group_name",request.getParameter("group_name"));
-        saveMap.put("sync_holidays",request.getParameter("sync_holidays"));
-        saveMap.put("need_photo",request.getParameter("need_photo"));
-        saveMap.put("note_can_use_local_pic",request.getParameter("note_can_use_local_pic"));
-        saveMap.put("allow_checkin_offworkday",request.getParameter("allow_checkin_offworkday"));
-        saveMap.put("allow_apply_offworkday",request.getParameter("allow_apply_offworkday"));
+        Integer companyId = BaseUtil.objToInteger(request.getParameter("company_id"), 0);
+        Integer groupType = BaseUtil.objToInteger(request.getParameter("group_type"), 0);
+        String groupName = BaseUtil.objToStr(request.getParameter("group_name"), "");
+        String syncHolidays = BaseUtil.objToStr(request.getParameter("sync_holidays"), "F");
+        String needPhoto = BaseUtil.objToStr(request.getParameter("need_photo"), "F");
+        String noteCanUseLocalPic = BaseUtil.objToStr(request.getParameter("note_can_use_local_pic"), "F");
+        String allowCheckinOffworkday = BaseUtil.objToStr(request.getParameter("allow_checkin_offworkday"), "F");
+        String allowApplyOffworkday = BaseUtil.objToStr(request.getParameter("allow_apply_offworkday"), "F");
+        saveMap.put("company_id", companyId);
+        saveMap.put("group_type",groupType);
+        saveMap.put("group_name",groupName);
+        saveMap.put("sync_holidays", syncHolidays);
+        saveMap.put("need_photo",needPhoto);
+        saveMap.put("note_can_use_local_pic",noteCanUseLocalPic);
+        saveMap.put("allow_checkin_offworkday",allowCheckinOffworkday);
+        saveMap.put("allow_apply_offworkday",allowApplyOffworkday);
+        saveMap.put("effective_time", DateUtil.getCurDate());
         try {
-        int id = save(TableList.WK_GROUP,saveMap);
+            //更新上一条的失效时间
+            deleteOrUpdate("update tbl_wk_group set failure_time ="+DateUtil.getCurDate()+"  where company_id=" + companyId + " ORDER BY id desc  limit 1");
+
+            int id = save(TableList.WK_GROUP,saveMap);
 //        System.out.println(id);
         //插入规则相关数据
             Map<String,Object> checkInDateMap=new HashMap<>();
@@ -143,7 +156,7 @@ public class CheckInWorkServiceImpl  extends BaseServiceImpl implements CheckInW
                    speDateObject = speDatesArray.getJSONObject(l);
                    speTimeInterval = speDateObject.getJSONArray("time_interval");
                    speInDateMap.put("group_id", id);
-                   speInDateMap.put("timestamp", speDateObject.getString("timestamp"));
+                   speInDateMap.put("spe_date", speDateObject.getString("spe_date"));
                    speInDateMap.put("type", speDateObject.getString("type"));
                    speInDateMap.put("notes", speDateObject.getString("notes"));
                    speDateId = save(TableList.WK_SPE_DAYS, speInDateMap);
@@ -181,7 +194,7 @@ public class CheckInWorkServiceImpl  extends BaseServiceImpl implements CheckInW
             for (Object userId:userList){
                 userSuffixSql.append("("+id+","+userId+"),");
             }
-            logger.info("批量插入特殊日期关系表语句：\n{}",userPrefixSql+userSuffixSql.substring(0,userSuffixSql.length()-1));
+            logger.info("批量插入用户规则关系表语句：\n{}",userPrefixSql+userSuffixSql.substring(0,userSuffixSql.length()-1));
             baseDao.batchUpdate(userPrefixSql+userSuffixSql.substring(0,userSuffixSql.length()-1));
             //------------------下发白名单----------------------------
             JSONArray whiteList = JSONArray.parseArray(request.getParameter("whiteList"));
@@ -190,7 +203,7 @@ public class CheckInWorkServiceImpl  extends BaseServiceImpl implements CheckInW
             for (Object whiteId:whiteList){
                 whiteSuffixSql.append("("+id+","+whiteId+"),");
             }
-            logger.info("批量插入特殊日期关系表语句：\n{}",whitePrefixSql+whiteSuffixSql.substring(0,whiteSuffixSql.length()-1));
+            logger.info("批量插入白名单语句：\n{}",whitePrefixSql+whiteSuffixSql.substring(0,whiteSuffixSql.length()-1));
             baseDao.batchUpdate(whitePrefixSql+whiteSuffixSql.substring(0,whiteSuffixSql.length()-1));
         }catch (Exception e){
             e.printStackTrace();
@@ -219,10 +232,13 @@ public class CheckInWorkServiceImpl  extends BaseServiceImpl implements CheckInW
             return Result.unDataResult("fail","缺少参数！");
         }
         //获取打卡规则
-        Map<String, Object> groupMap = findFirstBySql("select user_id,wg.* from " + TableList.WK_GROUP + " wg \n" +
+        String groupSql="select user_id,wg.* from " + TableList.WK_GROUP + " wg \n" +
                 "left join " + TableList.WK_USER_GROUP_RLAT+
-                " wugr on wugr.group_id=wg.id where user_id=" + userId + " and company_id=" + companyId + " ORDER BY wg.id desc");
+                " wugr on wugr.group_id=wg.id where user_id=" + userId + " and company_id=" + companyId + " ORDER BY wg.id desc";
+        Map<String, Object> groupMap = findFirstBySql(groupSql);
+        logger.info("用户{}的规则sql:\n{}",userId,groupSql);
         Long groupId=BaseUtil.objToLong(groupMap.get("id"),null);
+
         if (groupId==null){
             return Result.unDataResult("fail","未找到用户规则");
         }else{
@@ -235,7 +251,7 @@ public class CheckInWorkServiceImpl  extends BaseServiceImpl implements CheckInW
                return Result.ResultCode("success","用户在白名单内","201");
             }
             //获取特殊日期
-            String  coloumSql=" select id,timestamp,type,notes ";
+            String  coloumSql=" select id,spe_date,type,notes ";
             String  fromSql=" from "+TableList.WK_SPE_DAYS+" where group_id="+groupId;
             List<Map<String, Object>> speDaysList =findList(coloumSql,fromSql);
             Map<String, Object> checkDateMap;
@@ -253,12 +269,13 @@ public class CheckInWorkServiceImpl  extends BaseServiceImpl implements CheckInW
             fromSql=" from "+TableList.WK_LOC_INFOS+" where group_id="+groupId;
             List<Map<String, Object>> locInfosList = findList(coloumSql, fromSql);
 
+            String startDate = DateUtil.getDate(date);
+            String nextDate = DateUtil.NextDate(date);
             //当天打卡记录 有效记录未筛选
             coloumSql="select * ";
-            String date1 = DateUtil.getDate(date);
-            String date2 = DateUtil.NextDate(date);
             fromSql=" from " + TableList.WK_RECORD +" where group_id=" + groupId + " and user_id=" + userId +
-                    " and checkin_time between "+ date1 + " and "+DateUtil.NextDate(date);
+                    " and checkin_time between '"+ startDate + "' and '"+nextDate+"'";
+            logger.info("用户{}的打卡记录sql:\n{}",userId,coloumSql+fromSql);
             List<Map<String, Object>>  dayWork = findList(coloumSql,fromSql);
             groupMap.put("dayWork",dayWork);
             //插入地址信息
@@ -269,12 +286,13 @@ public class CheckInWorkServiceImpl  extends BaseServiceImpl implements CheckInW
                 
                 checdDateId = checkDateMap.get("id");
                 //需要打卡的日期type=1并且时间为今天
-                if ("1".equals(BaseUtil.objToStr(checkDateMap.get("type"),""))&&date1.equals(BaseUtil.objToLong(checkDateMap.get("timestamp"),null))){
+                if ("1".equals(BaseUtil.objToStr(checkDateMap.get("type"),""))&&startDate.equals(BaseUtil.objToLong(checkDateMap.get("timestamp"),null))){
                     //查询需要打卡的时间 当日零点开始的秒数
                     coloumSql="select work_sec,off_work_sec,remind_work_sec,remind_off_work_sec ";
                     fromSql =" from "+TableList.WK_CHECKINTIME+" " +
                             "wt left join "+TableList.WK_SPE_DAYS_TIME_RLAT+" " +
                             "str on wt.id=str.time_id where str.spe_id="+checdDateId;
+                    logger.info("用户{}的需要打卡的时间sql:\n{}",userId,coloumSql+fromSql);
                     dateList = findList(coloumSql, fromSql);
 //                    speDaysList.get(i).put("interval",dateList);
 //                    System.out.println(coloumSql+fromSql);
@@ -282,7 +300,8 @@ public class CheckInWorkServiceImpl  extends BaseServiceImpl implements CheckInW
                     groupMap.put("interval",dateList);
                     return ResultData.dataResult("success","获取打卡规则成功",groupMap);
                     //如果type=2 当天不需要打卡
-                }else if ("2".equals(BaseUtil.objToStr(checkDateMap.get("type"),""))&&date2.equals(BaseUtil.objToLong(checkDateMap.get("timestamp"),null))){
+                }else if ("2".equals(BaseUtil.objToStr(checkDateMap.get("type"),""))&&nextDate.equals(BaseUtil.objToLong(checkDateMap.get("timestamp"),null))){
+
                     return Result.ResultCode("success","不需要打卡的日期","202");
                 }
             }
@@ -293,6 +312,7 @@ public class CheckInWorkServiceImpl  extends BaseServiceImpl implements CheckInW
             //获取打卡时间
              coloumSql="select id,workdays,flex_time,noneed_offwork,limit_aheadtime";
              fromSql=" from "+TableList.WK_CHECKINDATE+" where group_id="+groupId;
+
             String week = String.valueOf(DateUtil.getWeek(date));
             List<Map<String, Object>> checkDateList = findList(coloumSql, fromSql);
             for (int i=0 ;i<checkDateList.size();i++ ) {
@@ -308,13 +328,14 @@ public class CheckInWorkServiceImpl  extends BaseServiceImpl implements CheckInW
 //                            "select dtr.date_id,CONCAT(work_sec,',',off_work_sec) inter from " + TableList.WK_CHECKINTIME + " wt left join " + TableList.WK_DATE_TIME_RLAT +
 //                            " dtr on wt.id=dtr.time_id where dtr.date_id=" + checdDateId+")x";
 //                    Map<String, Object> interval = findFirstBySql(fromSql);
+//                        logger.info("用户{}的需要打卡的时间sql:\n{}",userId,fromSql);
 //                    checkDateList.get(i).put("interval",interval.get("inter"));
                         coloumSql="select work_sec,off_work_sec,remind_work_sec,remind_off_work_sec ";
                         fromSql =" from "+TableList.WK_CHECKINTIME+" " +
                                 "wt left join "+TableList.WK_DATE_TIME_RLAT+" " +
                                 "dtr on wt.id=dtr.time_id where dtr.date_id="+checdDateId;
+                        logger.info("用户{}的需要打卡的时间sql:\n{}",userId,coloumSql+fromSql);
                         dateList = findList(coloumSql, fromSql);
-                        System.out.println(coloumSql+fromSql);
                         groupMap.put("interval",dateList);
                         return ResultData.dataResult("success","获取打卡规则成功",groupMap);
                     }
@@ -345,6 +366,7 @@ public class CheckInWorkServiceImpl  extends BaseServiceImpl implements CheckInW
                         !"group_id".equals(m.getKey())&&
                         !"checkin_type".equals(m.getKey())&&
                         !"exception_type".equals(m.getKey())&&
+                        !"checkin_date".equals(m.getKey())&&
                         !"checkin_time".equals(m.getKey())&&
                         !"location_title".equals(m.getKey())&&
                         !"location_detail".equals(m.getKey())&&
@@ -390,8 +412,22 @@ public class CheckInWorkServiceImpl  extends BaseServiceImpl implements CheckInW
         return null;
     }
     //失效sql
-    public  void effective(){
+    @Override
+    public  Result effective(Map<String, Object> paramMap) throws ParseException {
 
+        StringBuffer dateTimeRlatPrefixSql = new StringBuffer("INSERT INTO `visitor`.`tbl_wk_record`(`user_id`, `group_id`, `group_name`, `checkin_type`, `exception_type`,`checkin_date`, `checkin_time`, `location_title`, `location_detail`, `wifi_name`, `wifi_mac`, `checkin_divice`, `notes`, `mediaids`, `lat`, `lng` ) values");
+        StringBuffer dateTimeRlatsuffixSql = new StringBuffer();
+        String nextMinu = DateUtil.NextMinu("2019-12-02 00:00:00");
+
+        for (int i=1;i<24*60;i++){
+            nextMinu= DateUtil.NextMinu(nextMinu);
+
+
+            dateTimeRlatsuffixSql.append("(10, 24, '日常考勤', '上班打卡', '地点异常','"+nextMinu.substring(0,10)+"', '"+nextMinu.substring(11)+"', '依澜府', '四川省成都市武侯区益州大道中段784号附近', '办公一区', '3c:46:d8:0c:7a:70', '小米note3', '路上堵车，迟到了5分钟', 'WWCISP_G8PYgRaOVHjXWUWFqchpBqqqUpGj0OyR9z6WTwhnMZGCPHxyviVstiv_2fTG8YOJq8L8zJT2T2OvTebANV-2MQ', 30547645, 104063236),");
+        }
+
+        int[] locs = baseDao.batchUpdate(dateTimeRlatPrefixSql + dateTimeRlatsuffixSql.substring(0, dateTimeRlatsuffixSql.length() - 1));
+        return Result.unDataResult("test","test");
     }
     /**
      * 管理员 查看的月统计，月报

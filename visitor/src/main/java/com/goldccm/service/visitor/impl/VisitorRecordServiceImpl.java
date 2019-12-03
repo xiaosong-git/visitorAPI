@@ -953,25 +953,34 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 		if (userService.checkPhone(phone)==null){
 			return Result.unDataResult(ConsantCode.FAIL, "未找到手机号!");
 		}
+
+
 		String sql ="select id,realName,deviceToken,deviceType,isOnlineApp from "+TableList.USER+" " +
 				"where phone='"+phone+"' and realName='"+realName+"'";
 		logger.info("被访者sql：{}",sql);
 		Map<String, Object> visitorBy=findFirstBySql(sql);
-		sql="select realName from "+TableList.USER+" where id ="+userId;
-		logger.info("访者sql：{}",sql);
-		Map<String, Object> user=findFirstBySql(sql);
-		//访问者姓名
-		String userName=BaseUtil.objToStr(user.get("realName"),"");
 		if(visitorBy==null){
 			return Result.unDataResult("fail","用户姓名与手机不匹配!");
 		}
+		//查看访客是否实名
 		//被访者id
 		Integer visitorId = BaseUtil.objToInteger(visitorBy.get("id"), null);
+		boolean verify = userService.isVerify(visitorId);
+		if (!verify){
+			return Result.unDataResult("fail","被访者未实名！");
+		}
 		String deviceToken = BaseUtil.objToStr(visitorBy.get("deviceToken"), "");
 		String deviceType = BaseUtil.objToStr(visitorBy.get("deviceType"), "");
 		String isOnlineApp = BaseUtil.objToStr(visitorBy.get("isOnlineApp"), "");
 		//被访者姓名
 		String visitorByName = BaseUtil.objToStr(visitorBy.get("realName"), null);
+		sql="select realName from "+TableList.USER+" where id ="+userId;
+		logger.info("访者sql：{}",sql);
+		Map<String, Object> user=findFirstBySql(sql);
+		//访问者姓名
+		String userName=BaseUtil.objToStr(user.get("realName"),"");
+
+
 		if (userId.equals(visitorId)){
 			return Result.unDataResult("fail","请不要对自己发起访问！");
 		}
@@ -1028,7 +1037,7 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 				codeService.sendMsg(phone, 5, null, null, startDate, userName);
 				logger.info(visitorByName + "：发送短信推送成功");
 			}
-			return Result.unDataResult("sucess","申请成功");
+			return Result.unDataResult("success","申请成功");
 		}else {
 			return Result.unDataResult("fail","申请失败");
 		}

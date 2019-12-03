@@ -24,4 +24,6 @@ public interface CheckInWorkService extends IBaseService {
     Result gainMonthStatistics(Map<String, Object> paramMap);
 
     Result gainCalendarStatistics(Map<String, Object> paramMap);
+
+    Result effective(Map<String, Object> paramMap) throws ParseException;
 }

@@ -58,6 +58,17 @@ public class TestJSON {
                 "        { \"name\":\"Taobao\", \"info\":[ \"淘宝\", \"网购\" ] }\n" +
                 "    ]\n" +
                 "}";
+
+        String myJsonObj3="[{\"spe_date\": \"2019-11-25\",\n" +
+                "\"type\":1,\n" +
+                "\"notes\": \"由于进度不够必须加班\",\n" +
+                "\"time_interval\":[36000,43200,50400,72000]\n" +
+                "  } ,\n" +
+                "{\"spe_date\":\"2019-11-26\",   \n" +
+                "\"type\":2,\n" +
+                "\"notes\": \"由于进度太够决定休假\"\n" +
+                "  } ]";
+        JSONArray speDatesArray=JSONArray.parseArray(myJsonObj3);
         JSONObject jsonobj2 = JSON.parseObject(myJsonObj2); //将json字符串转换成jsonObject对象
         System.out.println(jsonobj2.get("sites"));
         System.out.println(jsonobj2.getString("sites"));

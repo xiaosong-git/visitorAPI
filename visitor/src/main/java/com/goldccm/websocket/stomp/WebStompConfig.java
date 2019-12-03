@@ -44,9 +44,21 @@ public class WebStompConfig extends AbstractWebSocketMessageBrokerConfigurer {
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         //定义了两个客户端订阅地址的前缀信息，也就是客户端接收服务端发送消息的前缀信息
-        registry.enableSimpleBroker("/message", "/notice");
+//        registry.enableSimpleBroker("/message", "/notice");
         //定义了服务端接收地址的前缀，也即客户端给服务端发消息的地址前缀
         registry.setApplicationDestinationPrefixes("/app");
+        /**
+         * 设置单独发送到某个user需要添加的前缀，用户订阅地址/user/topic/td1地址后会去掉/user，并加上用户名（需要springsecurity支持）等唯一标识组成新的目的地发送回去，
+         * 对于这个url来说 加上后缀之后走代理。发送时需要制定用户名:convertAndSendToUser或者sendtouser注解.
+         */
+        registry.setUserDestinationPrefix("/user");
+        registry.enableStompBrokerRelay("/message","/notice")
+                .setRelayHost("47.106.82.190")
+                .setRelayPort(61613)
+                .setSystemLogin("admin")
+                .setSystemPasscode("admin")
+                .setClientLogin("admin")
+                .setClientPasscode("admin");
     }
 
     @Override

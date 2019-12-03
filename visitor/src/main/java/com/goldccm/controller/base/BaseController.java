@@ -2,6 +2,10 @@ package com.goldccm.controller.base;
 
 
 
+import com.goldccm.service.meeting.impl.meetingServiceImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.servlet.http.HttpServletRequest;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
@@ -15,7 +19,7 @@ import java.util.Map;
  * @Date 2016/7/25 17:01
  */
 public class BaseController {
-
+    Logger logger = LoggerFactory.getLogger(BaseController.class);
     /**
      * 把请求参数 转换为map
      *
@@ -27,16 +31,19 @@ public class BaseController {
         Map<String,Object>  res = new HashMap<String,Object>();
         Map<String,String[]>  parameter = request.getParameterMap();
         Iterator<String> it = parameter.keySet().iterator();
+        StringBuffer str=new StringBuffer();
         while(it.hasNext()){
             String key = it.next();
             String[]  val = parameter.get(key);
             if(val!=null&&val.length>0){
                 if(val[0]!=null&&!"".equals(val[0])){
                     res.put(key, val[0].trim());
-                    System.out.println(key+"="+ val[0].trim());
+                    str.append(key+"="+ val[0].trim()+"\n");
+
                 }
             }
         }
+        logger.info(str.toString());
         return res;
     }
 

@@ -325,7 +325,7 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
             Integer userId = BaseUtil.objToInteger(paramMap.get("userId"), Integer.valueOf(0));
 
             if (isVerify(userId)) {
-                System.out.println("已经实名认证过");
+               logger.info("已经实名认证过");
                 return Result.unDataResult("fail", "已经实名认证过");
             }
 
@@ -440,17 +440,18 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
         String key="2B207D1341706A7R4160724854065152";//秘钥
         String dateTime=DateUtil.getSystemTimeFourteen();//时间戳
         String certNo = DESUtil.encode(key,idNO);
-        System.out.println("名称加密前为："+realName);
+        logger.info("名称加密前为：{}",realName);
         String userName =DESUtil.encode(key,realName);
-        System.out.println("名称加密后为："+userName);
+        logger.info("名称加密后为：{}",userName);
         String imageServerUrl = paramService.findValueByName("imageServerUrl");
         String photo=Base64.encode(FilesUtils.getImageFromNetByUrl(imageServerUrl+idHandleImgUrl));
         String signSource = merchantNo + merchOrderId + dateTime + productCode + key;//原始签名值
         String sign = MD5Util.MD5Encode(signSource);//签名值
 
+
         Map<String, String> map = new HashMap<String, String>();
         map.put("merchOrderId", merchOrderId);
-        System.out.println(merchOrderId);
+        logger.info(merchOrderId);
         map.put("merchantNo", merchantNo);
         map.put("productCode", productCode);
         map.put("userName", userName);//加密
@@ -463,7 +464,7 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
         String makePlanJsonResult = obj.getResponseEntity();
         JSONObject jsonObject = JSONObject.parseObject(makePlanJsonResult);
         Map resultMap = JSON.parseObject(jsonObject.toString());
-        System.out.println(jsonObject.toString());
+        logger.info(jsonObject.toString());
         if ("1".equals(resultMap.get("bankResult").toString())){
             return "success";
         }else{
@@ -1095,7 +1096,7 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
         Integer apiNewAuthCheckRedisDbIndex = Integer.valueOf(paramService.findValueByName("apiNewAuthCheckRedisDbIndex"));//存储在缓存中的位置
         //redis修改
         String s = RedisUtil.setStr(key, isAuth, apiNewAuthCheckRedisDbIndex, null);
-        System.out.println(update+" s: "+s);
+       logger.info(update+" s: "+s);
 
         return Result.unDataResult("数据库更新成功状态："+update,"redis修改状态："+s);
     }

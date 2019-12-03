@@ -1,23 +1,29 @@
 package com.goldccm.service.user.impl;
 
-import com.goldccm.Quartz.QuartzInit;
+import com.alibaba.fastjson.JSONObject;
+import com.alipay.api.java_websocket.WebSocketImpl;
+import com.goldccm.model.compose.Constant;
 import com.goldccm.model.compose.Result;
 import com.goldccm.model.compose.ResultData;
 import com.goldccm.model.compose.TableList;
 import com.goldccm.persist.base.IBaseDao;
+import com.goldccm.service.WebSocket.IWebSocketService;
 import com.goldccm.service.base.impl.BaseServiceImpl;
 import com.goldccm.service.user.IUserFriendService;
 import com.goldccm.service.user.IUserService;
 import com.goldccm.util.BaseUtil;
 import com.goldccm.util.ConsantCode;
-import com.sun.org.apache.regexp.internal.REUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketSession;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @Author linyb
@@ -31,7 +37,8 @@ public class UserFriendServiceImpl extends BaseServiceImpl implements IUserFrien
 
     @Autowired
     private IBaseDao baseDao;
-
+    @Autowired
+    private IWebSocketService webSocketService;
     @Override
     public Result findUserFriend(Map<String, Object> paramMap) throws Exception {
             Integer userId = BaseUtil.objToInteger(paramMap.get("userId"), null);
@@ -198,6 +205,26 @@ public class UserFriendServiceImpl extends BaseServiceImpl implements IUserFrien
             //添加至数据库 用户id 好友id 备注 applytype为0 对方同意后改为1
             Integer save = addFriend(userId,friendId,remark,"0");
         if (save > 0){
+            //发送websocket给好友
+            for (Map.Entry<Object, WebSocketSession> entry: Constant.SESSIONS.entrySet()){
+                logger.info("当前在线：user: "+entry.getKey()+" value: "+entry.getValue());
+            }
+
+            if (Constant.SESSIONS.containsKey((long)friendId)){
+                JSONObject obj = new JSONObject();
+                obj.put("fromUserid", userId);
+                obj.put("toUserId", friendId);
+                obj.put("message", "申请好友");
+                obj.put("type", 4);
+                String sql="select count(*) c from "+TableList.USER_FRIEND+" where friendId="+friendId+" and applyType=0";
+                Map<String, Object> count = findFirstBySql(sql);
+                if (count!=null){
+                    obj.put("count",count.get("c"));
+                }
+                webSocketService.sendMessageToUser(Constant.SESSIONS.get((long)friendId), (long)userId, (long)friendId, "申请好友",(long) 4, new TextMessage(obj.toJSONString()));
+            }else {
+                webSocketService.saveMessage((long)userId,(long)friendId,"申请好友",(long)4);
+            }
             return Result.unDataResult("success","提交好友申请成功");
         }
         return Result.unDataResult("fail","提交好友申请失败");
@@ -275,7 +302,7 @@ public class UserFriendServiceImpl extends BaseServiceImpl implements IUserFrien
 
         //查找是否已经为好友 我存在好友
         Map<String,Object> ifUserFriend = findFriend(userId,friendId);
-        System.out.println("ifUserFriend: "+ifUserFriend);
+       logger.info("ifUserFriend: "+ifUserFriend);
         //好友存在我
         Long isfriend = isFriend(friendId, userId);
         //我存在好友
@@ -321,7 +348,7 @@ public class UserFriendServiceImpl extends BaseServiceImpl implements IUserFrien
                 "from " + TableList.USER_FRIEND + "   uf \n" +
                 "left join " + TableList.USER + " u on uf.userid=u.id \n" +
                 "where uf.friendId = "+userId+" ";
-        System.out.println(columnSql+fromSql+union);
+       logger.info(columnSql+fromSql+union);
         List<Map<String,Object>> list = this.findList(columnSql,fromSql+union);
         return list != null && !list.isEmpty()
                 ? ResultData.dataResult("success","获取列表成功",list)

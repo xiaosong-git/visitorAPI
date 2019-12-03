@@ -52,7 +52,7 @@ public class QrcodeServiceImpl extends BaseServiceImpl implements IQrcodeService
                 "left join "+TableList.USER+" u on vr.userId=u.id\n" +
                 "left join "+TableList.USER+" vu on vr.visitorId=vu.id\n" +
                 "where vr.id="+recordId;
-        System.out.println(sql);
+        logger.info("二维码sql:{}",sql);
         Map<String, Object> visitRecord = findFirstBySql( sql);
         if (visitRecord==null){
             logger.error("访客二维码获取错误！未找到访客记录");
