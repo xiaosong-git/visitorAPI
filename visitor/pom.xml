@@ -7,6 +7,12 @@
     <version>1.0-SNAPSHOT</version>
     <name>webapp Maven Webapp</name>
     <url>http://maven.apache.org</url>
+    <repositories>
+        <repository>
+            <id>getui-nexus</id>
+            <url>http://mvn.gt.igexin.com/nexus/content/repositories/releases/</url>
+        </repository>
+    </repositories>
     <dependencies>
         <!-- servlet 基础 Jar -->
         <dependency>
@@ -248,25 +254,32 @@
             <version>4.2.6.RELEASE</version>
         </dependency>
         <dependency>
-            <groupId>io.projectreactor</groupId>
-            <artifactId>reactor-core</artifactId>
-            <version>2.0.5.RELEASE</version>
+            <groupId>com.gexin.platform</groupId>
+            <artifactId>gexin-rp-sdk-http</artifactId>
+            <version>4.1.0.5</version>
         </dependency>
-        <dependency>
-            <groupId>io.projectreactor</groupId>
-            <artifactId>reactor-net</artifactId>
-            <version>2.0.5.RELEASE</version>
-        </dependency>
-        <dependency>
-            <groupId>io.projectreactor.spring</groupId>
-            <artifactId>reactor-spring-context</artifactId>
-            <version>2.0.5.RELEASE</version>
-        </dependency>
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-all</artifactId>
-            <version>4.1.32.Final</version>
-        </dependency>
+
+<!--        stomp-->
+<!--        <dependency>-->
+<!--            <groupId>io.projectreactor</groupId>-->
+<!--            <artifactId>reactor-core</artifactId>-->
+<!--            <version>2.0.5.RELEASE</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>io.projectreactor</groupId>-->
+<!--            <artifactId>reactor-net</artifactId>-->
+<!--            <version>2.0.5.RELEASE</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>io.projectreactor.spring</groupId>-->
+<!--            <artifactId>reactor-spring-context</artifactId>-->
+<!--            <version>2.0.5.RELEASE</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>io.netty</groupId>-->
+<!--            <artifactId>netty-all</artifactId>-->
+<!--            <version>4.1.32.Final</version>-->
+<!--        </dependency>-->
         <!--        <dependency>-->
 <!--            <groupId>yop-java-sdk-2.2.9</groupId>-->
 <!--            <artifactId>yop-java-sdk-2.2.9</artifactId>-->

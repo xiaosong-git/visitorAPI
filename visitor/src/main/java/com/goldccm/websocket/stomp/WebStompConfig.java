@@ -52,13 +52,13 @@ public class WebStompConfig extends AbstractWebSocketMessageBrokerConfigurer {
          * 对于这个url来说 加上后缀之后走代理。发送时需要制定用户名:convertAndSendToUser或者sendtouser注解.
          */
         registry.setUserDestinationPrefix("/user");
-        registry.enableStompBrokerRelay("/message","/notice")
-                .setRelayHost("47.106.82.190")
-                .setRelayPort(61613)
-                .setSystemLogin("admin")
-                .setSystemPasscode("admin")
-                .setClientLogin("admin")
-                .setClientPasscode("admin");
+//        registry.enableStompBrokerRelay("/message","/notice")
+//                .setRelayHost("47.106.82.190")
+//                .setRelayPort(61613)
+//                .setSystemLogin("admin")
+//                .setSystemPasscode("admin")
+//                .setClientLogin("admin")
+//                .setClientPasscode("admin");
     }
 
     @Override

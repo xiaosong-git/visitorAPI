@@ -163,7 +163,7 @@ public interface IVisitorRecordService extends IBaseService {
      */
     Result visit (Map<String, Object> paramMap) throws Exception;
     /**
-     * 回应邀约
+     * webSocket回应邀约
      * @param session
      * @param msg
      * @return com.goldccm.model.compose.Result
@@ -196,6 +196,8 @@ public interface IVisitorRecordService extends IBaseService {
     Result forwarding(String visitor, String visitorBy, String companyId, String startDate) throws Exception;
 
     Result visitForwarding(Map<String, Object> paramMap) throws Exception;
-
+    //访问时填写公司
     Result modifyCompanyFromId(Map<String, Object> paramMap) throws Exception;
+    //接口回应邀约
+    Result visitReply(Map<String, Object> paramMap) throws Exception;
 }

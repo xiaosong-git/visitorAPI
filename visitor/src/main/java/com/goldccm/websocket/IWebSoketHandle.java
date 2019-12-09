@@ -106,6 +106,7 @@ public class IWebSoketHandle extends AbstractWebSocketHandler {
             //申请访问
             else if(Constant.MASSEGETYPE_VISITOR==type){
                 visitorRecordService.receiveVisit(session,msg);
+                //回应邀约
             }else if(Constant.MASSEGETYPE_REPLY==type){
                 visitorRecordService.visitReply(session,msg);
             }

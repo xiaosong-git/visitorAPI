@@ -137,6 +137,8 @@ public class TableList {
     public static final String FLOW_AUDIT = "tbl_fl_audit";
     //本地实人认证表
     public static final String USER_AUTH = "tbl_user_auth";
+    //app版本
+    public static final String APP_VERSION = "tbl_app_version";
 
 
 }

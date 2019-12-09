@@ -449,7 +449,7 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 		return pageModel != null ? ResultData.dataResult("success", "获取成功", pageModel)
 				: ResultData.dataResult("success", "暂无数据", new PageModel(pageNum, pageSize));
 	}
-//	//访客访问
+//	//访客访问  已废弃
 //	@Override
 //	public Result visitRequest(Map<String, Object> paramMap) throws Exception {
 //		Integer userId = BaseUtil.objToInteger(paramMap.get("userId"), null);
@@ -618,7 +618,7 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 		if (maxId == null || maxId.isEmpty() || maxId.get("maxVisitorId") == null) {
 //			System.out.println("111");
 			// 增量问题
-			String columnSql = "select vr.id visitId,vr.visitDate,vr.visitTime,vr.orgCode,vr.dateType,vr.startDate,vr.endDate,u.realName userRealName,u.idType userIdType,u.idNO userIdNO,u.soleCode soleCode,u.idHandleImgUrl idHandleImgUrl,c.companyFloor companyFloor,v.realName vistorRealName,v.idType vistorIdType,v.idNO visitorIdNO,o.province province,o.city city";
+			String columnSql = "select vr.id visitId,vr.userId,vr.visitDate,vr.visitTime,vr.orgCode,vr.dateType,vr.startDate,vr.endDate,u.realName userRealName,u.idType userIdType,u.idNO userIdNO,u.soleCode soleCode,u.idHandleImgUrl idHandleImgUrl,c.companyFloor companyFloor,v.realName vistorRealName,v.idType vistorIdType,v.idNO visitorIdNO,o.province province,o.city city";
 			String fromSql = " from " + TableList.VISITOR_RECORD + " vr " + " left join " + TableList.USER
 					+ " v on vr.visitorId=v.id" + " left join " + TableList.USER + " u on vr.userId=u.id"+ " left join " +TableList.COMPANY +" c on vr.companyId=c.id"
 					+ " left join " + TableList.ORG + " o on v.orgId=o.id"
@@ -697,7 +697,7 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 			}
 		} else {
 //			System.out.println("4444");
-			String columnSql = "select vr.id visitId,vr.visitDate,vr.visitTime,vr.orgCode,vr.dateType,vr.startDate,vr.endDate,u.realName userRealName,u.idType userIdType,u.idNO userIdNO,u.soleCode soleCode,u.idHandleImgUrl idHandleImgUrl,c.companyFloor companyFloor,v.realName vistorRealName,v.idType vistorIdType,v.idNO visitorIdNO,o.province province,o.city city";
+			String columnSql = "select vr.id visitId,vr.userId,vr.visitDate,vr.visitTime,vr.orgCode,vr.dateType,vr.startDate,vr.endDate,u.realName userRealName,u.idType userIdType,u.idNO userIdNO,u.soleCode soleCode,u.idHandleImgUrl idHandleImgUrl,c.companyFloor companyFloor,v.realName vistorRealName,v.idType vistorIdType,v.idNO visitorIdNO,o.province province,o.city city";
 			String fromSql = " from " + TableList.VISITOR_RECORD + " vr " + " left join " + TableList.USER
 					+ " v on vr.visitorId=v.id" + " left join " + TableList.USER + " u on vr.userId=u.id" + " left join " +TableList.COMPANY +" c on vr.companyId=c.id"
 					+ " left join " + TableList.ORG + " o on v.orgId=o.id" + " where vr.id>" + maxId.get("maxVisitorId")
@@ -759,7 +759,7 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 		}
 		Date date = new Date();
 		String today = new SimpleDateFormat("yyyy-MM-dd").format(date);
-		String coloumSql = "select vr.id visitId,vr.visitDate,vr.visitTime,vr.orgCode,vr.dateType,vr.startDate,vr.endDate,u.realName userRealName,u.soleCode soleCode,v.realName vistorRealName,o.province province,o.city city";
+		String coloumSql = "select vr.id visitId,vr.userId,vr.visitDate,vr.visitTime,vr.orgCode,vr.dateType,vr.startDate,vr.endDate,u.realName userRealName,u.soleCode soleCode,v.realName vistorRealName,o.province province,o.city city";
 		String fromSql = " from " + TableList.VISITOR_RECORD + " vr " + " left join " + TableList.USER
 				+ " v on vr.visitorId=v.id" + " left join " + TableList.USER + " u on vr.userId=u.id" + " left join "
 				+ TableList.ORG + " o on v.orgId=o.id" + " where vr.cstatus='applySuccess' and vr.orgCode = '" + orgCode
@@ -936,8 +936,6 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 
 	}
 
-
-
 	//非好友访问
 	@Override
 	public Result visit (Map<String, Object> paramMap) throws Exception {
@@ -955,7 +953,7 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 		}
 
 
-		String sql ="select id,realName,deviceToken,deviceType,isOnlineApp from "+TableList.USER+" " +
+		String sql ="select id,companyId,realName,deviceToken,deviceType,isOnlineApp from "+TableList.USER+" " +
 				"where phone='"+phone+"' and realName='"+realName+"'";
 		logger.info("被访者sql：{}",sql);
 		Map<String, Object> visitorBy=findFirstBySql(sql);
@@ -965,9 +963,23 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 		//查看访客是否实名
 		//被访者id
 		Integer visitorId = BaseUtil.objToInteger(visitorBy.get("id"), null);
+		if (userId.equals(visitorId)){
+			return Result.unDataResult("fail","请不要对自己发起访问！");
+		}
+		Integer companyId = BaseUtil.objToInteger(visitorBy.get("companyId"), null);
 		boolean verify = userService.isVerify(visitorId);
+		logger.info("被访者{}实名:{}",visitorId,verify);
 		if (!verify){
+			logger.info("被访者未实名！:{}",visitorId);
 			return Result.unDataResult("fail","被访者未实名！");
+		}
+		if (companyId==null){
+			sql="select 1 from "+TableList.COMPANY_USER+" where userId="+visitorId+" and currentStatus" +
+					"='normal' and status='applySuc'";
+			Map<String, Object> existUser = findFirstBySql(sql);
+			if (existUser==null){
+				return Result.unDataResult("fail","被访者无归属公司！");
+			}
 		}
 		String deviceToken = BaseUtil.objToStr(visitorBy.get("deviceToken"), "");
 		String deviceType = BaseUtil.objToStr(visitorBy.get("deviceType"), "");
@@ -979,36 +991,14 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 		Map<String, Object> user=findFirstBySql(sql);
 		//访问者姓名
 		String userName=BaseUtil.objToStr(user.get("realName"),"");
-
-
-		if (userId.equals(visitorId)){
-			return Result.unDataResult("fail","请不要对自己发起访问！");
-		}
-
-		Map<String, Object> repeat = findByRepeat(userId,visitorId,"applyConfirm");
-
-
-		if (repeat!=null) {
-
-			if (!"".equals(endDate)) {
-				SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-				Date de = new Date();
-				Date d1 = df.parse(df.format(de));
-				Date d2 = df.parse(endDate);
-				if (d1.getTime() <= d2.getTime()) {
-					return Result.unDataResult("fail","已经向此人提交过申请，请勿重复提交!");
-				} else {
-					String repeatId = BaseUtil.objToStr(repeat.get("id"), "");
-					//如果时间过期，则状态改为取消
-					Map<String, Object> visitRecord = new HashMap<>();
-					visitRecord.put("id",repeatId);
-					visitRecord.put("cstatus","Cancle");
-					Integer num = update(TableList.VISITOR_RECORD,visitRecord);
-					if (num <= 0) {
-						return Result.unDataResult("fail","上条访问申请未过期，请联系客服!");
-					}
-				}
-			}
+		//如果是访问recordType=1
+			//查询内部是否有邀约信息
+		Map<String, Object> check=check(userId,visitorId,1,startDate,endDate);
+			//如果是邀约recordType=2 访客与被访者在数据库中位置调换
+		if (check != null) {
+			//发送回消息
+			logger.info(startDate+"该时间段"+endDate+"内已经有邀约信息存在");
+			return Result.unDataResult("fail","在"+startDate+"——"+endDate+"内已经有邀约信息存在");
 		}
 		Map<String, Object> visitRecord =new HashMap<>();
 		Date date = new Date();
@@ -1050,12 +1040,11 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 	@Override
 	public void visitReply(WebSocketSession session,JSONObject msg) throws Exception {
 		//根据Id获取需要更新的类容
-
 		try {
-
 		    String replyDate=DateUtil.getCurDate();
 		    String replyTime=DateUtil.getCurTime();
 			Integer id=msg.getInteger("id");
+			//登入人
 			long userId=(long)session.getAttributes().get("userId");
 			String  cstatus=BaseUtil.objToStr(msg.get("cstatus"),null);
 			String  answerContent=BaseUtil.objToStr(msg.get("answerContent"),null);
@@ -1070,7 +1059,8 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 
 				long toUserId=msg.getLong("toUserId");
 				System.out.println("用户"+toUserId+"是否在线："+Constant.SESSIONS.containsKey(toUserId));
-                if (Constant.SESSIONS.containsKey(toUserId)) {
+                //
+				if (Constant.SESSIONS.containsKey(toUserId)) {
                     long fromUserId=(long)session.getAttributes().get("userId");
                     JSONObject obj =new JSONObject();
                     obj.put("orgName","无");
@@ -1164,6 +1154,7 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 		//获取msg中的消息转存数据库
 		//recordType 1--访问 2--邀约
 		Integer recordType=BaseUtil.objToInteger(msg.get("recordType"),0);
+		//被访人或被约人
 		Integer toUserId=BaseUtil.objToInteger(msg.get("toUserId"),0);
 		String cstatus=BaseUtil.objToStr(msg.get("cstatus"),"applyConfirm");
 		String startDate=BaseUtil.objToStr(msg.get("startDate"),"无");
@@ -1176,6 +1167,25 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 		//登入人公司ID与大楼ID
 		Map<String, Object> check =null;
 		String notification_title = "访问信息提醒";
+		//查询被访人或被约人是否实名
+			boolean verify = userService.isVerify(toUserId);
+			logger.info("被访者或被邀约者{}实名:{}",toUserId,verify);
+			String recordStr=recordType==1?"您访问的用户":"您邀请的用户";
+			String Str=recordType==1?"访问":"邀约";
+			if (!verify){
+				logger.info(recordStr+"未实名,无法进行"+Str);
+				session.sendMessage(new TextMessage(Result.ResultCodeType("fail",recordStr+"未实名,无法进行"+Str,"-1",BaseUtil.objToInteger(msg.get("type"),2))));
+				return;
+			}
+			if (companyId==0){
+				String sql="select 1 from "+TableList.COMPANY_USER+" where userId="+toUserId+" and currentStatus" +
+						"='normal' and status='applySuc'";
+				Map<String, Object> existUser = findFirstBySql(sql);
+				if (existUser==null){
+					session.sendMessage(new TextMessage(Result.ResultCodeType("fail",recordStr+"无公司归属,无法进行"+Str,"-1",BaseUtil.objToInteger(msg.get("type"),2))));
+					return;
+				}
+			}
 		//如果是访问recordType=1
 		if (Constant.RECORDTYPE_VISITOR==recordType){
 			//查询内部是否有邀约信息
@@ -1188,7 +1198,7 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 		if (check != null) {
 			//发送回消息
 			session.sendMessage(new TextMessage(Result.ResultCodeType("fail","在"+startDate+"——"+endDate+"内已经有邀约信息存在","-1",BaseUtil.objToInteger(msg.get("type"),2))));
-			System.out.println(startDate+"该时间段"+endDate+"内已经有邀约信息存在");
+			logger.info(startDate+"该时间段"+endDate+"内已经有邀约信息存在");
 			return ;
 		}
 			Map<String,Object> paramMap=new HashMap<>();
@@ -1301,7 +1311,7 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 		String sql = " select * from " + TableList.VISITOR_RECORD + " where userId = '" + userId + "' and visitorId ='"
 				+ toUserId + "' and recordType = " + recordType + " and cstatus<>'applyFail' and STR_TO_DATE(startDate,'%Y-%m-%d %H:%i')<STR_TO_DATE('"+endDate+"','%Y-%m-%d %H:%i')" +
 				" and   STR_TO_DATE(endDate,'%Y-%m-%d %H:%i')>STR_TO_DATE('"+startDate+"','%Y-%m-%d %H:%i')";
-        System.out.println(sql);
+        logger.info("检查是否时间段有邀约信息：{}",sql);
 		return findFirstBySql(sql);
 	}
 	@Override
@@ -1640,7 +1650,7 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 				return Result.unDataResult("fail", "提交公司信息失败");
 			}
 		}
-//		//推送处理
+//		//访问推送处理
 	public void visitPush(Map<String, Object> visitorRecord, Map<String, Object> userUser, Map<String, Object> visitorUser, Map<String, Object> saveMap, JSONObject msg, String visitorResult, Map<String, String> wxMap) throws Exception {
 		logger.info("visitPush");
 		Long toUserId = BaseUtil.objToLong(visitorRecord.get("userId"), (long) 0);
@@ -1693,6 +1703,106 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 			}else {
 
 				codeService.sendMsg(phone, 3, visitorResult, visitorBy, startDate, null);
+		}
+	}
+
+
+	/**
+	 * 通过接口回应邀约 1.更新访客日志表 2.发送推送给邀约人
+	 * @param paramMap
+	 * @return com.goldccm.model.compose.Result
+	 * @throws Exception
+	 * @author cwf
+	 * @date 2019/12/4 18:03
+	 */
+	public Result visitReply(Map<String, Object> paramMap){
+		try {
+			String replyDate=DateUtil.getCurDate();
+			String replyTime=DateUtil.getCurTime();
+			Integer id=BaseUtil.objToInteger(paramMap.get("id"),null);
+			//登入人
+			Long userId= BaseUtil.objToLong(paramMap.get("userId"),null);
+			String  cstatus=BaseUtil.objToStr(paramMap.get("cstatus"),null);
+			String  answerContent=BaseUtil.objToStr(paramMap.get("answerContent"),"");
+			//更新邀约信息
+			Map<String, Object> updateMap=new HashMap<>();
+			if(id==null||userId==null||cstatus==null){
+                return Result.unDataResult("fail","缺少参数");
+            }
+            updateMap.put("id",id);
+			updateMap.put("replyUserId",userId);
+			updateMap.put("replyDate",replyDate);
+			updateMap.put("replyTime",replyTime);
+			updateMap.put("cstatus",cstatus);
+			updateMap.put("answerContent",answerContent);
+			updateMap.put("isReceive","F");
+
+			int update = update(TableList.VISITOR_RECORD, updateMap);
+			String apply="同意";
+			if ("applyFail".equals(cstatus)){
+				apply="拒绝";
+			}
+			if (update>0){
+				//返回回消息
+                Map<String,Object> visitorMap=  baseDao.findById(TableList.VISITOR_RECORD,id);
+				Long toUserId=BaseUtil.objToLong(visitorMap.get("visitorId"),null);
+				System.out.println("用户"+toUserId+"是否在线："+Constant.SESSIONS.containsKey(toUserId));
+				//发送websocket
+				if (Constant.SESSIONS.containsKey(toUserId)) {
+					JSONObject obj =new JSONObject();
+					obj.put("orgName","无");
+					obj.put("companyId","无");
+					obj.put("fromUserId",userId);
+
+					Integer  companyId=BaseUtil.objToInteger(visitorMap.get("companyId"),0);
+					String  orgCode=BaseUtil.objToStr(visitorMap.get("orgCode"),null);
+					visitorMap.remove("companyId");
+					visitorMap.remove("orgCode");
+					for (Map.Entry<String,Object> entry:visitorMap.entrySet()){
+						if (entry.getValue()==null){
+							visitorMap.put(entry.getKey(),"无");
+						}
+						obj.put(entry.getKey(),entry.getValue());
+					}
+					if (companyId!=0){
+						Map<String,Object> comMap=baseDao.findById(TableList.COMPANY,companyId);
+						System.out.println(comMap);
+						obj.put("companyName",comMap.get("companyName"));
+					}
+					if (orgCode!=null){
+						String sql="select org_name from "+TableList.ORG+" where org_code='"+orgCode+"'";
+						Map<String,Object> corgMap=baseDao.findFirstBySql(sql);
+						obj.put("orgName",corgMap.get("org_name"));
+					}
+					obj.put("type",Constant.MASSEGETYPE_REPLY);
+					obj.put("fromUserId",userId);
+					obj.put("toUserId",toUserId);
+					System.out.println("发送给toUser的消息为+"+obj);
+					Constant.SESSIONS.get(toUserId).sendMessage(new TextMessage(obj.toJSONString()));
+				}else{
+				    //发送推送
+					Map<String, Object> toUser = baseDao.findById(TableList.USER,  toUserId.intValue());
+					String notification_title="回应信息提醒";
+					String deviceToken = BaseUtil.objToStr(toUser.get("deviceToken"), "");
+					String msg_content = "【朋悦比邻】您好，您有一条预约回应，请登入app查收!";
+					boolean isYmSuc=false;
+					if (!"".equals(deviceToken)) {
+						String deviceType = BaseUtil.objToStr(toUser.get("deviceType"), "0");
+						String isOnlineApp = BaseUtil.objToStr(toUser.get("isOnlineApp"),"T");
+						isYmSuc=shortMessageService.YMNotification(deviceToken,deviceType,notification_title,msg_content,isOnlineApp);
+						logger.info("发送 android,ios 推送成功? 设备号 {},{}",isYmSuc,deviceToken);
+//                        if (!isYmSuc) {
+//				            codeService.sendMsg(phone, 3, visitorResult, visitorBy, visitorDateTime, null);
+//			                }
+					}
+				}
+				return Result.unDataResult("success",apply+"邀约成功！");
+			}else {
+				return Result.unDataResult("fail",apply+"邀约失败！");
+			}
+		}catch (Exception e){
+			logger.error("邀请回应报错！",e);
+			return Result.unDataResult("fail","同意邀约失败！系统错误，请联系客服！");
 		}
 	}
 	}

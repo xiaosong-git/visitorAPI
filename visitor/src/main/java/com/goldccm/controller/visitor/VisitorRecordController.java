@@ -319,4 +319,24 @@ public class VisitorRecordController extends BaseController {
             return Result.unDataResult("fail", "系统异常");
         }
     }
+    /**
+     *  回应邀约
+     * @param request
+     * @return com.goldccm.model.compose.Result
+     * @throws Exception
+     * @author cwf
+     * @date 2019/12/5 9:48
+     */
+    @AuthCheckAnnotation(checkLogin = false,checkVerify = true, checkRequestLegal = true)
+    @RequestMapping("/visitReply")
+    @ResponseBody
+    public Result visitReply(HttpServletRequest request){
+        try {
+            Map<String,Object> paramMap = getParamsToMap(request);
+            return visitorRecordService.visitReply(paramMap);
+        }catch (Exception e){
+            e.printStackTrace();
+            return Result.unDataResult("fail", "系统异常");
+        }
+    }
 }
