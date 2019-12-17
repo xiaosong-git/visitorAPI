@@ -32,7 +32,7 @@ public class VisitorRecordController extends BaseController {
      * @param request
      * @return
      */
-    @AuthCheckAnnotation(checkLogin = true,checkVerify = true, checkRequestLegal = true)
+    @AuthCheckAnnotation(checkLogin = false,checkVerify = true, checkRequestLegal = true)
     @RequestMapping("/visitMyPeople/{pageNum}/{pageSize}")
     @ResponseBody
     public Result visitMyPeople(HttpServletRequest request, @PathVariable Integer pageNum, @PathVariable Integer pageSize){
@@ -44,7 +44,6 @@ public class VisitorRecordController extends BaseController {
             return Result.unDataResult("fail", "系统异常");
         }
     }
-
     /**
      * 正在申请访问
      * @param request
@@ -80,7 +79,6 @@ public class VisitorRecordController extends BaseController {
             return Result.unDataResult("fail", "系统异常");
         }
     }
-
     /**
      * 我访问的人记录
      * @param request
@@ -98,7 +96,6 @@ public class VisitorRecordController extends BaseController {
             return Result.unDataResult("fail", "系统异常");
         }
     }
-
 //    /**
 //     * 发起访问请求
 //     * @param request
@@ -116,7 +113,6 @@ public class VisitorRecordController extends BaseController {
 //            return Result.unDataResult("fail", "系统异常");
 //        }
 //    }
-
     /**
      * 访问我公司的其他人
      * @param request
@@ -146,7 +142,6 @@ public class VisitorRecordController extends BaseController {
     public Result visit(HttpServletRequest request){
         try {
             Map<String,Object> paramMap = getParamsToMap(request);
-
             return visitorRecordService.visit(paramMap);
         }catch (Exception e){
             e.printStackTrace();
@@ -174,7 +169,6 @@ public class VisitorRecordController extends BaseController {
 //            return Result.unDataResult("fail", "系统异常");
 //        }
 //    }
-
     /**
      *  网页端发送邀约信息
      * @param request
@@ -202,7 +196,6 @@ public class VisitorRecordController extends BaseController {
     @RequestMapping("/dealQrcodeUrl")
     @ResponseBody
     public Result dealQrcodeUrl(HttpServletRequest request){
-
         try {
             Map<String,Object> paramMap = getParamsToMap(request);
 //            response.setHeader("Access-Control-Allow-Origin", "*");
@@ -213,27 +206,40 @@ public class VisitorRecordController extends BaseController {
             return Result.fail();
         }
     }
-    //邀约记录 查询我的邀约与邀约我的记录前端根据userID visitorId 进行判断
-    @AuthCheckAnnotation(checkLogin = true,checkVerify = true, checkRequestLegal = true)
+    //我的邀约
+    @AuthCheckAnnotation(checkLogin = false,checkVerify = true, checkRequestLegal = true)
     @RequestMapping("/inviteRecord/{pageNum}/{pageSize}")
     @ResponseBody
     public Result inviteRecord(HttpServletRequest request, @PathVariable Integer pageNum, @PathVariable Integer pageSize){
         try {
             Map<String,Object> paramMap = getParamsToMap(request);
-            return visitorRecordService.visitRecord(paramMap,pageNum,pageSize,Constant.RECORDTYPE_INVITE);
+            return visitorRecordService.myVisitOrInvite(paramMap,pageNum,pageSize,"vr.userId",Constant.RECORDTYPE_INVITE);
         }catch (Exception e){
             e.printStackTrace();
             return Result.unDataResult("fail", "系统异常");
         }
     }
-    //访问记录
-    @AuthCheckAnnotation(checkLogin = true,checkVerify = true, checkRequestLegal = true)
+    //邀约我的人
+    @AuthCheckAnnotation(checkLogin = false,checkVerify = true, checkRequestLegal = true)
+    @RequestMapping("/inviteMine/{pageNum}/{pageSize}")
+    @ResponseBody
+    public Result inviteMine(HttpServletRequest request, @PathVariable Integer pageNum, @PathVariable Integer pageSize){
+        try {
+            Map<String,Object> paramMap = getParamsToMap(request);
+            return visitorRecordService.inviteMine(paramMap,pageNum,pageSize, "vr.visitorId",Constant.RECORDTYPE_INVITE);
+        }catch (Exception e){
+            e.printStackTrace();
+            return Result.unDataResult("fail", "系统异常");
+        }
+    }
+    //我的访问
+    @AuthCheckAnnotation(checkLogin = false,checkVerify = true, checkRequestLegal = true)
     @RequestMapping("/visitRecord/{pageNum}/{pageSize}")
     @ResponseBody
     public Result visitRecord(HttpServletRequest request, @PathVariable Integer pageNum, @PathVariable Integer pageSize){
         try {
             Map<String,Object> paramMap = getParamsToMap(request);
-            return visitorRecordService.visitRecord(paramMap,pageNum,pageSize, Constant.RECORDTYPE_VISITOR);
+            return visitorRecordService.myVisitOrInvite(paramMap,pageNum,pageSize, "vr.userId", Constant.RECORDTYPE_VISITOR);
         }catch (Exception e){
             e.printStackTrace();
             return Result.unDataResult("fail", "系统异常");
@@ -339,4 +345,25 @@ public class VisitorRecordController extends BaseController {
             return Result.unDataResult("fail", "系统异常");
         }
     }
+    /**
+     *  回应邀约
+     * @param request
+     * @return com.goldccm.model.compose.Result
+     * @throws Exception
+     * @author cwf
+     * @date 2019/12/5 9:48
+     */
+    @AuthCheckAnnotation(checkLogin = false,checkVerify = true, checkRequestLegal = true)
+    @RequestMapping("/inviteStranger")
+    @ResponseBody
+    public Result inviteStranger(HttpServletRequest request){
+        try {
+            Map<String,Object> paramMap = getParamsToMap(request);
+            return visitorRecordService.InviteStranger(paramMap);
+        }catch (Exception e){
+            e.printStackTrace();
+            return Result.unDataResult("fail", "系统异常");
+        }
+    }
+
 }

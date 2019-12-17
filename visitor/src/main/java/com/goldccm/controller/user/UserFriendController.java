@@ -33,7 +33,7 @@ public class UserFriendController extends BaseController {
      * @param request
      * @return
      */
-    @AuthCheckAnnotation(checkLogin = false,checkVerify = true, checkRequestLegal = true)
+    @AuthCheckAnnotation(checkLogin = true,checkVerify = true, checkRequestLegal = true)
     @RequestMapping("/findUserFriend")
     @ResponseBody
     public Result findUserFriend(HttpServletRequest request){
@@ -69,7 +69,7 @@ public class UserFriendController extends BaseController {
      * @param request
      * @return
      */
-    @AuthCheckAnnotation(checkLogin = false,checkVerify = true, checkRequestLegal = true)
+    @AuthCheckAnnotation(checkLogin = true,checkVerify = true, checkRequestLegal = true)
     @RequestMapping("/findRealName")
     @ResponseBody
     public Result findRealName(HttpServletRequest request){
@@ -140,7 +140,7 @@ public class UserFriendController extends BaseController {
      * @param request
      * @return
      */
-    @AuthCheckAnnotation(checkLogin = false,checkVerify = false, checkRequestLegal = true)
+    @AuthCheckAnnotation(checkLogin = true,checkVerify = false, checkRequestLegal = true)
     @RequestMapping("/beAgreeingFriendList")
     @ResponseBody
     public Result beAgreeingFriendList(HttpServletRequest request){
@@ -161,7 +161,7 @@ public class UserFriendController extends BaseController {
      * @param request
      * @return
      */
-    @AuthCheckAnnotation(checkLogin = false,checkVerify = true, checkRequestLegal = true)
+    @AuthCheckAnnotation(checkLogin = true,checkVerify = true, checkRequestLegal = true)
     @RequestMapping("/agreeFriend")
     @ResponseBody
     public Result agreeFriend(HttpServletRequest request){
@@ -180,7 +180,7 @@ public class UserFriendController extends BaseController {
      * @param request
      * @return
      */
-    @AuthCheckAnnotation(checkLogin = false,checkVerify = true, checkRequestLegal = true)
+    @AuthCheckAnnotation(checkLogin = true,checkVerify = true, checkRequestLegal = true)
     @RequestMapping("/findIsUserByPhone")
     @ResponseBody
     public Result findIsUserByPhone(HttpServletRequest request){
@@ -211,5 +211,22 @@ public class UserFriendController extends BaseController {
             return Result.unDataResult("fail", "系统异常");
         }
     }
-
+    /**
+     * 修改好友备注
+     * @param request
+     * @return
+     *  update by cwf  2019/8/28 16:50 cause
+     */
+    @AuthCheckAnnotation(checkLogin = true,checkVerify = true, checkRequestLegal = true)
+    @RequestMapping("/updateFriendRemark")
+    @ResponseBody
+    public Result updateFriendRemark(HttpServletRequest request){
+        try {
+            Map<String,Object> paramMap = getParamsToMap(request);
+            return userFriendService.updateFriendRemark(paramMap);
+        }catch (Exception e){
+            e.printStackTrace();
+            return Result.unDataResult("fail", "系统异常");
+        }
+    }
 }

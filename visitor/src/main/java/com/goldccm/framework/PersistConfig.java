@@ -44,9 +44,9 @@ public class PersistConfig {
 //            dataSource.setUsername("root");
 //            dataSource.setPassword("root");
             //测试
-//            dataSource.setUrl("jdbc:mysql://192.168.1.54:3306/visitor?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&autoReconnect=true");
-//            dataSource.setUsername("root");
-//            dataSource.setPassword("flzxsqc!11");
+            dataSource.setUrl("jdbc:mysql://192.168.1.54:3306/visitor?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&autoReconnect=true");
+            dataSource.setUsername("root");
+            dataSource.setPassword("flzxsqc!11");
         }
         dataSource.setMaxActive(170);
         dataSource.setInitialSize(5);//50

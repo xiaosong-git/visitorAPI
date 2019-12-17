@@ -3,7 +3,6 @@ package com.goldccm.controller.user;
 
 import com.goldccm.annotation.AuthCheckAnnotation;
 import com.goldccm.controller.base.BaseController;
-import com.goldccm.model.compose.Constant;
 import com.goldccm.model.compose.Result;
 import com.goldccm.model.compose.ResultData;
 import com.goldccm.model.compose.TableList;
@@ -12,7 +11,6 @@ import com.goldccm.service.user.IUserAccountService;
 import com.goldccm.service.user.IUserService;
 import com.goldccm.util.BaseUtil;
 import com.goldccm.util.ConsantCode;
-import com.sun.tools.javadoc.Start;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;

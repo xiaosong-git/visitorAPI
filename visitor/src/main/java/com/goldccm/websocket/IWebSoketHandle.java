@@ -103,10 +103,10 @@ public class IWebSoketHandle extends AbstractWebSocketHandler {
             if (Constant.MASSEGETYPE_NOMAL==type||4==type){
                 webSocketService.dealChat(session,msg);
             }
-            //申请访问
+            //申请访问或申请邀约
             else if(Constant.MASSEGETYPE_VISITOR==type){
                 visitorRecordService.receiveVisit(session,msg);
-                //回应邀约
+                //回应访问或回应邀约
             }else if(Constant.MASSEGETYPE_REPLY==type){
                 visitorRecordService.visitReply(session,msg);
             }

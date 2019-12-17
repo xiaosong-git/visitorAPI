@@ -25,7 +25,7 @@ public interface IAliPayService {
 
     AlipayTradeQueryResponse checkTrade(String tradeNo);
 
-   AlipayTradeRefundResponse Refund(String tradeNo, String amount);
+    AlipayTradeRefundResponse Refund(String tradeNo, String amount);
 
     int setTradeStatus(String status);
 }

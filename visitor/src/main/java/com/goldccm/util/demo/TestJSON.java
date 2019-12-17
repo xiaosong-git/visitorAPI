@@ -1,4 +1,4 @@
-package com.goldccm.util;
+package com.goldccm.util.demo;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -35,6 +35,8 @@ public class TestJSON {
                 "        \"site3\":\"c.runoob.com\"\n" +
                 "    }\n" +
                 "}";
+        String mytestjson="{result:\"ok\", taskId:\"OSS-1209_c0ae428734823197c3ec726f70d86958\", status:\"successed_offline\"}";
+        JSONObject myjsonobj = JSON.parseObject(mytestjson);
         JSONObject jsonobj = JSON.parseObject(myJsonObj); //将json字符串转换成jsonObject对象
         /***获取JSONObject中每个key对应的value值时，可以根据实际场景中想得到什么类型就分别运用不到的方法***/
         System.out.println(jsonobj.get("name")); //取出name对应的value值，得到的是一个object

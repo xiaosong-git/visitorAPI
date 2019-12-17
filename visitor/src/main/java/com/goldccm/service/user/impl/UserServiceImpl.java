@@ -273,13 +273,26 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
             return  Result.unDataResult("fail","密码错误:剩余" + leftInputNum + "次输入机会");
         }
     }
-
+    //为了非好友邀约新建aop
     @Override
     public Result registerOrigin(Map<String, Object> paramMap) throws Exception {
         paramMap.remove("token");
-        String code = paramMap.get("code")+"";
-        String phone = paramMap.get("phone")+"";
-        if(!this.verifyPhone(phone)){
+        String code = BaseUtil.objToStr(paramMap.get("code"),"");
+        String phone = BaseUtil.objToStr(paramMap.get("phone"),"");
+        Map<String, Object> userByPhone = getUserByPhone(phone);
+        String sysPwd = BaseUtil.objToStr(paramMap.get("sysPwd"),"");
+        if ("".equals(code)||"".equals(phone)||"".equals(sysPwd)){
+            return Result.unDataResult("fail","缺少参数");
+        }
+        if(userByPhone!=null){
+            //查看tbl_account表中是否存在账户
+            int userId = BaseUtil.objToInteger(userByPhone.get("id"),0);
+            Map<String, Object> account = findFirstBySql("select * from " + TableList.USER_ACCOUNT + " where " + " userId=" + userId);
+            //没有账户 则创建账户
+            if (account==null){
+                return creatAccount(userId,sysPwd);
+            }
+            //有账户则返回已被注册
             return Result.unDataResult("fail","手机号已经被注册");
         }
         boolean flag = codeService.verifyCode(phone,code,1);
@@ -287,28 +300,20 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
             return Result.unDataResult("fail","验证码错误");
         }
         paramMap.remove("code");
-
-        String sysPwd = BaseUtil.objToStr(paramMap.get("sysPwd"),null);
         paramMap.remove("sysPwd");
-
         //添加用户信息
-        Date date = new Date();
-        paramMap.put("createDate",new SimpleDateFormat("yyyy-MM-dd").format(date));
-        paramMap.put("createTime",new SimpleDateFormat("HH:mm:ss").format(date));
-        paramMap.put("token",UUID.randomUUID().toString());
-        paramMap.put("loginName",phone);
-        paramMap.put("isAuth","F");
-        paramMap.put("workKey", NumberUtil.getRandomWorkKey(10));
-        paramMap.put("isSetTransPwd","F");
-        paramMap.put("soleCode",OrderNoUtil.genOrderNo("C", 16));
-
-        int userId = this.save(TableList.USER, paramMap);
+        int userId = createUser(phone, "");
         if(userId < 1){
             return Result.unDataResult("fail","注册失败");
         }
-
         //添加用户账户表
-        Map<String,Object> userAccount = new HashMap<String, Object>();
+        return creatAccount(userId,sysPwd);
+    }
+    /**
+     * 根据userId创建账户
+     */
+    public Result creatAccount(int userId,String sysPwd ){
+        Map<String,Object> userAccount = new HashMap<>();
         userAccount.put("userId",userId);
         userAccount.put("sysPwd",sysPwd);
         userAccount.put("cstatus",TableList.USER_CSSTATUS_NORMAL);
@@ -317,7 +322,29 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
         Map<String,Object> user = this.findById(TableList.USER,userId);
         return userAccountId > 0 ?ResultData.dataResult("success","注册成功",user) :Result.unDataResult("fail","注册失败");
     }
-
+    /**
+     * 为邀约者创建账号
+     * @param
+     * @return
+     * @throws Exception
+     */
+    @Override
+    public int createUser(String phone,String realName) throws Exception {
+        Map<String, Object> paramMap =new HashMap<>();
+        //添加用户信息
+        Date date = new Date();
+        paramMap.put("createDate",new SimpleDateFormat("yyyy-MM-dd").format(date));
+        paramMap.put("createTime",new SimpleDateFormat("HH:mm:ss").format(date));
+        paramMap.put("token",UUID.randomUUID().toString());
+        paramMap.put("loginName",phone);
+        paramMap.put("isAuth","F");
+        paramMap.put("phone",phone);
+        paramMap.put("realName",realName);
+        paramMap.put("workKey", NumberUtil.getRandomWorkKey(10));
+        paramMap.put("isSetTransPwd","F");
+        paramMap.put("soleCode",OrderNoUtil.genOrderNo("C", 16));
+       return this.save(TableList.USER, paramMap);
+    }
     @Override
     public Result verify(Map<String, Object> paramMap) {
         try {
@@ -366,7 +393,12 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
 
             try{
                 //实人认证  update by cwf  2019/11/25 11:30 Reason:先查询本地库是否有实名认证 如果没有 则调用CTID认证
-               if(!localPhoneResult(idNO,realName)){
+                String sql="select distinct * from "+TableList.USER_AUTH +" where idNo='"+idNO+"' and realName='"+realName+"'";
+                Map<String, Object> userAuth = findFirstBySql(sql);
+                if (userAuth!=null){
+                    idHandleImgUrl=BaseUtil.objToStr(userAuth.get("idHandleImgUrl"),idHandleImgUrl);
+                    logger.info("本地实人认证成功上一张成功图片为：{}",idHandleImgUrl);
+                } else {
                    String photoResult = phoneResult(idNoMW, realName, idHandleImgUrl);
                    if (!"success".equals(photoResult)){
                        return Result.unDataResult("fail", photoResult);
@@ -471,15 +503,7 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
             return resultMap.get("message").toString();
         }
     }
-    public boolean localPhoneResult(String idNO,String realName) throws Exception{
-            String sql="select distinct userId from "+TableList.USER_AUTH +" where idNo='"+idNO+"' and realName='"+realName+"'";
-        Map<String, Object> local = findFirstBySql(sql);
-        if (local!=null){
-            logger.info("本地实人认证成功！");
-            return true;
-        }
-        return false;
-    }
+
 
 
     @Override
@@ -1020,7 +1044,7 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
                 ? ResultData.dataResult("success","查询用户成功",list)
                 : Result.unDataResult("success","暂无数据");
     }
-
+    //退出app
     @Override
     public Result appQuit(Map<String, Object> paramMap) {
         int userId=BaseUtil.objToInteger(paramMap.get("userId"),0);

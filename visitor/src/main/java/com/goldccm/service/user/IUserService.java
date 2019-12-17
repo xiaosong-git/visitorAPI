@@ -61,6 +61,9 @@ public interface IUserService extends IBaseService {
      * @Date 2017/4/10 23:27
      */
     Result registerOrigin(Map<String, Object> paramMap) throws Exception;
+
+    int createUser(String phone, String realName) throws Exception;
+
     /**
      * 实名认证
      * @Author linyb

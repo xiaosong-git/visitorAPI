@@ -161,6 +161,7 @@ public class AuthCheckInteceptor extends HandlerInterceptorAdapter {
             writer.close();
             return false;
         }
+
         if (auth.checkOtherLegal()){
             response.setCharacterEncoding("UTF-8");
             response.setContentType("application/json; charset=utf-8");
@@ -170,6 +171,7 @@ public class AuthCheckInteceptor extends HandlerInterceptorAdapter {
             writer.close();
             return true;
         }
+
         return super.preHandle(request, response, handler);
     }
 }

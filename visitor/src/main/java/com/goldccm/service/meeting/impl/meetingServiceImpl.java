@@ -12,6 +12,7 @@ import com.goldccm.service.shortMessage.impl.ShortMessageServiceImpl;
 import com.goldccm.service.user.impl.UserServiceImpl;
 import com.goldccm.util.BaseUtil;
 import com.goldccm.util.DateUtil;
+import com.goldccm.util.GTNotification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -386,14 +387,17 @@ public class meetingServiceImpl extends BaseServiceImpl implements IMeetingServi
                 //推送
                 Map<String, Object> userUser = userService.getUserByUserId(managerId);
                 if (userUser!=null){
-                String deviceToken = BaseUtil.objToStr(userUser.get("deviceToken"), null);
-                if (deviceToken != null&&!"".equals(deviceToken)) {
-                    String isOnlineApp = BaseUtil.objToStr(userUser.get("isOnlineApp"), "T");
+                String deviceToken = BaseUtil.objToStr(userUser.get("deviceToken"), "");
+//                if (deviceToken != null&&!"".equals(deviceToken)) {
+                    String isOnlineApp = BaseUtil.objToStr(userUser.get("isOnlineApp"), "F");
                     String notification_title = "房间取消预定通知";
                     String msg_content = "【朋悦比邻】您好，您管理的大楼有房间被取消预定！，请登入app查收!";
-                    String deviceType = BaseUtil.objToStr(userUser.get("deviceType"), "0");
-                    shortMessageService.YMNotification(deviceToken, deviceType, notification_title, msg_content, isOnlineApp);
-                }
+//                    String deviceType = BaseUtil.objToStr(userUser.get("deviceType"), "0");
+                    String phone = BaseUtil.objToStr(userUser.get("phone"), "0");
+                    //个推 如果deviceToken没有则发送Alias
+                    boolean single = GTNotification.Single(deviceToken, phone, notification_title, msg_content, msg_content);
+//                    shortMessageService.YMNotification(deviceToken, deviceType, notification_title, msg_content, isOnlineApp);
+//                }
             }
             }
         }

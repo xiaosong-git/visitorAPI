@@ -153,40 +153,22 @@ public interface IVisitorRecordService extends IBaseService {
      * @date 2019/7/29 15:43
      */
     int saveVisitRecord(Map<String, Object> paramMap)throws Exception;
-    /**
-     * 申请访问
-     * @param paramMap
-     * @return com.goldccm.model.compose.Result
-     * @throws Exception
-     * @author chenwf
-     * @date 2019/7/29 17:33
-     */
+    //非好友访问
     Result visit (Map<String, Object> paramMap) throws Exception;
     /**
      * webSocket回应邀约
-     * @param session
-     * @param msg
-     * @return com.goldccm.model.compose.Result
-     * @throws Exception
-     * @author chenwf
-     * @date 2019/7/29 17:33
      */
     void visitReply (WebSocketSession session,JSONObject msg) throws Exception;
     /**
-     * 处理邀约消息
-     * @param session
-     * @param msg
-     * @return com.goldccm.model.compose.Result
-     * @throws Exception
-     * @author chenwf
+     * 处理访问消息
      * @date 2019/7/30 14:14
      */
     void receiveVisit (WebSocketSession session,JSONObject msg) throws Exception;
 
 //    Result visitAgree (Map<String, Object> paramMap) throws Exception;
 
-
-    Result visitRecord(Map<String, Object> paramMap, Integer pageNum, Integer pageSize,Integer recordType);
+    //我的访问or 我的邀约
+    Result myVisitOrInvite(Map<String, Object> paramMap, Integer pageNum, Integer pageSize, String s, Integer recordType);
 
     Result findRecordFromId(Map<String, Object> paramMap);
 
@@ -200,4 +182,8 @@ public interface IVisitorRecordService extends IBaseService {
     Result modifyCompanyFromId(Map<String, Object> paramMap) throws Exception;
     //接口回应邀约
     Result visitReply(Map<String, Object> paramMap) throws Exception;
+
+    Result inviteMine(Map<String, Object> paramMap, Integer pageNum, Integer pageSize, String s, Integer recordtype);
+
+    Result InviteStranger(Map<String, Object> paramMap) throws Exception;
 }

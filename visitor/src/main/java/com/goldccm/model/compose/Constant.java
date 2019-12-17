@@ -49,13 +49,13 @@ public class Constant {
     public static final Integer DEVICE_ANDRIOD=2;
 
     //同意邀约url
-    public static final String INVITE_URL="http://f.pyblkj.cn:8082/visitor/agree.jsp?id=";
+    public static final String INVITE_URL="http://f.pyblkj.cn/visitor/agree.jsp?id=";
 //    public static final String INVITE_URL="http://47.106.82.190:8082/visitor/agree.jsp?id=";
     //访客url
-    public static final String URL="http://f.pyblkj.cn:8082/visitor/qrcode.jsp?id=";
+    public static final String URL="http://f.pyblkj.cn/visitor/qrcode.jsp?id=";
 //    public static final String URL="http://47.106.82.190:8082/visitor/qrcode.jsp?id=";
     //微信推送地址
-    public static final String WX_URL="http://localhost/weixin/wx/sendTempMsg";
+//    public static final String WX_URL="http://localhost/weixin/wx/sendTempMsg";
     //websocket通信在线情况
     public static  Map<Object, WebSocketSession> SESSIONS =new HashMap<>();
 

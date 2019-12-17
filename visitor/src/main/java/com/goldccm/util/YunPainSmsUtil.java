@@ -66,7 +66,7 @@ public class YunPainSmsUtil {
 
     public static Integer MSG_TYPE_INVITE = 6;//邀请
 
-    public static String CHECK_CODE_INVITE = "【朋悦比邻】visitorBy，您好，companyName的accName邀请您于visitorDateTime —— endDateTime到:companyAddr进行访谈，同意请点击：#url\n";
+    public static String CHECK_CODE_INVITE = "【朋悦比邻】visitorBy，您好，companyName的accName邀请您于visitorDateTime —— endDateTime到:companyAddr进行访谈，请点击获取进出二维码：#url\n";
 
     public static Integer MSG_TYPE_VISITORBY_QRCODE = 7;//访客
 
@@ -127,6 +127,8 @@ public class YunPainSmsUtil {
             msg= msg.replace("visitor1", visitor);
             content= msg.replace("visitorDateTime", visitorDateTime);
         }else if(MSG_TYPE_INVITE==type){
+//            "【朋悦比邻】visitorBy，您好，companyName的accName邀请您于visitorDateTime —— endDateTime到:companyAddr进行访谈，同意请点击：#url\n";
+
             msg = CHECK_CODE_INVITE;
             msg= msg.replace("accName", visitor);
             msg=msg.replace("visitorBy",visitorBy);

@@ -11,6 +11,7 @@ import com.goldccm.service.shortMessage.impl.ShortMessageServiceImpl;
 import com.goldccm.service.user.IUserService;
 import com.goldccm.util.BaseUtil;
 import com.goldccm.util.DateUtil;
+import com.goldccm.util.GTNotification;
 import com.goldccm.util.YMNotification;
 import com.goldccm.websocket.IWebSoketHandle;
 import org.apache.commons.lang3.StringUtils;
@@ -300,16 +301,17 @@ public class WebSocketServiceimpl extends BaseServiceImpl implements IWebSocketS
                         session.sendMessage(new TextMessage(Result.ResultCodeType("success","发送成功","200",type)));
                         //发送推送
                         Map<String, Object> toUserMap = findById(TableList.USER, (int) toUserId);
-                        String deviceToken = BaseUtil.objToStr(toUserMap.get("deviceToken"), null);
-                        if(deviceToken!=null&&!"".equals(deviceToken)){
-                        String deviceType = BaseUtil.objToStr(toUserMap.get("deviceType"), "0");
-                        String isOnlineApp = BaseUtil.objToStr(toUserMap.get("isOnlineApp"), "T");
+                        String deviceToken = BaseUtil.objToStr(toUserMap.get("deviceToken"), "");
+//                        String deviceType = BaseUtil.objToStr(toUserMap.get("deviceType"), "0");
+//                        String isOnlineApp = BaseUtil.objToStr(toUserMap.get("isOnlineApp"), "T");
                             String notification_title="您有一条聊天消息需处理！";
                             if (type==4){
                                 notification_title="您有一条好友申请需处理！";
                             }
-                        shortMessageService.YMNotification(deviceToken,deviceType,notification_title,content,isOnlineApp);
-                        }
+                          String  phone = BaseUtil.objToStr(toUserMap.get("phone"), "0");
+                        //个推
+                         GTNotification.Single(deviceToken, phone, notification_title, content, content);
+//                         shortMessageService.YMNotification(deviceToken,deviceType,notification_title,content,isOnlineApp);
                     }else {
                         session.sendMessage(new TextMessage(Result.ResultCodeType("fail","发送失败","-1",type)));
                     }

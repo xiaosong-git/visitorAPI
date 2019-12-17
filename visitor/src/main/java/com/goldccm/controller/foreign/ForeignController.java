@@ -7,6 +7,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.goldccm.annotation.AuthCheckAnnotation;
 import com.goldccm.controller.base.BaseController;
 import com.goldccm.model.compose.Result;
+import com.goldccm.service.visitor.IForeignService;
 import com.goldccm.service.visitor.IVisitorRecordService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -25,6 +26,8 @@ public class ForeignController extends BaseController {
 
     @Autowired
     private IVisitorRecordService visitorRecordService;
+    @Autowired
+    private IForeignService foreignService;
     /**
      * 访问我的人
      * @param request
@@ -122,5 +125,39 @@ public class ForeignController extends BaseController {
             visitorRecordService.uploadAccessRecord(pospCode,orgCode,visitId,inOrOut,visitDate,visitTime);
         }
         return Result.unDataResult("success","数据发送成功!");
+    }
+
+    /**
+     * 访问我的人重构
+     * @param request
+     * @return
+     */
+    @AuthCheckAnnotation(checkLogin = false,checkVerify = false, checkRequestLegal = false)
+    @RequestMapping("/newFindOrgCode/{pospCode}/{orgCode}/{pageNum}/{pageSize}")
+    @ResponseBody
+    public Result newFindOrgCode(HttpServletRequest request, @PathVariable String pospCode, @PathVariable String orgCode, @PathVariable Integer pageNum, @PathVariable Integer pageSize){
+        try {
+            return foreignService.FindOrgCode(pospCode,orgCode,pageNum,pageSize);
+        }catch (Exception e){
+            e.printStackTrace();
+            return Result.unDataResult("fail", "系统异常");
+        }
+    }
+
+    /**
+     * 确认访问数据重构
+     * @param request
+     * @return
+     */
+    @AuthCheckAnnotation(checkLogin = false,checkVerify = false, checkRequestLegal = false)
+    @RequestMapping("/newFindOrgCodeConfirm/{pospCode}/{orgCode}/{idStr}")
+    @ResponseBody
+    public Result newFindOrgCodeConfirm(HttpServletRequest request, @PathVariable String pospCode, @PathVariable String orgCode, @PathVariable String idStr){
+        try {
+            return foreignService.newFindOrgCodeConfirm(pospCode,orgCode,idStr);
+        }catch (Exception e){
+            e.printStackTrace();
+            return Result.unDataResult("fail", "系统异常");
+        }
     }
 }

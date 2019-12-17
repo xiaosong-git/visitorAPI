@@ -7,6 +7,7 @@ import com.goldccm.model.compose.Result;
 import com.goldccm.model.compose.ResultData;
 import com.goldccm.model.compose.TableList;
 import com.goldccm.persist.base.IBaseDao;
+import com.goldccm.persist.base.impl.BaseDaoImpl;
 import com.goldccm.service.WebSocket.IWebSocketService;
 import com.goldccm.service.base.impl.BaseServiceImpl;
 import com.goldccm.service.user.IUserFriendService;
@@ -161,18 +162,23 @@ public class UserFriendServiceImpl extends BaseServiceImpl implements IUserFrien
         Map<String,Object> newUserMap=new HashMap<>();
         if (ifUserFriend!=null) {
             String applyType = BaseUtil.objToStr(ifUserFriend.get("applyType"),null);
+
             if (applyType ==null||"0".equals(applyType)) {
+
                 return Result.unDataResult("fail", "申请中的好友!");
             }else if ("1".equals(applyType)){
                 return Result.unDataResult("fail", "你们已经是好友啦!");
                 //重新添加好友
             }else if ("2".equals(applyType)){
+
                 //查看对方是否也删除了我
                 Map<String,Object> friendUser = findFriend(friendId,userId);
                 //如果无数据，返回错误
              if (friendUser!=null){
                  String friendType = BaseUtil.objToStr(friendUser.get("applyType"),null);
-                 long id = BaseUtil.objToLong(friendUser.get("ufId"), null);
+                 logger.info("{}对于{}的好友状态{}",friendId,userId,friendType);
+                 //ifUserFriend的id
+                 long id = BaseUtil.objToLong(ifUserFriend.get("ufId"), null);
                  //如果对方也在申请我
                  if("0".equals(friendType)){
                      Integer updatemyType = updateFriendType(userId, friendId, remark, 1);
@@ -191,6 +197,7 @@ public class UserFriendServiceImpl extends BaseServiceImpl implements IUserFrien
                      }
                      //对方也删除了我，重新发起申请
                  }else if("2".equals(friendType)){
+                     logger.info("更新好友状态id：{}",friendType);
                      newUserMap.put("id",id);
                      newUserMap.put("applyType","0");
                      int update = update(TableList.USER_FRIEND, newUserMap);
@@ -242,6 +249,7 @@ public class UserFriendServiceImpl extends BaseServiceImpl implements IUserFrien
         friendMap.put("userId",userId);
         friendMap.put("friendId",friendId);
         friendMap.put("applyType",2);
+//        int update = update(TableList.USER_FRIEND, friendMap);//id不能为空
         int update = deleteOrUpdate("update " + TableList.USER_FRIEND + " set applyType=2 where userId=" + userId + " and " +
                 " friendId=" + friendId);
         if(update > 0){
@@ -353,5 +361,25 @@ public class UserFriendServiceImpl extends BaseServiceImpl implements IUserFrien
         return list != null && !list.isEmpty()
                 ? ResultData.dataResult("success","获取列表成功",list)
                 : Result.unDataResult("success","暂无数据");
+    }
+
+    @Override
+    public Result updateFriendRemark(Map<String, Object> paramMap) {
+        String userId=BaseUtil.objToStr(paramMap.get("userId"),null);
+        String friendId=BaseUtil.objToStr(paramMap.get("friendId"),null);
+        String remark=BaseUtil.objToStr(paramMap.get("remark"),null);
+        if (userId==null||friendId==null||remark==null){
+            return Result.unDataResult("fail","缺少参数！");
+        }
+        Map<String, Object> updateMap=new HashMap<>();
+        updateMap.put("userId",userId);
+        updateMap.put("friendId",friendId);
+        updateMap.put("remark",remark);
+        int update = baseDao.update(TableList.USER_FRIEND, updateMap);
+        if (update>0){
+
+            return Result.unDataResult("success","修改备注成功！");
+        }
+        return Result.unDataResult("fail","修改备注失败");
     }
 }

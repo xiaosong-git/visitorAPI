@@ -361,7 +361,7 @@ public class AliPayServiceImpl extends BaseServiceImpl implements IAliPayService
      * @date 2019/9/26 22:28
      */
    @Override
-    public  AlipayTradeRefundResponse Refund(String tradeNo, String amount){
+    public   AlipayTradeRefundResponse Refund(String tradeNo, String amount){
         AlipayClient alipayClient = new DefaultAlipayClient(ParamDef.findAliByName("UNIFIED_ORDER_URL"),
                 ParamDef.findAliByName("APP_ID"),
                 ParamDef.findAliByName("APP_PRIVATE_KEY"),
@@ -408,10 +408,7 @@ public class AliPayServiceImpl extends BaseServiceImpl implements IAliPayService
         }
         return  statuCode;
     }
-
-    public static void main(String[] args) {
-//        AlipayTradeQueryResponse alipayTradeQueryResponse = checkTradeTest("451569547870070");
-        closeTrade("451569547870070");
+    public static void  refuseTest(String tradeNo,String amount){
         AlipayClient alipayClient = new DefaultAlipayClient(ParamDef.findAliByName("UNIFIED_ORDER_URL"),
                 ParamDef.findAliByName("APP_ID"),
                 ParamDef.findAliByName("APP_PRIVATE_KEY"),
@@ -421,10 +418,10 @@ public class AliPayServiceImpl extends BaseServiceImpl implements IAliPayService
                 ParamDef.findAliByName("SIGN_TYPE"));
         AlipayTradeRefundRequest request = new AlipayTradeRefundRequest();//创建API对应的request类
         request.setBizContent("{" +
-                "    \"out_trade_no\":\"101569591598537\"," +
+                "    \"out_trade_no\":\""+tradeNo+"\"," +
 //                "    \"trade_no\":\""+aliTradeNo+"\"," +
                 "    \"out_request_no\":\"1000001\"," +
-                "    \"refund_amount\":\"2\"" +
+                "    \"refund_amount\":\""+amount+"\"" +
                 "  }");//设置业务参数
         AlipayTradeRefundResponse response = null;//通过alipayClient调用API，获得对应的response类
         try {
@@ -432,7 +429,35 @@ public class AliPayServiceImpl extends BaseServiceImpl implements IAliPayService
         } catch (AlipayApiException e) {
             e.printStackTrace();
         }
-        System.out.print(response.getBody());
+//        logger.info(response.getBody());
+//        return response;
+    }
+    public static void main(String[] args) {
+        refuseTest("9651576056849458","0.50");
+
+//        AlipayTradeQueryResponse alipayTradeQueryResponse = checkTradeTest("451569547870070");
+//        Refund("9261576033182556",2.00);
+//        AlipayClient alipayClient = new DefaultAlipayClient(ParamDef.findAliByName("UNIFIED_ORDER_URL"),
+//                ParamDef.findAliByName("APP_ID"),
+//                ParamDef.findAliByName("APP_PRIVATE_KEY"),
+//                ParamDef.findAliByName("FORMAT"),
+//                ParamDef.findAliByName("CHARSET"),
+//                ParamDef.findAliByName("ALIPAY_PUBLIC_KEY"),
+//                ParamDef.findAliByName("SIGN_TYPE"));
+//        AlipayTradeRefundRequest request = new AlipayTradeRefundRequest();//创建API对应的request类
+//        request.setBizContent("{" +
+//                "    \"out_trade_no\":\"101569591598537\"," +
+////                "    \"trade_no\":\""+aliTradeNo+"\"," +
+//                "    \"out_request_no\":\"1000001\"," +
+//                "    \"refund_amount\":\"2\"" +
+//                "  }");//设置业务参数
+//        AlipayTradeRefundResponse response = null;//通过alipayClient调用API，获得对应的response类
+//        try {
+//            response = alipayClient.execute(request);
+//        } catch (AlipayApiException e) {
+//            e.printStackTrace();
+//        }
+//        System.out.print(response.getBody());
 
     }
 }
