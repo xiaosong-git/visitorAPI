@@ -12,9 +12,7 @@ import com.goldccm.service.user.IUserService;
 import com.goldccm.util.BaseUtil;
 import com.goldccm.util.DateUtil;
 import com.goldccm.util.GTNotification;
-import com.goldccm.util.YMNotification;
 import com.goldccm.websocket.IWebSoketHandle;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,7 +59,7 @@ public class WebSocketServiceimpl extends BaseServiceImpl implements IWebSocketS
     public int saveMessage(Long fromUserId, Long toUserId, String content, Long type) throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put("id", 0);
-        params.put("fromUserid", fromUserId);
+        params.put("fromUserId", fromUserId);
         params.put("toUserId", toUserId);
         params.put("message", content);
         params.put("type", type);
@@ -182,32 +180,13 @@ public class WebSocketServiceimpl extends BaseServiceImpl implements IWebSocketS
             //fromUserId=谁发送的 当recordType=1时 发送人为userId
             if(msgMap.get("recordType")==Constant.RECORDTYPE_VISITOR){
                 obj.put("fromUserId",msgMap.get("userId"));
-                Map<String, Object> fromUser = findById(TableList.USER, BaseUtil.objToInteger(msgMap.get("userId"),0));
-                String realName=BaseUtil.objToStr(fromUser.get("realName"),"null");
-                String nickName=BaseUtil.objToStr(fromUser.get("niceName"),"null");
-                String headImgUrl=BaseUtil.objToStr(fromUser.get("headImgUrl"),"null");
-                String idHandleImgUrl=BaseUtil.objToStr(fromUser.get("idHandleImgUrl"),"null");
-                String orgId=BaseUtil.objToStr(fromUser.get("orgId"),"null");
-                obj.put("realName",realName);
-                obj.put("nickName",nickName);
-                obj.put("headImgUrl",headImgUrl);
-                obj.put("idHandleImgUrl",idHandleImgUrl);
-                obj.put("orgId",orgId);
-
+                //获取用户信息
+                saveJson(BaseUtil.objToInteger(msgMap.get("userId"),0),obj);
                // 当recordType=1时 发送人为userId
             }else if(msgMap.get("recordType")==Constant.RECORDTYPE_INVITE){
                 obj.put("fromUserId",msgMap.get("visitorId"));
-                Map<String, Object> fromUser = findById(TableList.USER, BaseUtil.objToInteger(msgMap.get("visitorId"),0));
-                String realName=BaseUtil.objToStr(fromUser.get("realName"),"null");
-                String nickName=BaseUtil.objToStr(fromUser.get("niceName"),"null");
-                String headImgUrl=BaseUtil.objToStr(fromUser.get("headImgUrl"),"null");
-                String idHandleImgUrl=BaseUtil.objToStr(fromUser.get("idHandleImgUrl"),"null");
-                String orgId=BaseUtil.objToStr(fromUser.get("orgId"),"null");
-                obj.put("realName",realName);
-                obj.put("nickName",nickName);
-                obj.put("headImgUrl",headImgUrl);
-                obj.put("idHandleImgUrl",idHandleImgUrl);
-                obj.put("orgId",orgId);
+                //获取用户信息
+                saveJson(BaseUtil.objToInteger(msgMap.get("visitorId"),0),obj);
             }
             obj.put("toUserId",userId);
             //2.1 发送信息时判断是(邀约/访问)还是应答（邀约/访问）
@@ -217,7 +196,6 @@ public class WebSocketServiceimpl extends BaseServiceImpl implements IWebSocketS
                 //如果状态不为applyConfirm 那么返回tpye=3作为应答
                 obj.put("type", Constant.MASSEGETYPE_REPLY);
             }
-
             //发送给session连接者
             System.out.println("发送websocket消息:"+obj.toJSONString());
             session.sendMessage(new TextMessage(obj.toJSONString()));
@@ -225,7 +203,6 @@ public class WebSocketServiceimpl extends BaseServiceImpl implements IWebSocketS
             if (!("T".equals(msgMap.get("isReceive")))){
                 updateRecord((long)msgMap.get("id"));
             }
-
         }
         return Result.unDataResult("success", "访问记录获取成功");
     }
@@ -267,27 +244,19 @@ public class WebSocketServiceimpl extends BaseServiceImpl implements IWebSocketS
 //                }
                 //用户在线，调用发送接口
                 if (Constant.SESSIONS.containsKey(toUserId)) {
-                    Map<String,Object> paraMap=userService.getUserByUserId((int)fromUserId);
+
                     obj.put("message", msg.getString("message"));
                     obj.put("toUserId", toUserId);
                     obj.put("fromUserId", fromUserId);
                     obj.put("type",type);
                     obj.put("updateTime", DateUtil.getSystemTime());
-                    String realName=BaseUtil.objToStr(paraMap.get("realName"),"null");
-                    String nickName=BaseUtil.objToStr(paraMap.get("niceName"),"null");
-                    String headImgUrl=BaseUtil.objToStr(paraMap.get("headImgUrl"),"null");
-                    String idHandleImgUrl=BaseUtil.objToStr(paraMap.get("idHandleImgUrl"),"null");
-                    String orgId=BaseUtil.objToStr(paraMap.get("orgId"),"null");
-                    obj.put("realName",realName);
-                    obj.put("nickName",nickName);
-                    obj.put("headImgUrl",headImgUrl);
-                    obj.put("idHandleImgUrl",idHandleImgUrl);
-                    obj.put("orgId",orgId);
+                    //查看用户信息
+                    saveJson((int)fromUserId,obj);
+//                    //查看好友申请数量
                     if (type==4){
                         String sql="select count(*) c from "+TableList.USER_FRIEND+" where friendId="+toUserId+" and applyType=0";
                         Map<String, Object> count = findFirstBySql(sql);
                         if (count!=null){
-
                             obj.put("count",count.get("c"));
                         }
                     }
@@ -363,4 +332,23 @@ public class WebSocketServiceimpl extends BaseServiceImpl implements IWebSocketS
         return baseDao.deleteOrUpdate(sql);
     }
 
+    /**
+     * 获取用户信息并存入jsonObj
+     *
+     */
+    @Override
+    public void saveJson(Integer fromUserId, JSONObject obj){
+        Map<String,Object> paraMap=userService.getUserByUserId(fromUserId);
+        String realName=BaseUtil.objToStr(paraMap.get("realName"),"null");
+        String nickName=BaseUtil.objToStr(paraMap.get("niceName"),"null");
+        String headImgUrl=BaseUtil.objToStr(paraMap.get("headImgUrl"),"null");
+        String idHandleImgUrl=BaseUtil.objToStr(paraMap.get("idHandleImgUrl"),"null");
+        String orgId=BaseUtil.objToStr(paraMap.get("orgId"),"null");
+        obj.put("realName",realName);
+        obj.put("nickName",nickName);
+        obj.put("headImgUrl",headImgUrl);
+        obj.put("idHandleImgUrl",idHandleImgUrl);
+        obj.put("orgId",orgId);
+
+    }
 }

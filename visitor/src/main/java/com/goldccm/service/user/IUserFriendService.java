@@ -119,6 +119,9 @@ public interface IUserFriendService extends IBaseService {
      *  update by cwf  2019/8/28 16:51 cause
      */
     Result findFriendApplyMe(Map<String, Object> userId) throws Exception;
+
+    Map findFriend(Object userId, Object friendId);
+
     //修改好友备注
     Result updateFriendRemark(Map<String, Object> paramMap);
 }

@@ -273,7 +273,7 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
             return  Result.unDataResult("fail","密码错误:剩余" + leftInputNum + "次输入机会");
         }
     }
-    //为了非好友邀约新建aop
+    //为了非好友邀约做新注册
     @Override
     public Result registerOrigin(Map<String, Object> paramMap) throws Exception {
         paramMap.remove("token");

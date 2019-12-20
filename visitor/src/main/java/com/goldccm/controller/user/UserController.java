@@ -205,7 +205,7 @@ public class UserController extends BaseController {
      * @Author linyb
      * @Date 2017/4/3 21:15
      */
-    @AuthCheckAnnotation(checkLogin = false,checkVerify = false, checkRequestLegal = true)
+    @AuthCheckAnnotation(checkLogin = true,checkVerify = false, checkRequestLegal = true)
     @RequestMapping("/verify")
     @ResponseBody
     public Result verify(HttpServletRequest request){
@@ -389,7 +389,7 @@ public class UserController extends BaseController {
      * @param request
      * @return
      */
-    @AuthCheckAnnotation(checkLogin = false,checkVerify = false, checkRequestLegal = true)
+    @AuthCheckAnnotation(checkLogin = true,checkVerify = false, checkRequestLegal = true)
     @RequestMapping("/test/modify")
     @ResponseBody
     public Result modify(HttpServletRequest request){

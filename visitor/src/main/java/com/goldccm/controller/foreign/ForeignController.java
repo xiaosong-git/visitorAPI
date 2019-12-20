@@ -128,7 +128,7 @@ public class ForeignController extends BaseController {
     }
 
     /**
-     * 访问我的人重构
+     * 访问我的人新接口
      * @param request
      * @return
      */
@@ -145,7 +145,7 @@ public class ForeignController extends BaseController {
     }
 
     /**
-     * 确认访问数据重构
+     * 确认访问数据新接口
      * @param request
      * @return
      */

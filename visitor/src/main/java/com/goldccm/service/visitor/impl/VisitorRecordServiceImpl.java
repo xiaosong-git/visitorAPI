@@ -65,7 +65,7 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 		if (user.get("companyId") == null) {
 			return Result.unDataResult("fail", "暂无公司数据!");
 		}
-		String columnSql = "select vr.*,u.realName realName,o.province province,o.city city,o.org_name org_name,c.companyName companyName";
+		String columnSql = "select vr.*,IF(u.realName IS NULL or u.realName=\"\",remarkName,u.realName) realName,o.province province,o.city city,o.org_name org_name,c.companyName companyName";
 
 		String fromSql = " from " + TableList.VISITOR_RECORD + " vr " + " left join " + TableList.USER
 				+ " u on vr.userId=u.id" + " left join " + TableList.COMPANY + " c on u.companyId=c.id" + " left join "
@@ -1336,35 +1336,37 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 	}
 	//我的邀约 我的访问
 	@Override
-	public Result myVisitOrInvite(Map<String, Object> paramMap, Integer pageNum, Integer pageSize, String str, Integer recordType) {
+	public Result myVisitOrInvite(Map<String, Object> paramMap, Integer pageNum, Integer pageSize, Integer recordType) {
         Integer userId = BaseUtil.objToInteger(paramMap.get("userId"), null);
         if (userId==null){
             return Result.unDataResult("fail","缺少参数");
         }
 
-	    String coloumSql="SELECT vr.id, u.realName,u.phone,u.headImgUrl,\n" +
+	    String coloumSql="select * ";
+        String fromSql=" from ((SELECT vr.id,IF(u.realName IS NULL or u.realName=\"\",remarkName,u.realName) realName,u.phone,u.headImgUrl,\n" +
 				"\tvr.visitDate,vr.visitTime,vr.userId,vr.visitorId,vr.reason,vr.cstatus,vr.dateType\n" +
 				",vr.startDate,vr.endDate,vr.answerContent,vr.orgCode,vr.companyId,vr.recordType,\n" +
-				"vr.replyDate,vr.replyTime,vr.vitype,vr.replyUserId,vr.isReceive,o.org_name,c.companyName,o.accessType";
-        String fromSql=" from "+TableList.VISITOR_RECORD+" vr\n" +
+				"vr.replyDate,vr.replyTime,vr.vitype,vr.replyUserId,vr.isReceive,o.org_name,c.companyName,o.accessType"+
+				" from "+TableList.VISITOR_RECORD+" vr\n" +
                 "left join "+TableList.USER+" u on u.id=vr.visitorId\n" +
 				"left join "+TableList.COMPANY+" c on vr.companyId=c.id\n" +
 				"left join  "+TableList.ORG+" o on vr.orgCode=o.org_code " +
-                "where "+str+"="+userId+" or vr.visitorId="+userId+" and recordType="+recordType+
-				"  ORDER BY startDate>NOW() desc,  IF(startDate > NOW(), FIELD(cstatus,'Cancle','applyFail',  'applySuccess','applyConfirm'), startDate ) desc,startDate desc,endDate asc";
-//        String union=" union \n" +
-//                "SELECT vr.id,u.realName,u.phone,u.headImgUrl,\n" +
-//                "\tvr.visitDate,vr.visitTime,vr.userId,vr.visitorId,vr.reason,vr.cstatus,vr.dateType," +
-//                "vr.startDate,vr.endDate,vr.answerContent,vr.orgCode,vr.companyId,vr.recordType," +
-//                "vr.replyDate,vr.replyTime,vr.vitype,vr.replyUserId,vr.isReceive,o.org_name,c.companyName,o.accessType " +
-//                "FROM "+TableList.VISITOR_RECORD+" vr\n" +
-//                "left join "+TableList.USER+" u on u.id=vr.userId\n" +
-//				"left join "+TableList.COMPANY+" c on vr.companyId=c.id\n" +
-//				"left join  "+TableList.ORG+" o on vr.orgCode=o.org_code " +
-//                "where vr.visitorId="+userId+" and recordType="+recordType+")x";
+                "where userId="+userId+" and recordType="+recordType+
+				"  ORDER BY startDate>NOW() desc,  IF(startDate > NOW(), FIELD(cstatus,'Cancle','applyFail',  'applySuccess','applyConfirm'), startDate ) desc,startDate desc,endDate asc limit 1000)";
+        String union=" union \n" +
+                "(SELECT vr.id,IF(u.realName IS NULL or u.realName=\"\",remarkName,u.realName) realName,u.phone,u.headImgUrl,\n" +
+                "\tvr.visitDate,vr.visitTime,vr.userId,vr.visitorId,vr.reason,vr.cstatus,vr.dateType," +
+                "vr.startDate,vr.endDate,vr.answerContent,vr.orgCode,vr.companyId,vr.recordType," +
+                "vr.replyDate,vr.replyTime,vr.vitype,vr.replyUserId,vr.isReceive,o.org_name,c.companyName,o.accessType " +
+                "FROM "+TableList.VISITOR_RECORD+" vr\n" +
+                "left join "+TableList.USER+" u on u.id=vr.userId\n" +
+				"left join "+TableList.COMPANY+" c on vr.companyId=c.id\n" +
+				"left join  "+TableList.ORG+" o on vr.orgCode=o.org_code " +
+                "where vr.visitorId="+userId+" and recordType="+recordType+" " +
+				"ORDER BY startDate>NOW() desc,  IF(startDate > NOW(), FIELD(cstatus,'Cancle','applyFail',  'applySuccess','applyConfirm'), startDate ) desc,startDate desc,endDate asc limit 1000))x";
 //        String oder=" ORDER BY visitDate desc,visitTime desc ";
-		logger.info(coloumSql+fromSql );
-        PageModel pageModel = findPage(coloumSql, fromSql, pageNum, pageSize);
+		logger.info(coloumSql+fromSql+union );
+        PageModel pageModel = findPage(coloumSql, fromSql+union, pageNum, pageSize);
         return ResultData.dataResult("success","获取成功",pageModel);
 	}
 	/**
@@ -1740,9 +1742,6 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 
 	/**
 	 * 通过接口回应邀约 1.更新访客日志表 2.发送推送给邀约人
-	 * @param paramMap
-	 * @return com.goldccm.model.compose.Result
-	 * @throws Exception
 	 * @author cwf
 	 * @date 2019/12/4 18:03
 	 */
@@ -1839,18 +1838,15 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 			return Result.unDataResult("fail","同意邀约失败！系统错误，请联系客服！");
 		}
 	}
-
 	@Override
-	public Result inviteMine(Map<String, Object> paramMap, Integer pageNum, Integer pageSize, String s, Integer recordtype) {
-		return myVisitOrInvite(paramMap,pageNum,pageSize,s,recordtype);
+	public Result inviteMine(Map<String, Object> paramMap, Integer pageNum, Integer pageSize, Integer recordtype) {
+		//todo 将我的邀约与邀约我的人功能拆分出来
+		return null;
 	}
 	/**
 	 * 非好友邀约
 	 *  判断对方是否为平台用户，如果是，则发送普通邀约，如果不是则发送短信
-	 *  目前只发送短信，不进行判断
-	 * @param paramMap
-	 * @return com.goldccm.model.compose.Result
-	 * @throws Exception
+	 *  目前只发送短信，不进行判断用户存在
 	 * @author cwf
 	 * @date 2019/12/17 11:33
 	 */
@@ -1876,9 +1872,10 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 		}
 		String sql ="select id,companyId,realName,isAuth,deviceToken,deviceType,isOnlineApp from "+TableList.USER+" " +
 				"where phone='"+phone+"'";
-		//被邀者
+		//被邀者==访问者
 		Map<String, Object> invitor=findFirstBySql(sql);
-		String invitorName = BaseUtil.objToStr(invitor.get("realName"),"");
+//		String invitorName = BaseUtil.objToStr(invitor.get("realName"),"");
+		//被邀者==访问者id
 		Integer userId = BaseUtil.objToInteger(invitor.get("id"), 0);
 		if (userId.equals(visitorId)){
 			return Result.unDataResult("fail","请不要对自己发起邀约！");
@@ -1900,6 +1897,14 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 				"where c.id="+companyId;
 		Map<String, Object> company= findFirstBySql(companySql);
 		String addr = BaseUtil.objToStr(company.get("addr"),"");
+		//查看是否重复邀约
+		Map<String, Object> check=check(userId,visitorId,2,startDate,endDate);
+		//如果是邀约recordType=2 访客与被访者在数据库中位置调换
+		if (check != null) {
+			//发送回消息
+			logger.info(startDate+"该时间段"+endDate+"内已经有邀约信息存在");
+			return Result.unDataResult("fail","在"+startDate+"——"+endDate+"内已经有邀约信息存在");
+		}
 		//被邀约者/访客Id
 		Map<String, Object> visitRecord =new HashMap<>();
 		Date date = new Date();
@@ -1912,10 +1917,13 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 		visitRecord.put("reason",reason);
 		visitRecord.put("startDate",startDate);
 		visitRecord.put("endDate",endDate);
-		visitRecord.put("vitype","B");
+		visitRecord.put("vitype","A");
 		visitRecord.put("orgCode",orgCode);
 		visitRecord.put("companyId",companyId);
 		visitRecord.put("recordType",2);
+		visitRecord.put("remarkName",realName);
+		//提示为非好友邀约
+		visitRecord.put("answerContent","非好友邀约");
 
 		//记录访问记录
 		int saveVisitRecord =save(TableList.VISITOR_RECORD,visitRecord);

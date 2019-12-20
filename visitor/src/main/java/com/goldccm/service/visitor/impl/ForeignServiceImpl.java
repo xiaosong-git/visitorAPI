@@ -50,14 +50,13 @@ public class ForeignServiceImpl  extends BaseServiceImpl implements IForeignServ
         if (posp == null) {
             return Result.unDataResult("fail", "无此上位机编码" + pospCode + "或者无此大楼编码" + orgCode);
         }
-        String today= DateUtil.getSystemTime();
+
         String columnSql = "select vr.id visitId,vr.userId,vr.visitDate,vr.visitTime,vr.orgCode,vr.dateType,vr.startDate,vr.endDate,u.realName userRealName,u.idType userIdType,u.idNO userIdNO,u.soleCode soleCode,u.idHandleImgUrl idHandleImgUrl,c.companyFloor companyFloor,v.realName vistorRealName,v.idType vistorIdType,v.idNO visitorIdNO,o.province province,o.city city";
         String fromSql = " from " + TableList.VISITOR_RECORD + " vr " + " left join " + TableList.USER
                 + " v on vr.visitorId=v.id" + " left join " + TableList.USER + " u on vr.userId=u.id"+ " left join " +TableList.COMPANY +" c on vr.companyId=c.id"
                 + " left join " + TableList.ORG + " o on v.orgId=o.id"
                 + " where vr.cstatus='applySuccess' and vr.orgCode = '" + orgCode + "'"
-                + " and vr.startDate<= '" + today
-                + "' and vr.endDate>='" + today + "' and isFlag='F' order by vr.id";
+                + " and vr.startDate<=date_add(now(),interval +30 minute) and vr.endDate>= date_add(now(),interval -30 minute) and isFlag='F' order by vr.id";
         logger.info(columnSql+fromSql);
         PageModel pageModel = this.findPage(columnSql, fromSql, pageNum, pageSize);
         //有数据 获取图片并插入

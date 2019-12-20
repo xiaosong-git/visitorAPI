@@ -32,7 +32,7 @@ public class VisitorRecordController extends BaseController {
      * @param request
      * @return
      */
-    @AuthCheckAnnotation(checkLogin = false,checkVerify = true, checkRequestLegal = true)
+    @AuthCheckAnnotation(checkLogin = true,checkVerify = true, checkRequestLegal = true)
     @RequestMapping("/visitMyPeople/{pageNum}/{pageSize}")
     @ResponseBody
     public Result visitMyPeople(HttpServletRequest request, @PathVariable Integer pageNum, @PathVariable Integer pageSize){
@@ -49,7 +49,7 @@ public class VisitorRecordController extends BaseController {
      * @param request
      * @return
      */
-    @AuthCheckAnnotation(checkLogin = false,checkVerify = true, checkRequestLegal = true)
+    @AuthCheckAnnotation(checkLogin = true,checkVerify = true, checkRequestLegal = true)
     @RequestMapping("/adoptionAndRejection")
     @ResponseBody
     public Result updateVisitorRecord(HttpServletRequest request){
@@ -136,7 +136,7 @@ public class VisitorRecordController extends BaseController {
      * @return
      */
     //checkLogin需要为true
-    @AuthCheckAnnotation(checkLogin = false,checkVerify = false, checkRequestLegal = true)
+    @AuthCheckAnnotation(checkLogin = true,checkVerify = false, checkRequestLegal = true)
     @RequestMapping("/visit")
     @ResponseBody
     public Result visit(HttpServletRequest request){
@@ -207,39 +207,39 @@ public class VisitorRecordController extends BaseController {
         }
     }
     //我的邀约
-    @AuthCheckAnnotation(checkLogin = false,checkVerify = true, checkRequestLegal = true)
+    @AuthCheckAnnotation(checkLogin = true,checkVerify = true, checkRequestLegal = true)
     @RequestMapping("/inviteRecord/{pageNum}/{pageSize}")
     @ResponseBody
     public Result inviteRecord(HttpServletRequest request, @PathVariable Integer pageNum, @PathVariable Integer pageSize){
         try {
             Map<String,Object> paramMap = getParamsToMap(request);
-            return visitorRecordService.myVisitOrInvite(paramMap,pageNum,pageSize,"vr.userId",Constant.RECORDTYPE_INVITE);
+            return visitorRecordService.myVisitOrInvite(paramMap,pageNum,pageSize,Constant.RECORDTYPE_INVITE);
         }catch (Exception e){
             e.printStackTrace();
             return Result.unDataResult("fail", "系统异常");
         }
     }
     //邀约我的人
-    @AuthCheckAnnotation(checkLogin = false,checkVerify = true, checkRequestLegal = true)
+    @AuthCheckAnnotation(checkLogin = true,checkVerify = true, checkRequestLegal = true)
     @RequestMapping("/inviteMine/{pageNum}/{pageSize}")
     @ResponseBody
     public Result inviteMine(HttpServletRequest request, @PathVariable Integer pageNum, @PathVariable Integer pageSize){
         try {
             Map<String,Object> paramMap = getParamsToMap(request);
-            return visitorRecordService.inviteMine(paramMap,pageNum,pageSize, "vr.visitorId",Constant.RECORDTYPE_INVITE);
+            return visitorRecordService.inviteMine(paramMap,pageNum,pageSize, Constant.RECORDTYPE_INVITE);
         }catch (Exception e){
             e.printStackTrace();
             return Result.unDataResult("fail", "系统异常");
         }
     }
     //我的访问
-    @AuthCheckAnnotation(checkLogin = false,checkVerify = true, checkRequestLegal = true)
+    @AuthCheckAnnotation(checkLogin = true,checkVerify = true, checkRequestLegal = true)
     @RequestMapping("/visitRecord/{pageNum}/{pageSize}")
     @ResponseBody
     public Result visitRecord(HttpServletRequest request, @PathVariable Integer pageNum, @PathVariable Integer pageSize){
         try {
             Map<String,Object> paramMap = getParamsToMap(request);
-            return visitorRecordService.myVisitOrInvite(paramMap,pageNum,pageSize, "vr.userId", Constant.RECORDTYPE_VISITOR);
+            return visitorRecordService.myVisitOrInvite(paramMap,pageNum,pageSize, Constant.RECORDTYPE_VISITOR);
         }catch (Exception e){
             e.printStackTrace();
             return Result.unDataResult("fail", "系统异常");
@@ -313,7 +313,7 @@ public class VisitorRecordController extends BaseController {
      * @author cwf
      * @date 2019/10/12 14:18
      */
-    @AuthCheckAnnotation(checkLogin = false,checkVerify = true, checkRequestLegal = true)
+    @AuthCheckAnnotation(checkLogin = true,checkVerify = true, checkRequestLegal = true)
     @RequestMapping("/modifyCompanyFromId")
     @ResponseBody
     public Result modifyCompanyFromId(HttpServletRequest request){
@@ -333,7 +333,7 @@ public class VisitorRecordController extends BaseController {
      * @author cwf
      * @date 2019/12/5 9:48
      */
-    @AuthCheckAnnotation(checkLogin = false,checkVerify = true, checkRequestLegal = true)
+    @AuthCheckAnnotation(checkLogin = true,checkVerify = true, checkRequestLegal = true)
     @RequestMapping("/visitReply")
     @ResponseBody
     public Result visitReply(HttpServletRequest request){

@@ -66,7 +66,7 @@ public class YunPainSmsUtil {
 
     public static Integer MSG_TYPE_INVITE = 6;//邀请
 
-    public static String CHECK_CODE_INVITE = "【朋悦比邻】visitorBy，您好，companyName的accName邀请您于visitorDateTime —— endDateTime到:companyAddr进行访谈，请点击获取进出二维码：#url\n";
+    public static String CHECK_CODE_INVITE = "【朋悦比邻】visitorBy，您好，companyName的accName请您于visitorDateTime —— endDateTime到:companyAddr进行访谈，请使用链接中的二维码通行：url\n";
 
     public static Integer MSG_TYPE_VISITORBY_QRCODE = 7;//访客
 

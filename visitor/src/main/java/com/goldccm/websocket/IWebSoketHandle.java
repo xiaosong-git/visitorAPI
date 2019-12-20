@@ -5,14 +5,17 @@ import com.alibaba.fastjson.JSONObject;
 import com.goldccm.model.compose.Constant;
 import com.goldccm.model.compose.Result;
 import com.goldccm.service.WebSocket.IWebSocketService;
+import com.goldccm.service.user.IUserFriendService;
 import com.goldccm.service.visitor.IVisitorRecordService;
 import com.goldccm.util.BaseUtil;
+import org.hamcrest.core.Is;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.socket.*;
 import org.springframework.web.socket.handler.AbstractWebSocketHandler;
 
+import java.io.IOException;
 import java.util.Map;
 
 
@@ -23,6 +26,8 @@ public class IWebSoketHandle extends AbstractWebSocketHandler {
     public IWebSocketService webSocketService;
     @Autowired
     public IVisitorRecordService visitorRecordService;
+    @Autowired
+    public IUserFriendService userFriendService;
     /**
      * 处理字符串类的信息
      *
@@ -87,8 +92,6 @@ public class IWebSoketHandle extends AbstractWebSocketHandler {
     @Override
     public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
         String msgStr = message.getPayload().toString();
-
-
         int type=0;
         //解析消息
         try {
@@ -100,15 +103,21 @@ public class IWebSoketHandle extends AbstractWebSocketHandler {
             logger.info("处理要发送的消息：{}",msgStr);
             JSONObject msg = JSON.parseObject(msgStr);
              type= msg.getInteger("type");
-            if (Constant.MASSEGETYPE_NOMAL==type||4==type){
-                webSocketService.dealChat(session,msg);
-            }
-            //申请访问或申请邀约
-            else if(Constant.MASSEGETYPE_VISITOR==type){
-                visitorRecordService.receiveVisit(session,msg);
-                //回应访问或回应邀约
-            }else if(Constant.MASSEGETYPE_REPLY==type){
-                visitorRecordService.visitReply(session,msg);
+            //判断是否为好友，非好友则返回信息
+            boolean isFriend = isFriend(session, msg);
+            //是好友
+            if (isFriend){
+                //type==4 好友申请数量
+                if (Constant.MASSEGETYPE_NOMAL==type||4==type){
+                    webSocketService.dealChat(session,msg);
+                }
+                //申请访问或申请邀约
+                else if(Constant.MASSEGETYPE_VISITOR==type){
+                    visitorRecordService.receiveVisit(session,msg);
+                    //回应访问或回应邀约
+                }else if(Constant.MASSEGETYPE_REPLY==type){
+                    visitorRecordService.visitReply(session,msg);
+                }
             }
         }catch (Exception e){
             e.printStackTrace();
@@ -168,8 +177,65 @@ public class IWebSoketHandle extends AbstractWebSocketHandler {
        logger.info(session.getAttributes().get("userId")+"客户连接关闭");
         Constant.SESSIONS.remove(session.getAttributes().get("userId"));
     }
+    /**
+     *  判断用户是否为好友，非好友则返回信息
+     * @param session webSocket相关信息
+     * @param msg 消息
+     * @return  是否为好友
+     * @throws IOException
+     * @author cwf
+     * @date 2019/12/19 14:45
+     */
+    public boolean isFriend(WebSocketSession session,JSONObject msg) throws IOException {
 
-
+        int type= msg.getInteger("type");
+        Object userId = session.getAttributes().get("userId");
+        Object friendId= msg.get("toUserId");
+        Map<String,Object> friendUser=userFriendService . findFriend(friendId,userId);
+        JSONObject obj = new JSONObject();
+        obj.put("fromUserId", friendId);
+        obj.put("toUserId",userId);
+        obj.put("message", "对方开启了好友验证，你还不是他好友，请先发送好友验证请求！");
+        obj.put("type", type);
+        webSocketService.saveJson(BaseUtil.objToInteger(friendId,0),obj);
+        if (friendUser==null){
+            logger.info("发送的消息：{}",obj.toString());
+            session.sendMessage(new TextMessage(obj.toString()));
+            //非好友
+            return false;
+            //todo 判断好友状态是否为2
+        } else  {
+            int applyType = BaseUtil.objToInteger(friendUser.get("applyType"), 2);
+            if (applyType!=1) {
+                logger.info("发送的消息：{}",obj.toString());
+                session.sendMessage(new TextMessage(obj.toString()));
+                //非好友
+                return false;
+            }
+        }
+        Map<String,Object> userFriend=userFriendService . findFriend(userId,friendId);
+        if (userFriend==null){
+            obj.put("message", "您还不是对方好友，请添加好友！");
+            logger.info("发送的消息：{}",obj.toString());
+            session.sendMessage(new TextMessage(obj.toString()));
+            //非好友
+            return false;
+        }else  {
+            int applyType = BaseUtil.objToInteger(userFriend.get("applyType"), 2);
+            if (applyType!=1) {
+                obj.put("message", "您还不是对方好友，请添加好友！");
+                if(applyType==2){
+                    obj.put("message", "您已删除对方，请重新添加好友！");
+                }
+                logger.info("发送的消息：{}",obj.toString());
+                session.sendMessage(new TextMessage(obj.toString()));
+               //非好友
+                return false;
+            }
+        }
+        //是好友
+        return true;
+    }
 
 
 }

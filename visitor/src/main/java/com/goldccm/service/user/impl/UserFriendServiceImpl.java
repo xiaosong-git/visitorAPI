@@ -53,6 +53,7 @@ public class UserFriendServiceImpl extends BaseServiceImpl implements IUserFrien
                 " left join " + TableList.USER + " u on uf.friendId=u.id" +
                 " left join " + TableList.COMPANY + " c on c.id=u.companyId"+
                 " where uf.userId = '"+userId+"' and uf.applyType=1  ";
+        logger.info("查询好友{}",columnSql+fromSql);
         List<Map<String,Object>> list = this.findList(columnSql,fromSql);
         return list != null && !list.isEmpty()
                 ? ResultData.dataResult("success","获取通讯录记录成功",list)
@@ -162,17 +163,42 @@ public class UserFriendServiceImpl extends BaseServiceImpl implements IUserFrien
         Map<String,Object> newUserMap=new HashMap<>();
         if (ifUserFriend!=null) {
             String applyType = BaseUtil.objToStr(ifUserFriend.get("applyType"),null);
-
+            //对方对我状态
+            Map<String,Object> friendUser = findFriend(friendId,userId);
             if (applyType ==null||"0".equals(applyType)) {
-
+                logger.info("{}申请中的好友!{}",userId,friendId);
                 return Result.unDataResult("fail", "申请中的好友!");
             }else if ("1".equals(applyType)){
+                logger.info("{}你们已经是好友啦!{}",userId,friendId);
+                if (friendUser!=null) {
+                    String friendType = BaseUtil.objToStr(friendUser.get("applyType"), null);
+                    logger.info("{}对于{}的好友状态{}", friendId, userId, friendType);
+                    //ifUserFriend的id
+                    long id = BaseUtil.objToLong(ifUserFriend.get("ufId"), null);
+                    //如果对方在申请我，直接添加好友
+                    if ("0".equals(friendType)) {
+                        Integer updateFriendType = updateFriendType(friendId, userId, null, 1);
+                        if (updateFriendType > 0 ) {
+                            logger.info("{}重新申请好友成功!{}", userId, friendId);
+                            return Result.unDataResult("success", "添加好友成功");
+                        }
+                        //对方没删除我，直接修改回状态为1
+                    }else if ("2".equals(friendType)){
+
+                        logger.info("更新好友状态id：{}",friendType);
+                        newUserMap.put("id",id);
+                        newUserMap.put("applyType","0");
+                        int update = update(TableList.USER_FRIEND, newUserMap);
+                        if (update>0){
+                            return Result.unDataResult("success", "重新申请好友成功!");
+                        }
+                    }
+                }
                 return Result.unDataResult("fail", "你们已经是好友啦!");
                 //重新添加好友
             }else if ("2".equals(applyType)){
 
                 //查看对方是否也删除了我
-                Map<String,Object> friendUser = findFriend(friendId,userId);
                 //如果无数据，返回错误
              if (friendUser!=null){
                  String friendType = BaseUtil.objToStr(friendUser.get("applyType"),null);
@@ -184,6 +210,7 @@ public class UserFriendServiceImpl extends BaseServiceImpl implements IUserFrien
                      Integer updatemyType = updateFriendType(userId, friendId, remark, 1);
                      Integer updateFriendType = updateFriendType(friendId, userId, null, 1);
                      if (updateFriendType>0&&updatemyType>0){
+                         logger.info("{}重新申请好友成功!{}",userId,friendId);
                          return Result.unDataResult("success","重新申请好友成功");
                      }
                      //对方没删除我，直接修改回状态为1
@@ -219,7 +246,7 @@ public class UserFriendServiceImpl extends BaseServiceImpl implements IUserFrien
 
             if (Constant.SESSIONS.containsKey((long)friendId)){
                 JSONObject obj = new JSONObject();
-                obj.put("fromUserid", userId);
+                obj.put("fromUserId", userId);
                 obj.put("toUserId", friendId);
                 obj.put("message", "申请好友");
                 obj.put("type", 4);
@@ -362,7 +389,10 @@ public class UserFriendServiceImpl extends BaseServiceImpl implements IUserFrien
                 ? ResultData.dataResult("success","获取列表成功",list)
                 : Result.unDataResult("success","暂无数据");
     }
-
+    @Override
+    public Map findFriend(Object userId,Object friendId){
+     return findFirstBySql("select * from "+TableList.USER_FRIEND+" where userId="+userId+" and friendId="+friendId);
+    }
     @Override
     public Result updateFriendRemark(Map<String, Object> paramMap) {
         String userId=BaseUtil.objToStr(paramMap.get("userId"),null);

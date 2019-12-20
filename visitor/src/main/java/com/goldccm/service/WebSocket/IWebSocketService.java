@@ -121,4 +121,7 @@ public interface IWebSocketService extends IBaseService {
      Result sendVisitToUser(WebSocketSession session,TextMessage message) throws Exception;
 
      String undataResult(String code,String result,Integer type);
+
+
+     void saveJson(Integer fromUserId, JSONObject obj);
 }
