@@ -1838,10 +1838,27 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 			return Result.unDataResult("fail","同意邀约失败！系统错误，请联系客服！");
 		}
 	}
+	//邀约我的人
 	@Override
-	public Result inviteMine(Map<String, Object> paramMap, Integer pageNum, Integer pageSize, Integer recordtype) {
+	public Result inviteMine(Map<String, Object> paramMap, Integer pageNum, Integer pageSize, Integer recordType) {
 		//todo 将我的邀约与邀约我的人功能拆分出来
-		return null;
+		Integer userId = BaseUtil.objToInteger(paramMap.get("userId"), null);
+		if (userId==null){
+			return Result.unDataResult("fail","缺少参数");
+		}
+		String coloumSql="SELECT vr.id,IF(u.realName IS NULL or u.realName=\"\",remarkName,u.realName) realName,u.phone,u.headImgUrl,\n" +
+				"\tvr.visitDate,vr.visitTime,vr.userId,vr.visitorId,vr.reason,vr.cstatus,vr.dateType," +
+				"vr.startDate,vr.endDate,vr.answerContent,vr.orgCode,vr.companyId,vr.recordType," +
+				"vr.replyDate,vr.replyTime,vr.vitype,vr.replyUserId,vr.isReceive,o.org_name,c.companyName,o.accessType ";
+		String fromSql="FROM "+TableList.VISITOR_RECORD+" vr\n" +
+				"left join "+TableList.USER+" u on u.id=vr.userId\n" +
+				"left join "+TableList.COMPANY+" c on vr.companyId=c.id\n" +
+				"left join  "+TableList.ORG+" o on vr.orgCode=o.org_code " +
+				"where vr.userId="+userId+" and recordType="+recordType+" " +
+				"ORDER BY startDate>NOW() desc,  IF(startDate > NOW(), FIELD(cstatus,'Cancle','applyFail',  'applySuccess','applyConfirm'), startDate ) desc,startDate desc,endDate";
+		logger.info("邀约我的人\n"+coloumSql+fromSql );
+		PageModel pageModel = findPage(coloumSql, fromSql, pageNum, pageSize);
+		return ResultData.dataResult("success","获取成功",pageModel);
 	}
 	/**
 	 * 非好友邀约
@@ -1936,6 +1953,28 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 			return Result.unDataResult("fail","邀约失败");
 		}
 
+	}
+	//我的访问
+	@Override
+	public Result myVisit(Map<String, Object> paramMap, Integer pageNum, Integer pageSize, Integer recordType) {
+		Integer userId = BaseUtil.objToInteger(paramMap.get("userId"), null);
+		if (userId==null){
+			return Result.unDataResult("fail","缺少参数");
+		}
+
+		String coloumSql="SELECT vr.id,IF(u.realName IS NULL or u.realName=\"\",remarkName,u.realName) realName,u.phone,u.headImgUrl,\n" +
+				"\tvr.visitDate,vr.visitTime,vr.userId,vr.visitorId,vr.reason,vr.cstatus,vr.dateType\n" +
+				",vr.startDate,vr.endDate,vr.answerContent,vr.orgCode,vr.companyId,vr.recordType,\n" +
+				"vr.replyDate,vr.replyTime,vr.vitype,vr.replyUserId,vr.isReceive,o.org_name,c.companyName,o.accessType";
+		String fromSql=" from "+TableList.VISITOR_RECORD+" vr\n" +
+				"left join "+TableList.USER+" u on u.id=vr.visitorId\n" +
+				"left join "+TableList.COMPANY+" c on vr.companyId=c.id\n" +
+				"left join  "+TableList.ORG+" o on vr.orgCode=o.org_code " +
+				"where userId="+userId+" and recordType="+recordType+
+				"  ORDER BY startDate>NOW() desc,  IF(startDate > NOW(), FIELD(cstatus,'Cancle','applyFail',  'applySuccess','applyConfirm'), startDate ) desc,startDate desc,endDate ";
+		logger.info("我的邀约："+coloumSql+fromSql );
+		PageModel pageModel = findPage(coloumSql, fromSql, pageNum, pageSize);
+		return ResultData.dataResult("success","获取成功",pageModel);
 	}
 }
 

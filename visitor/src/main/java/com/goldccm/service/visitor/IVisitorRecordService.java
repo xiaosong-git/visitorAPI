@@ -182,8 +182,10 @@ public interface IVisitorRecordService extends IBaseService {
     Result modifyCompanyFromId(Map<String, Object> paramMap) throws Exception;
     //接口回应邀约
     Result visitReply(Map<String, Object> paramMap) throws Exception;
-    //待开发
+    //邀约我的人
     Result inviteMine(Map<String, Object> paramMap, Integer pageNum, Integer pageSize, Integer recordtype);
     //非好友邀约
     Result InviteStranger(Map<String, Object> paramMap) throws Exception;
+
+    Result myVisit(Map<String, Object> paramMap, Integer pageNum, Integer pageSize, Integer recordtypeVisitor);
 }

@@ -108,7 +108,7 @@ public class AppVersionService extends BaseServiceImpl implements IAppVersionSer
                 appVersionInfo.put("updateUrl",appVersion.get("uploadFile"));//更新地址
                 appVersionInfo.put("memo",appVersion.get("memo"));//版本说明
                 logger.info("-----用户的软件不是最新版本------");
-                return ResultData.dataResult("success", "", appVersionInfo);
+                return ResultData.dataResult("success", "不是最新版本", appVersionInfo);
             }else{
                 //用户的软件已经是最新版
                 logger.info("-----用户的软件已经是最新版------");

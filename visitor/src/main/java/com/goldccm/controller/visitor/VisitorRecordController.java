@@ -220,7 +220,7 @@ public class VisitorRecordController extends BaseController {
         }
     }
     //邀约我的人
-    @AuthCheckAnnotation(checkLogin = true,checkVerify = true, checkRequestLegal = true)
+    @AuthCheckAnnotation(checkLogin = false,checkVerify = true, checkRequestLegal = true)
     @RequestMapping("/inviteMine/{pageNum}/{pageSize}")
     @ResponseBody
     public Result inviteMine(HttpServletRequest request, @PathVariable Integer pageNum, @PathVariable Integer pageSize){
@@ -240,6 +240,19 @@ public class VisitorRecordController extends BaseController {
         try {
             Map<String,Object> paramMap = getParamsToMap(request);
             return visitorRecordService.myVisitOrInvite(paramMap,pageNum,pageSize, Constant.RECORDTYPE_VISITOR);
+        }catch (Exception e){
+            e.printStackTrace();
+            return Result.unDataResult("fail", "系统异常");
+        }
+    }
+    //我的访问
+    @AuthCheckAnnotation(checkLogin = false,checkVerify = true, checkRequestLegal = true)
+    @RequestMapping("/myVisit/{pageNum}/{pageSize}")
+    @ResponseBody
+    public Result myVisit(HttpServletRequest request, @PathVariable Integer pageNum, @PathVariable Integer pageSize){
+        try {
+            Map<String,Object> paramMap = getParamsToMap(request);
+            return visitorRecordService.myVisit(paramMap,pageNum,pageSize, Constant.RECORDTYPE_VISITOR);
         }catch (Exception e){
             e.printStackTrace();
             return Result.unDataResult("fail", "系统异常");
@@ -346,7 +359,7 @@ public class VisitorRecordController extends BaseController {
         }
     }
     /**
-     *  回应邀约
+     *  非好友邀约
      * @param request
      * @return com.goldccm.model.compose.Result
      * @throws Exception
