@@ -389,6 +389,11 @@ public class CheckInWorkServiceImpl  extends BaseServiceImpl implements CheckInW
         return Result.unDataResult("fail","打卡失败");
     }
 
+    @Override
+    public Result gainMonthStatistics(Map<String, Object> paramMap) {
+        return null;
+    }
+
 
     /**
      * 日历 个人日打卡记录
@@ -411,7 +416,7 @@ public class CheckInWorkServiceImpl  extends BaseServiceImpl implements CheckInW
 
         return null;
     }
-    //失效sql
+    //生成测试数据
     @Override
     public  Result effective(Map<String, Object> paramMap) throws ParseException {
 
@@ -434,13 +439,13 @@ public class CheckInWorkServiceImpl  extends BaseServiceImpl implements CheckInW
      * 日统计，一、上下班统计：1、迟到分钟数 2、早退分钟数 3、旷工分钟数 4、缺卡分钟数 5、地点异常数 6设备异常数
      *        二、假勤统计：1、打卡补卡 2、外勤 3、外出 4、出差 、5、年假 6、事假 7、病假 8、调休假 9、婚假 10、产假 11、陪产假 12、其他
      * 备注：当天没有打卡记录为旷工，当天有部分打卡为缺卡。
-     * @param paramMap
+     * @param date
      * @return com.goldccm.model.compose.Result
      * @throws Exception
      * @author cwf
      * @date 2019/11/19 10:04
      */
-    public Result gainMonthStatistics(Map<String, Object> paramMap){
+    public Result gainMonthStatistics(String date){
 
         return null;
     }

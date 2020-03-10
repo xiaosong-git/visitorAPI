@@ -1,6 +1,5 @@
 package com.goldccm.service.user.impl;
 
-import com.goldccm.controller.user.UserAppRoleController;
 import com.goldccm.model.compose.Result;
 import com.goldccm.model.compose.ResultData;
 import com.goldccm.model.compose.TableList;

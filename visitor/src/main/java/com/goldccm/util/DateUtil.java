@@ -7,7 +7,8 @@ import com.goldccm.model.compose.Constant;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  * 时间的处理
@@ -148,6 +149,20 @@ public class DateUtil {
         String first = f.format(c.getTime());
         return first;
     }
+    /**
+     * 获取某月第一天
+     *
+     * @return
+     */
+    public static String getMonthFirstDay(String yearDate) throws ParseException {
+        SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd");
+        Date date = new SimpleDateFormat("yyyy-MM").parse(yearDate);
+        Calendar c = Calendar.getInstance();
+        c.setTime(date);
+        c.set(Calendar.DAY_OF_MONTH, 1);//设置为1号,当前日期既为本月第一天
+        String first = f.format(c.getTime());
+        return first;
+    }
 
     /**
      * 获取当月最后一天
@@ -159,6 +174,20 @@ public class DateUtil {
         Calendar ca = Calendar.getInstance();
         ca.set(Calendar.DAY_OF_MONTH, ca.getActualMaximum(Calendar.DAY_OF_MONTH));
         String last = f.format(ca.getTime());
+        return last;
+    }
+    /**
+     * 获取某月最后一天
+     *
+     * @return
+     */
+    public static String getMonthLastDay(String yearDate) throws ParseException {
+        SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd");
+        Date date = new SimpleDateFormat("yyyy-MM").parse(yearDate);
+        Calendar c = Calendar.getInstance();
+        c.setTime(date);
+        c.set(Calendar.DAY_OF_MONTH, c.getActualMaximum(Calendar.DAY_OF_MONTH));
+        String last = f.format(c.getTime());
         return last;
     }
 
@@ -419,5 +448,17 @@ public class DateUtil {
         System.out.println(x.substring(11));
         System.out.println(x.substring(0,10));
 //        System.out.println(getDate("2019-11-20 00:00:00").substring(10,14));
+        SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd");
+        Date date = new SimpleDateFormat("yyyy-MM").parse("2020-02");
+
+        Calendar c = Calendar.getInstance();
+        c.setTime(date);
+//        c.set(Calendar.DAY_OF_MONTH, 1);//设置为1号,当前日期既为本月第一天
+        c.set(Calendar.DAY_OF_MONTH, c.getActualMaximum(Calendar.DAY_OF_MONTH));
+        String last = f.format(c.getTime());
+//        String first = f.format(c.getTime());
+        System.out.println(getMonthFirstDay("2020-02"));
+        System.out.println(getMonthLastDay("2020-02"));
+
     }
 }

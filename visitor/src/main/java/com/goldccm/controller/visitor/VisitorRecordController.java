@@ -6,6 +6,7 @@ import com.goldccm.controller.base.BaseController;
 import com.goldccm.model.compose.Constant;
 import com.goldccm.model.compose.Result;
 import com.goldccm.service.visitor.IVisitorRecordService;
+import com.goldccm.util.BaseUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,7 +33,7 @@ public class VisitorRecordController extends BaseController {
      * @param request
      * @return
      */
-    @AuthCheckAnnotation(checkLogin = true,checkVerify = true, checkRequestLegal = true)
+    @AuthCheckAnnotation(checkLogin = false,checkVerify = true, checkRequestLegal = true)
     @RequestMapping("/visitMyPeople/{pageNum}/{pageSize}")
     @ResponseBody
     public Result visitMyPeople(HttpServletRequest request, @PathVariable Integer pageNum, @PathVariable Integer pageSize){
@@ -118,7 +119,7 @@ public class VisitorRecordController extends BaseController {
      * @param request
      * @return
      */
-    @AuthCheckAnnotation(checkLogin = true,checkVerify = true, checkRequestLegal = true)
+    @AuthCheckAnnotation(checkLogin = false,checkVerify = true, checkRequestLegal = true)
     @RequestMapping("/visitMyCompany/{pageNum}/{pageSize}")
     @ResponseBody
     public Result visitMyCompany(HttpServletRequest request, @PathVariable Integer pageNum, @PathVariable Integer pageSize){
@@ -232,7 +233,7 @@ public class VisitorRecordController extends BaseController {
             return Result.unDataResult("fail", "系统异常");
         }
     }
-    //我的访问
+    //访问我的
     @AuthCheckAnnotation(checkLogin = true,checkVerify = true, checkRequestLegal = true)
     @RequestMapping("/visitRecord/{pageNum}/{pageSize}")
     @ResponseBody
@@ -378,5 +379,102 @@ public class VisitorRecordController extends BaseController {
             return Result.unDataResult("fail", "系统异常");
         }
     }
+    //根据条件判断访问我的人，邀约我的人。。。。
+    @AuthCheckAnnotation(checkLogin = false,checkVerify = true, checkRequestLegal = true)
+    @RequestMapping("/visitorList")
+    @ResponseBody
+    public Result visitorList(HttpServletRequest request){
+        try {
+            Map<String,Object> paramMap = getParamsToMap(request);
+            return visitorRecordService.visitorList(paramMap);
+        }catch (Exception e){
+            e.printStackTrace();
+            return Result.unDataResult("fail", "系统异常");
+        }
+    }
+    //根据条件判断访问我的人，邀约我的人。。。。
+    @AuthCheckAnnotation(checkLogin = false,checkVerify = true, checkRequestLegal = true)
+    @RequestMapping("/visitorSucList")
+    @ResponseBody
+    public Result visitorSucList(HttpServletRequest request){
+        try {
+            Map<String,Object> paramMap = getParamsToMap(request);
+            return visitorRecordService.visitorSucList(paramMap);
+        }catch (Exception e){
+            e.printStackTrace();
+            return Result.unDataResult("fail", "系统异常");
+        }
+    }
+    /**
+     * 企业用户访问
+     * @param request
+     * @return
+     */
+    @AuthCheckAnnotation(checkLogin = false)
+    @RequestMapping("/innerVisitRequest")
+    @ResponseBody
+    public Result innerVisitRequest(HttpServletRequest request){
+        try {
+            Map<String,Object> paramMap = getParamsToMap(request);
+            return this.visitorRecordService.innerVisitRequest(paramMap);
+        }catch (Exception e){
+            e.printStackTrace();
+            return Result.unDataResult("fail", "系统异常");
+        }
 
+    }
+    /**
+     * 企业用户回应访问
+     * @param request
+     * @return
+     */
+    @AuthCheckAnnotation(checkLogin = false)
+    @RequestMapping("/innerVisitResponse")
+    @ResponseBody
+    public Result innerVisitResponse(HttpServletRequest request){
+        try {
+            Map<String,Object> paramMap = getParamsToMap(request);
+            return this.visitorRecordService.innerVisitResponse(paramMap);
+        }catch (Exception e){
+            e.printStackTrace();
+            return Result.unDataResult("fail", "系统异常");
+        }
+    }
+    @AuthCheckAnnotation(checkLogin = false)
+    @RequestMapping("/sendPhotos")
+    @ResponseBody
+    public String sendPhotos(HttpServletRequest request){
+        try {
+            Map<String,Object> paramMap = getParamsToMap(request);
+            String  o = BaseUtil.objToStr(paramMap.get("innerUrl"),"");
+            return this.visitorRecordService.sendPhotos(o);
+        }catch (Exception e){
+            e.printStackTrace();
+            return "error";
+        }
+    }
+    @AuthCheckAnnotation(checkLogin = false)
+    @RequestMapping("/findRecordUser")
+    @ResponseBody
+    public  Result findRecordUser(HttpServletRequest request){
+        try {
+            Map<String,Object> paramMap = getParamsToMap(request);
+            return this.visitorRecordService.findRecordUser(paramMap);
+        }catch (Exception e){
+            e.printStackTrace();
+            return Result.unDataResult("fail", "系统异常");
+        }
+    }
+    @AuthCheckAnnotation(checkLogin = false)
+    @RequestMapping("/findRecordUserDetail")
+    @ResponseBody
+    public  Result findRecordUserDetail(HttpServletRequest request){
+        try {
+            Map<String,Object> paramMap = getParamsToMap(request);
+            return this.visitorRecordService.findRecordUserDetail(paramMap);
+        }catch (Exception e){
+            e.printStackTrace();
+            return Result.unDataResult("fail", "系统异常");
+        }
+    }
 }

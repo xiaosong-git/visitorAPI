@@ -139,6 +139,12 @@ public class TableList {
     public static final String USER_AUTH = "tbl_user_auth";
     //app版本
     public static final String APP_VERSION = "tbl_app_version";
+    //路由
+    public static final String ROUTER ="tbl_router" ;
+    //企业内部用户
+    public static final String INNER_USER ="v_inner_user" ;
+
+    public static final String BURYING_POINT ="tbl_burying_point" ;
 
 
 }

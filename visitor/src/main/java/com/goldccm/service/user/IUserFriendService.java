@@ -124,4 +124,6 @@ public interface IUserFriendService extends IBaseService {
 
     //修改好友备注
     Result updateFriendRemark(Map<String, Object> paramMap);
+    //新的朋友
+    Result newFriend(Map<String, Object> paramMap);
 }

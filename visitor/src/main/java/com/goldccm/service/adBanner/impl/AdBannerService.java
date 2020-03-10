@@ -1,9 +1,7 @@
 package com.goldccm.service.adBanner.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.goldccm.model.compose.Result;
-import com.goldccm.model.compose.ResultData;
-import com.goldccm.model.compose.TableList;
+import com.goldccm.model.compose.*;
 import com.goldccm.service.adBanner.IAdBannerService;
 import com.goldccm.service.base.impl.BaseServiceImpl;
 import com.goldccm.service.param.IParamService;
@@ -36,7 +34,7 @@ public class AdBannerService extends BaseServiceImpl implements IAdBannerService
         Integer apiNewAuthCheckRedisDbIndex = Integer.valueOf(paramService.findValueByName("apiNewAuthCheckRedisDbIndex"));//存储在缓存中的位置
         //redis修改
         String json = RedisUtil.getStrVal(key, apiNewAuthCheckRedisDbIndex);
-        if(!StringUtils.isBlank(json)){
+        if(!"[]".equals(json)){
             //先从缓存中获取
 
             banners = JSON.parseObject(json, List.class);
@@ -67,15 +65,28 @@ public class AdBannerService extends BaseServiceImpl implements IAdBannerService
         }
         return ResultData.dataResult("success","获取成功",banners);
     }
-//    @Override
-//    public List bannerList(Map<String,Object> paramMap) throws Exception{
-//        String coloumSql="select * ";
-//        String andSql="";
-//        Integer companyId=BaseUtil.objToInteger(paramMap.get("companyId"),null);
-//        if (companyId!=null){
-//            andSql="companyId ="+companyId;
-//        }
-//        String fromSql="from "+ TableList.AD_BANNER +" where status = 1 "+andSql+" order by orders desc ";
-//        return findList(coloumSql,fromSql);
-//    }
+    @Override
+    public Result bannerList(Map<String, Object> paramMap) throws Exception{
+        Long userId = BaseUtil.objToLong(paramMap.get("userId"), 0L);
+        if (userId.equals(0L)){
+            //查询默认新闻
+            List list = this.findList(" select * ", "from " + TableList.AD_BANNER + " where orgId is null and status = 1 order by orders desc limit 7 ");
+            return ResultData.dataResult("success","获取成功",list);
+        }
+        //根据用户id查找relationNo
+        Map<String, Object> relation = findFirstBySql("select o.relation_no from t_org  o  left join tbl_company c on c.orgId=o.id left join tbl_user u on u.companyId =c.id \n" +
+                "where u.id=" + userId);
+        String relationNo="0";
+        if (relation!=null){
+
+
+            relationNo=BaseUtil.objToStr(relation.get("relation_no"), "0");
+        }
+        String sql = "  from ((select * from "+ TableList.AD_BANNER + " where  status = 1 AND relationNo like concat(('"+relationNo+"'),'%')" +
+                " order by orders desc limit 7) " +
+                "union" +
+                " ( select * from "+ TableList.AD_BANNER + " where  orgId is null order by orders desc limit 7 ))x limit 7";
+        List list = findList("select * ", sql);
+        return ResultData.dataResult("success","获取成功",list);
+    }
 }

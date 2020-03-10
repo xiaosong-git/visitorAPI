@@ -149,7 +149,7 @@ public class WebSocketServiceimpl extends BaseServiceImpl implements IWebSocketS
                 "and visitorId =  "+userId+" and vitype='A' and recordType=2\n" +
                 "and replyDate is not null";
         String suffix=")x";
-//        System.out.println(coloumSql+fromSql+union1+union2+union3+suffix);
+        System.out.println(coloumSql+fromSql+union1+union2+union3+suffix);
         return baseDao.findList(coloumSql, fromSql+union1+union2+union3+suffix);
     }
 

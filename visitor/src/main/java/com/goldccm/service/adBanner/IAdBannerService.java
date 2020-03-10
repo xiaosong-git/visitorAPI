@@ -3,6 +3,8 @@ package com.goldccm.service.adBanner;
 import com.goldccm.model.compose.Result;
 import com.goldccm.service.base.IBaseService;
 
+import java.util.Map;
+
 /**
  * Created by Administrator on 2017/10/18.
  */
@@ -13,6 +15,8 @@ public interface IAdBannerService extends IBaseService {
      * @throws Exception
      */
     Result list() throws Exception;
+
+    Result bannerList(Map<String, Object> paramMap) throws Exception;
 //    /**
 //     * 获取广告sql
 //     * @param paramMap

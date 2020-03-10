@@ -1,19 +1,18 @@
 package com.goldccm.service.user.impl;
 
 import com.alibaba.fastjson.JSONObject;
-import com.alipay.api.java_websocket.WebSocketImpl;
 import com.goldccm.model.compose.Constant;
 import com.goldccm.model.compose.Result;
 import com.goldccm.model.compose.ResultData;
 import com.goldccm.model.compose.TableList;
 import com.goldccm.persist.base.IBaseDao;
-import com.goldccm.persist.base.impl.BaseDaoImpl;
 import com.goldccm.service.WebSocket.IWebSocketService;
 import com.goldccm.service.base.impl.BaseServiceImpl;
 import com.goldccm.service.user.IUserFriendService;
 import com.goldccm.service.user.IUserService;
 import com.goldccm.util.BaseUtil;
 import com.goldccm.util.ConsantCode;
+import com.goldccm.util.phoneUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -182,7 +181,6 @@ public class UserFriendServiceImpl extends BaseServiceImpl implements IUserFrien
                             logger.info("{}重新申请好友成功!{}", userId, friendId);
                             return Result.unDataResult("success", "添加好友成功");
                         }
-                        //对方没删除我，直接修改回状态为1
                     }else if ("2".equals(friendType)){
 
                         logger.info("更新好友状态id：{}",friendType);
@@ -263,7 +261,7 @@ public class UserFriendServiceImpl extends BaseServiceImpl implements IUserFrien
         }
         return Result.unDataResult("fail","提交好友申请失败");
     }
-
+    //删除好友
     @Override
     public Result deleteUserFriend(Map<String, Object> paramMap) throws Exception {
         Integer userId = BaseUtil.objToInteger(paramMap.get("userId"), null);
@@ -411,5 +409,42 @@ public class UserFriendServiceImpl extends BaseServiceImpl implements IUserFrien
             return Result.unDataResult("success","修改备注成功！");
         }
         return Result.unDataResult("fail","修改备注失败");
+    }
+
+    @Override
+    public Result newFriend(Map<String, Object> paramMap) {
+        String phoneStr = BaseUtil.objToStr(paramMap.get("phoneStr"),",");
+        String userId=BaseUtil.objToStr(paramMap.get("userId"),"0");
+        String[] phones = phoneStr.split(",");
+        logger.info("传入手机号为：{}",phoneStr);
+        StringBuffer newPhones=new StringBuffer();
+        for (String phone:phones){
+            if( phoneUtil.isPhoneLegal(phone)){
+                newPhones.append(phone).append(",");
+            }
+
+        }
+        if (newPhones.length()==0){
+            return Result.unDataResult("success","暂无数据");
+        }
+        newPhones.deleteCharAt(newPhones.length() - 1);
+        logger.info("最终查询的手机号为：{}",newPhones);
+
+        String columsql="select * from ";
+        String sql = "(select u.id,u.realName,u.phone,u.orgId,u.province,u.city,u.area,u.addr,u.idHandleImgUrl,u.companyId,u.niceName,u.headImgUrl,'同意' applyType, null\n" +
+                " remark  from  "+ TableList.USER_FRIEND +" uf  left join "+ TableList.USER +" u on uf.userId=u.id where uf.friendId = '"+userId+"' and uf.applyType=0 \n" +
+                " union " +
+                "select u.id,u.realName,u.phone,u.orgId,u.province,u.city,u.area,u.addr,u.idHandleImgUrl,u.companyId,u.niceName,u.headImgUrl," +
+                " case (select  applyType from "+ TableList.USER_FRIEND +" uf where uf.friendId=u.id and uf.userId="+userId+" )  when 0 then '申请中' when 1 then '已添加' else '添加' end \n" +
+                "\t applyType," +
+                "(select  remark from "+ TableList.USER_FRIEND +" uf where uf.friendId=u.id and uf.userId="+userId+" ) remark"+
+                " from "+ TableList.USER +"  u where phone in ("+newPhones+") and isAuth='T' " +
+                "ORDER BY FIELD(applyType, '同意', '添加', '申请中','已添加'),convert(realName using gbk))x where id >0 and id <>"+userId;
+        logger.info(columsql+sql);
+        List <Map<String, Object>> list=findList(columsql,sql);
+        return list != null && !list.isEmpty()
+                ? ResultData.dataResult("success","查询用户成功",list)
+                : Result.unDataResult("success","暂无数据");
+
     }
 }

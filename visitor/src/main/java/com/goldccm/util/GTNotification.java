@@ -30,10 +30,10 @@ public class GTNotification {
     static String host = "http://sdk.open.api.igexin.com/apiex.htm";
 
     public static void main(String[] args) throws Exception {
-//        Single("64a00060bb7cdbf4976c37fb742ddfd2","18150797748","文坤","坤","透传");
-        Single("51c61bd49cda922a1c6e6ca44ef6dd1b","18150797748","发","发","发");
+        Single("b12de65be5df251532f98629785ff00b","15659154890","素芬","素芬","透传");
+        Single("32d7047feb5e24dcafa91656a13b350e","18150797748","发","发","发");
 //        Single("9fde86d15925a4eb3bb14f0feade83fb","18150797748","塑封","塑封","塑封");
-        Single("55c021f33d9df3b25322cd0ae09542b9","18150797748","春雨","春雨","塑封");
+        Single("d23bedd070498c0c4f0fdd20fb2b2f68","18150797748","发哥","发哥","塑封");
 //        Single("683a18644fd5f8bcdf5555f1a9a083fd","18150797748","宋伟","宋伟","宋伟");
     }
     public static boolean Single(String CID,String Alias,String title,String text,String transmissionContent){

@@ -72,7 +72,7 @@ public class AuthCheckInteceptor extends HandlerInterceptorAdapter {
             }
             String userIdStr = request.getParameter("userId");
             String requestVer = request.getParameter("requestVer");//发送请求的APP版本
-            if(StringUtils.isNotBlank(token) && StringUtils.isNotBlank(userIdStr)){
+            if(StringUtils.isNotBlank(userIdStr)){
                 //新redis
 //                Integer apiAuthCheckRedisDbIndex = Integer.valueOf(paramService.findValueByName("apiAuthCheckRedisDbIndex"));//app存储在缓存中的位置11
                 Integer apiNewAuthCheckRedisDbIndex = Integer.valueOf(paramService.findValueByName("apiNewAuthCheckRedisDbIndex"));//新存储在缓存中的位置35

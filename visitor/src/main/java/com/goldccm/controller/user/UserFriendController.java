@@ -140,7 +140,7 @@ public class UserFriendController extends BaseController {
      * @param request
      * @return
      */
-    @AuthCheckAnnotation(checkLogin = true,checkVerify = false, checkRequestLegal = true)
+    @AuthCheckAnnotation(checkLogin = false,checkVerify = false, checkRequestLegal = true)
     @RequestMapping("/beAgreeingFriendList")
     @ResponseBody
     public Result beAgreeingFriendList(HttpServletRequest request){
@@ -180,7 +180,7 @@ public class UserFriendController extends BaseController {
      * @param request
      * @return
      */
-    @AuthCheckAnnotation(checkLogin = true,checkVerify = true, checkRequestLegal = true)
+    @AuthCheckAnnotation(checkLogin = false,checkVerify = true, checkRequestLegal = true)
     @RequestMapping("/findIsUserByPhone")
     @ResponseBody
     public Result findIsUserByPhone(HttpServletRequest request){
@@ -203,7 +203,6 @@ public class UserFriendController extends BaseController {
     @ResponseBody
     public Result findFriendApplyMe(HttpServletRequest request){
         try {
-            System.out.println("---------------findFriendApplyMe--------------");
             Map<String,Object> paramMap = getParamsToMap(request);
             return userFriendService.findFriendApplyMe(paramMap);
         }catch (Exception e){
@@ -229,4 +228,23 @@ public class UserFriendController extends BaseController {
             return Result.unDataResult("fail", "系统异常");
         }
     }
+
+    /**
+     * 新的好友
+     * @param request
+     * @return
+     */
+    @AuthCheckAnnotation(checkLogin = false,checkVerify = true, checkRequestLegal = true)
+    @RequestMapping("/newFriend")
+    @ResponseBody
+    public Result newFriend(HttpServletRequest request){
+        try {
+            Map<String,Object> paramMap = getParamsToMap(request);
+            return userFriendService.newFriend(paramMap);
+        }catch (Exception e){
+            e.printStackTrace();
+            return Result.unDataResult("fail", "系统异常");
+        }
+    }
+
 }

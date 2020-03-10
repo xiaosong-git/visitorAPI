@@ -1598,7 +1598,7 @@ public final class RedisUtil {
     }
 
     /**
-     * 保存对象
+     * 删除对象
      *
      * @Author linyb
      * @Date 2017/2/28 14:44
@@ -1672,7 +1672,8 @@ public final class RedisUtil {
 
     public static void main(String[] args) {
         String key = "params_maxNewPlanUserId";
-
-        System.out.println(RedisUtil.del(8, key));
+        String s = RedisUtil.getJedis(35).get("10_isAuth");
+        System.out.println(s);
+//        System.out.println(RedisUtil.del(8, key));
     }
 }

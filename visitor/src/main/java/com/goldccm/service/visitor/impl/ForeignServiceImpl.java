@@ -8,8 +8,6 @@ import com.goldccm.service.base.impl.BaseServiceImpl;
 import com.goldccm.service.param.IParamService;
 import com.goldccm.service.visitor.IForeignService;
 import com.goldccm.util.Base64;
-import com.goldccm.util.BaseUtil;
-import com.goldccm.util.DateUtil;
 import com.goldccm.util.FilesUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,15 +35,15 @@ public class ForeignServiceImpl  extends BaseServiceImpl implements IForeignServ
         }
         // 判断上位机是否正常
         String orgSql = " select * from " + TableList.ORG + " where org_code = '" + orgCode + "'";
-        System.out.println(orgSql);
+//        System.out.println(orgSql);
         Map<String, Object> org = findFirstBySql(orgSql);
         if (org == null) {
-            return Result.unDataResult("fail", "数据异常!");
+            return Result.unDataResult("fail", "数据异常,无此大楼!"+orgCode);
         }
         String orgId = org.get("id").toString();
         String pospSql = " select * from " + TableList.POSP + " where orgId = '" + orgId + "' and pospCode ='"
                 + pospCode + "' and cstatus='normal'";
-        System.out.println(pospSql);
+//        System.out.println(pospSql);
         Map<String, Object> posp = findFirstBySql(pospSql);
         if (posp == null) {
             return Result.unDataResult("fail", "无此上位机编码" + pospCode + "或者无此大楼编码" + orgCode);
@@ -57,7 +55,7 @@ public class ForeignServiceImpl  extends BaseServiceImpl implements IForeignServ
                 + " left join " + TableList.ORG + " o on v.orgId=o.id"
                 + " where vr.cstatus='applySuccess' and vr.orgCode = '" + orgCode + "'"
                 + " and vr.startDate<=date_add(now(),interval +30 minute) and vr.endDate>= date_add(now(),interval -30 minute) and isFlag='F' order by vr.id";
-        logger.info(columnSql+fromSql);
+//        logger.info(columnSql+fromSql);
         PageModel pageModel = this.findPage(columnSql, fromSql, pageNum, pageSize);
         //有数据 获取图片并插入
         if (pageModel.getRows() != null && !pageModel.getRows().isEmpty()) {
@@ -79,7 +77,7 @@ public class ForeignServiceImpl  extends BaseServiceImpl implements IForeignServ
 
     @Override
     public Result newFindOrgCodeConfirm(String pospCode, String orgCode, String idStr) {
-        if ("".equals(pospCode)){
+        if ("".equals(pospCode)) {
             return Result.unDataResult("fail", "上位机编号缺失!");
         }
         // 判断上位机是否正常

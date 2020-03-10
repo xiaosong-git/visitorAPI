@@ -20,7 +20,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
@@ -347,25 +346,24 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
     }
     @Override
     public Result verify(Map<String, Object> paramMap) {
-        try {
-            paramMap.remove("token");
-            Integer userId = BaseUtil.objToInteger(paramMap.get("userId"), Integer.valueOf(0));
+                try {
+                    paramMap.remove("token");
+                    Integer userId = BaseUtil.objToInteger(paramMap.get("userId"), Integer.valueOf(0));
 
-            if (isVerify(userId)) {
-               logger.info("已经实名认证过");
-                return Result.unDataResult("fail", "已经实名认证过");
-            }
+                    if (isVerify(userId)) {
+                        logger.info("已经实名认证过");
+                        return Result.unDataResult("fail", "已经实名认证过");
+                    }
 
-            /**
-             * 验证 短信验证码
-             */
+                    /**
+                     * 验证 短信验证码
+                     */
             /*String phone = BaseUtil.objToStr(paramMap.get("phone"), null);
             String code = BaseUtil.objToStr(paramMap.get("code"), null);
             boolean flag = this.codeService.verifyCode(phone, code, 1).booleanValue();
             if (!flag) {
                 return Result.unDataResult("fail", "验证码错误");
             }*/
-
             String idNO = BaseUtil.objToStr(paramMap.get("idNO"), null);
             String realName = URLDecoder.decode(BaseUtil.objToStr(paramMap.get("realName"), null), "UTF-8");
             if(idNO == null){
@@ -377,11 +375,13 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
             //原先为前端加密后端解密
             String idNoMW = DESUtil.decode(workKey, idNO);
 //            String idNoMW = idNO;
-
             if(realName == null){
                 return Result.unDataResult("fail", "真实姓名不能为空!");
             }
             String idHandleImgUrl = BaseUtil.objToStr(paramMap.get("idHandleImgUrl"), null);
+            if(idHandleImgUrl == null){
+                return Result.unDataResult("fail", "图片上传失败，请稍后再试!");
+            }
             /**
              * 验证 身份证
              */
@@ -392,7 +392,7 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
             }
 
             try{
-                //实人认证  update by cwf  2019/11/25 11:30 Reason:先查询本地库是否有实名认证 如果没有 则调用CTID认证
+                //实人认证  update by cwf  2019/11/25 11:30 Reason:先查询本地库是否有实名认证 如果没有 则调用CTID认证  判断实人认证是否过期，过期重新走ctid
                 String sql="select distinct * from "+TableList.USER_AUTH +" where idNo='"+idNO+"' and realName='"+realName+"'";
                 Map<String, Object> userAuth = findFirstBySql(sql);
                 if (userAuth!=null){
@@ -411,10 +411,7 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
 
             String address = BaseUtil.objToStr(paramMap.get("address"), null);
             //非空判断
-            if(idHandleImgUrl == null){
-                TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();//回滚
-                return Result.unDataResult("fail", "图片上传失败，请稍后再试!");
-            }
+
             idHandleImgUrl = URLDecoder.decode(idHandleImgUrl, "UTF-8");
             //暂时注释
 //            String idType = URLDecoder.decode(BaseUtil.objToStr(paramMap.get("idType"), null), "UTF-8");
@@ -464,7 +461,7 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
             return Result.unDataResult("fail", "异常，请稍后再试");
         }
     }
-
+    //旧实人认证 0.5元一张
     public String phoneResult(String idNO,String realName,String idHandleImgUrl) throws Exception{
         String merchOrderId = OrderNoUtil.genOrderNo("V", 16);//商户请求订单号
         String merchantNo="100000000000006";//商户号
@@ -570,7 +567,7 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
         userAccount.remove("payPwd");
         userAccount.remove("cstatus");
         userAccount.remove("userId");
-        return this.update(TableList.USER_ACCOUNT,userAccount) > 0 ?Result.unDataResult("success","找回系统密码成功"):Result.unDataResult("fail","找回系统密码失败");
+        return this.update(TableList.USER_ACCOUNT,userAccount) > 0 ?Result.unDataResult("success","更新手机成功"):Result.unDataResult("fail","更新手机失败");
     }
 
     @Override
@@ -621,7 +618,6 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
                 niceName = URLDecoder.decode(niceName,"UTF-8"); //昵称
                 userUpdate.put("niceName",niceName);
             }
-
             String  headImgUrl = BaseUtil.objToStr(paramMap.get("headImgUrl"),null);
             if(StringUtils.isNotBlank(headImgUrl)){
                 headImgUrl = URLDecoder.decode(headImgUrl,"UTF-8"); //头像路径
@@ -816,7 +812,7 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
                 return ResultData.dataResult(ConsantCode.SUCCESS,"登录成功",result);
             }else{
                 //验证码输入错误
-                return  Result.unDataResult(ConsantCode.FAIL,"验证码输入错误，请重新获取!");
+                return  Result.unDataResult(ConsantCode.FAIL,"验证码输入错误，请重新输入!");
             }
         }else{
             //返回账户冻结原因
@@ -1003,13 +999,10 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
      */
     @Override
     public Result findIsUserByPhone(Map<String, Object> paramMap)  throws Exception{
-        long startTime=System.currentTimeMillis();
         String phoneStr = BaseUtil.objToStr(paramMap.get("phoneStr"),",");
         String userId=BaseUtil.objToStr(paramMap.get("userId"),"0");
-//        System.out.println(phoneStr);
         String[] phones = phoneStr.split(",");
-//        System.out.println("phones.length"+phones.length);
-//        System.out.println("phones[0]"+phones[0]);
+        logger.info("传入手机号为：{}",phoneStr);
         StringBuffer newPhones=new StringBuffer();
         for (String phone:phones){
             if( phoneUtil.isPhoneLegal(phone)){
@@ -1017,29 +1010,17 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
             }
 
         }
-//        System.out.println("newPhones"+newPhones);
-//        System.out.println("newPhones.length()"+newPhones.length());
-
-//        if(phoneStr.endsWith(",")){
-//            phoneStr= phoneStr.substring(0,phoneStr.length() -1);
-//        }
         if (newPhones.length()==0){
             return Result.unDataResult("success","暂无数据");
         }
         newPhones.deleteCharAt(newPhones.length() - 1);
-        logger.info("最终查询的手机号为："+newPhones);
-
-//        String columsql="select u.*,uf.applyType,uf.remark";
-//        String sql = " from "+ TableList.USER +"  u left join "+ TableList.USER_FRIEND +" uf on uf.friendId=u.id " +
-//                "where phone in ("+newPhones+") and uf.userId ="+userId;
+        logger.info("最终查询的手机号为：{}",newPhones);
         // update by cwf  2019/11/8 15:44 Reason:查询是否存在用户，并显示是否为好友
         String columsql="select *,(select  applyType from "+ TableList.USER_FRIEND +" uf where uf.friendId=u.id and uf.userId="+userId+" ) applyType," +
                 "(select  remark from "+ TableList.USER_FRIEND +" uf where uf.friendId=u.id and uf.userId="+userId+" ) remark";
         String sql = " from "+ TableList.USER +"  u where phone in ("+newPhones+") and isAuth='T'";
         logger.info(columsql+sql);
         List <Map<String, Object>> list=findList(columsql,sql);
-        long endTime=System.currentTimeMillis();
-        logger.info("本次查询时间为："+(endTime-startTime));
         return list != null && !list.isEmpty()
                 ? ResultData.dataResult("success","查询用户成功",list)
                 : Result.unDataResult("success","暂无数据");
@@ -1124,4 +1105,35 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
 
         return Result.unDataResult("数据库更新成功状态："+update,"redis修改状态："+s);
     }
+
+    @Override
+    public Result forget(Map<String, Object> paramMap) {
+        String code =BaseUtil.objToStr(paramMap.get("code"),"");//短信验证码
+        String phone = BaseUtil.objToStr(paramMap.get("phone"),"");//手机号
+        String sysPwd = BaseUtil.objToStr(paramMap.get("sysPwd"),"");//新密码
+        if ("".equals(sysPwd)){
+            return  Result.unDataResult("fail","新密码不能为空");
+        }
+        if(verifyPhone(phone)){
+            return Result.unDataResult("fail","手机号未注册");
+        }
+        String sql ="select ua.id from tbl_user u left join tbl_user_account ua on u.id=ua.userId  where phone ='"+phone+"' ";
+        Map<String, Object> user = findFirstBySql(sql);
+        Integer id = BaseUtil.objToInteger(user.get("id"), 0);
+        if (id==0){
+            return Result.unDataResult("fail","系统账户缺失，请联系管理员");
+        }
+        boolean flag = codeService.verifyCode(phone,code,1);
+        if(!flag){
+            return  Result.unDataResult("fail","验证码错误");
+        }
+        int update=0;
+            sql="update " + TableList.USER_ACCOUNT + " set sysPwd='" + sysPwd + "' where " +
+                    "id =" + id;
+            logger.info(sql);
+            update = this.deleteOrUpdate(sql);
+            logger.info("更新成功？{}",update);
+        return update >0 ? Result.success() : Result.fail();
+    }
+
 }

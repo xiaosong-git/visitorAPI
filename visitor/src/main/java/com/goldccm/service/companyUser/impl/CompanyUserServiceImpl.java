@@ -83,6 +83,7 @@ public class CompanyUserServiceImpl extends BaseServiceImpl implements ICompanyU
                 " left join " + TableList.DICT_ITEM + " d on d.dict_code='companyUserRoleType' and d.item_code=cu.roleType " +
                 " left join " + TableList.DICT_ITEM + " i on i.dict_code='companyUserStatus' and i.item_code=cu.status " +
                 " where cu.userId = '"+userId+"' and cu.status = 'applySuc' and cu.currentStatus='normal'";
+        System.out.println(columnSql+fromSql);
         List<Map<String, Object>> list  = findList(columnSql,fromSql);
 
         return list != null && !list.isEmpty()

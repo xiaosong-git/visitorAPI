@@ -103,6 +103,12 @@ public class IWebSoketHandle extends AbstractWebSocketHandler {
             logger.info("处理要发送的消息：{}",msgStr);
             JSONObject msg = JSON.parseObject(msgStr);
              type= msg.getInteger("type");
+             if(Constant.MASSEGETYPE_VISITOR==type){
+                visitorRecordService.receiveVisit(session,msg);
+                //回应访问或回应邀约
+            }else if(Constant.MASSEGETYPE_REPLY==type){
+                visitorRecordService.visitReply(session,msg);
+            }else{
             //判断是否为好友，非好友则返回信息
             boolean isFriend = isFriend(session, msg);
             //是好友
@@ -112,13 +118,8 @@ public class IWebSoketHandle extends AbstractWebSocketHandler {
                     webSocketService.dealChat(session,msg);
                 }
                 //申请访问或申请邀约
-                else if(Constant.MASSEGETYPE_VISITOR==type){
-                    visitorRecordService.receiveVisit(session,msg);
-                    //回应访问或回应邀约
-                }else if(Constant.MASSEGETYPE_REPLY==type){
-                    visitorRecordService.visitReply(session,msg);
-                }
             }
+             }
         }catch (Exception e){
             e.printStackTrace();
             logger.info("发送数据报错.....{}",msgStr);
@@ -199,6 +200,7 @@ public class IWebSoketHandle extends AbstractWebSocketHandler {
         obj.put("type", type);
         webSocketService.saveJson(BaseUtil.objToInteger(friendId,0),obj);
         if (friendUser==null){
+            logger.info("{}对{}好友为空",friendId,userId);
             logger.info("发送的消息：{}",obj.toString());
             session.sendMessage(new TextMessage(obj.toString()));
             //非好友
@@ -207,6 +209,7 @@ public class IWebSoketHandle extends AbstractWebSocketHandler {
         } else  {
             int applyType = BaseUtil.objToInteger(friendUser.get("applyType"), 2);
             if (applyType!=1) {
+                logger.info("好友状态为2");
                 logger.info("发送的消息：{}",obj.toString());
                 session.sendMessage(new TextMessage(obj.toString()));
                 //非好友
@@ -215,6 +218,7 @@ public class IWebSoketHandle extends AbstractWebSocketHandler {
         }
         Map<String,Object> userFriend=userFriendService . findFriend(userId,friendId);
         if (userFriend==null){
+            logger.info("{}对{}好友为空",userId,friendId);
             obj.put("message", "您还不是对方好友，请添加好友！");
             logger.info("发送的消息：{}",obj.toString());
             session.sendMessage(new TextMessage(obj.toString()));
@@ -223,17 +227,21 @@ public class IWebSoketHandle extends AbstractWebSocketHandler {
         }else  {
             int applyType = BaseUtil.objToInteger(userFriend.get("applyType"), 2);
             if (applyType!=1) {
+                logger.info("{}对{}好友状态不为1",userId,friendId);
                 obj.put("message", "您还不是对方好友，请添加好友！");
                 if(applyType==2){
+                    logger.info("{}对{}好友状态为2",userId,friendId);
                     obj.put("message", "您已删除对方，请重新添加好友！");
                 }
                 logger.info("发送的消息：{}",obj.toString());
                 session.sendMessage(new TextMessage(obj.toString()));
                //非好友
+                logger.info("返回false");
                 return false;
             }
         }
         //是好友
+        logger.info("true");
         return true;
     }
 

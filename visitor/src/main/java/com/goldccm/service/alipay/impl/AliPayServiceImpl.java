@@ -433,7 +433,7 @@ public class AliPayServiceImpl extends BaseServiceImpl implements IAliPayService
 //        return response;
     }
     public static void main(String[] args) {
-        refuseTest("9651576056849458","0.50");
+        refuseTest("9951576139112546","1.00");
 
 //        AlipayTradeQueryResponse alipayTradeQueryResponse = checkTradeTest("451569547870070");
 //        Refund("9261576033182556",2.00);

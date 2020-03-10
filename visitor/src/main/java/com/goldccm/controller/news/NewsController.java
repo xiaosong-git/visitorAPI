@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Map;
 
 /**
  * 新闻
@@ -41,4 +42,19 @@ public class NewsController extends BaseController {
             return Result.unDataResult("fail", "系统异常");
         }
     }
+
+    @AuthCheckAnnotation(checkLogin = false, checkVerify = false, checkRequestLegal = false)
+    @RequestMapping("/newList")
+    @ResponseBody
+    public Result newList(HttpServletRequest request){
+        try {
+            Map<String,Object> paramMap = getParamsToMap(request);
+            return newsService.findNews(paramMap);
+        }catch (Exception e){
+            e.printStackTrace();
+            return Result.unDataResult("fail", "系统异常");
+        }
+    }
+
+
 }

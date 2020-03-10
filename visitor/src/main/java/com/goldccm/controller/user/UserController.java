@@ -12,6 +12,8 @@ import com.goldccm.service.user.IUserService;
 import com.goldccm.util.BaseUtil;
 import com.goldccm.util.ConsantCode;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.stereotype.Controller;
@@ -31,7 +33,7 @@ import java.util.Map;
 @RequestMapping("/user")
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 public class UserController extends BaseController {
-
+    Logger logger = LoggerFactory.getLogger(UserController.class);
     @Autowired
     private ICodeService codeService;
     @Autowired
@@ -107,25 +109,15 @@ public class UserController extends BaseController {
     @ResponseBody
     public Result forget(HttpServletRequest request){
         Map<String,Object> paramMap = getParamsToMap(request);
-        paramMap.remove("token");
-        String code = paramMap.get("code")+"";//短信验证码
-        String phone = paramMap.get("phone")+"";//手机号
-        if(userService.verifyPhone(phone)){
-            return new Result(500,"手机号未注册");
+        try {
+            return userService.forget(paramMap);
+        }catch (Exception e){
+            logger.error("忘记密码错误",e);
+            return Result.unDataResult(ConsantCode.FAIL, "系统异常");
         }
 
-        boolean flag = codeService.verifyCode(phone,code,1);
-        if(!flag){
-            return new Result(500,"验证码错误");
-        }
-        paramMap.remove("code");
-        /**
-         * 修改密码
-         */
-        Map<String,Object> user = userService.getUserByPhone(phone);
-        paramMap.put("password", paramMap.get("password")+"");
-        paramMap.put("id", Integer.parseInt(user.get("id")+""));
-        return userService.update(TableList.USER,paramMap) > 0 ? Result.success() : Result.fail();
+
+
     }
 
     /**
@@ -396,6 +388,23 @@ public class UserController extends BaseController {
         try {
             Map<String,Object> paramMap = getParamsToMap(request);
             return this.userService.modify(paramMap);
+        }catch (Exception e){
+            e.printStackTrace();
+            return Result.unDataResult("fail", "系统异常");
+        }
+
+    }
+    @AuthCheckAnnotation(checkLogin = false,checkVerify = false, checkRequestLegal = true)
+    @RequestMapping("/checkPhone")
+    @ResponseBody
+    public Result checkPhone(HttpServletRequest request){
+        try {
+            Map<String,Object> paramMap = getParamsToMap(request);
+            Map<String, Object> user = this.userService.getUserByPhone(BaseUtil.objToStr(paramMap.get("phone"), ""));
+            if (user!=null){
+                return Result.unDataResult("fail","用户存在！");
+            }
+            return Result.unDataResult("success","欢迎注册");
         }catch (Exception e){
             e.printStackTrace();
             return Result.unDataResult("fail", "系统异常");

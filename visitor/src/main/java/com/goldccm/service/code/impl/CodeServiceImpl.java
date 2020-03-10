@@ -35,23 +35,22 @@ public class CodeServiceImpl extends BaseServiceImpl implements ICodeService {
             }
             //从Redis中取出正确验证码
             //redis修改，原dbNum=7 现在dbNum=31
-
             Object obj = RedisUtil.getObject(phone.getBytes(),31);
             if(obj == null){
                 return false;
             }
             String redisCode = (String)obj;
             //比对
-            if ((redisCode != null) && (code.equals(redisCode))) {
+            if ( code.equals(redisCode)) {
                 //redis修改，原dbNum=7 现在dbNum=31
+                if (type==2){
+                    return true;
+                }
                 RedisUtil.delObject(phone.getBytes(), 31);
                 return true;
             }
         }
-        //redis修改，原dbNum=7 现在dbNum=31
-        RedisUtil.delObject(phone.getBytes(), 31);
         return false;
-//       return  true;
     }
 
     @Override
@@ -59,6 +58,7 @@ public class CodeServiceImpl extends BaseServiceImpl implements ICodeService {
         String code = NumberUtil.getRandomCode(6);
         String limit = paramService.findValueByName("maxErrorInputSyspwdLimit");
         String date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+
         String state = YunPainSmsUtil.sendSmsCode(code, phone, type, date, limit, visitorResult, visitorBy, visitorDateTime, visitor);
         if("0000".equals(state)){
             //redis修改，原dbNum=7 现在dbNum=31

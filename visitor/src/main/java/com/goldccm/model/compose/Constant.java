@@ -4,6 +4,8 @@ import org.springframework.web.socket.WebSocketSession;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * 项目参数
@@ -49,7 +51,7 @@ public class Constant {
     public static final Integer DEVICE_ANDRIOD=2;
 
     //同意邀约url
-    public static final String INVITE_URL="http://f.pyblkj.cn/visitor/agree.jsp?id=";
+    public static final String INVITE_URL="http://f.`pyblkj.cn/visitor/agree.jsp?id=";
 //    public static final String INVITE_URL="http://47.106.82.190:8082/visitor/agree.jsp?id=";
     //访客url
     public static final String URL="f.pyblkj.cn/q?id=";
@@ -57,6 +59,6 @@ public class Constant {
     //微信推送地址
 //    public static final String WX_URL="http://localhost/weixin/wx/sendTempMsg";
     //websocket通信在线情况
-    public static  Map<Object, WebSocketSession> SESSIONS =new HashMap<>();
+    public static ConcurrentMap<Object, WebSocketSession> SESSIONS =new ConcurrentHashMap<>();
 
 }

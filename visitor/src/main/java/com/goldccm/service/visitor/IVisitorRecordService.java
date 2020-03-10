@@ -188,4 +188,18 @@ public interface IVisitorRecordService extends IBaseService {
     Result InviteStranger(Map<String, Object> paramMap) throws Exception;
 
     Result myVisit(Map<String, Object> paramMap, Integer pageNum, Integer pageSize, Integer recordtypeVisitor);
+
+    Result visitorList(Map<String, Object> paramMap);
+
+    Result innerVisitRequest(Map<String, Object> paramMap) throws Exception;
+
+    Result innerVisitResponse(Map<String, Object> paramMap) throws Exception;
+
+    String sendPhotos(String innerUrl) throws Exception;
+    //按用户查询记录列表
+    Result findRecordUser(Map<String, Object> paramMap);
+
+    Result findRecordUserDetail(Map<String, Object> paramMap);
+
+    Result visitorSucList(Map<String, Object> paramMap);
 }

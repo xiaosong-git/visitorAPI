@@ -3,6 +3,8 @@ package com.goldccm.service.news;
 import com.goldccm.model.compose.Result;
 import com.goldccm.service.base.IBaseService;
 
+import java.util.Map;
+
 /**
  * Description:新闻相关
  * Author: LZ
@@ -18,4 +20,6 @@ public interface INewsService extends IBaseService {
      * @throws Exception
      */
     Result findByStatus(String status, Integer pageNum, Integer pageSize) throws Exception;
+
+    Result findNews(Map<String, Object> paramMap);
 }

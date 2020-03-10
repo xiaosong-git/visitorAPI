@@ -61,7 +61,6 @@ public class CompanyUserController extends BaseController {
         }
     }
 
-
     /**
      * 全部初始化数据
      * @param request

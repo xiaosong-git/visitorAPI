@@ -255,4 +255,12 @@ public interface IUserService extends IBaseService {
     Result appQuit(Map<String, Object> paramMap);
     //改变用户的实人认证状态
     Result modify(Map<String, Object> paramMap);
+
+    /**
+     * 通过短信修改密码
+     * @param paramMap
+     * @return
+     */
+    Result forget(Map<String, Object> paramMap);
+
 }

@@ -1,13 +1,10 @@
 package com.goldccm.controller.base;
 
 
-
-import com.goldccm.service.meeting.impl.meetingServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;

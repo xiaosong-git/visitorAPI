@@ -85,7 +85,7 @@ public class WebConfig extends WebMvcConfigurerAdapter {
     }
 
     /**
-     * 配置多文件上次
+     * 配置多文件上传
      * @Date  2016/9/1 10:44
      * @author linyb
      */
