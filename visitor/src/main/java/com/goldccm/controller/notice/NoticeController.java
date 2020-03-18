@@ -36,7 +36,12 @@ public class NoticeController extends BaseController {
     public Result list(HttpServletRequest request, @PathVariable Integer pageNum,@PathVariable Integer pageSize){
         Map<String,Object> paramMap = getParamsToMap(request);
         Integer userId = BaseUtil.objToInteger(paramMap.get("userId"),0);
+        try {
         return noticeService.findNoticeByUser(userId,pageNum,pageSize);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return Result.fail();
     }
     /**
      * 获取所有上级组织的公告

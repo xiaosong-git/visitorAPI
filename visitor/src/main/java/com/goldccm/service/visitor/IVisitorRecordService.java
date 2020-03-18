@@ -200,6 +200,6 @@ public interface IVisitorRecordService extends IBaseService {
     Result findRecordUser(Map<String, Object> paramMap);
 
     Result findRecordUserDetail(Map<String, Object> paramMap);
-
+    //访问成功列表
     Result visitorSucList(Map<String, Object> paramMap);
 }

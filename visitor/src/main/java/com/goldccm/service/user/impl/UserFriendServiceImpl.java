@@ -303,7 +303,7 @@ public class UserFriendServiceImpl extends BaseServiceImpl implements IUserFrien
                 return Result.unDataResult("fail","用户姓名与手机不匹配!");
             }
             Integer friendId = Integer.parseInt(findPhoneAndReal.get("id").toString());
-            if (userId==friendId){
+            if (userId.equals(friendId)){
                 return Result.unDataResult("fail","无法添加自己为好友!");
             }
             Map<String, Object> addFriendMap = new HashMap<>();

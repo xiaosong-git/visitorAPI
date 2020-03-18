@@ -46,7 +46,7 @@ public class VisitorRecordController extends BaseController {
         }
     }
     /**
-     * 正在申请访问
+     * 帮助审核
      * @param request
      * @return
      */
@@ -132,7 +132,7 @@ public class VisitorRecordController extends BaseController {
         }
     }
     /**
-     * 申请访问
+     * 非好友访问
      * @param request
      * @return
      */
@@ -327,7 +327,7 @@ public class VisitorRecordController extends BaseController {
      * @author cwf
      * @date 2019/10/12 14:18
      */
-    @AuthCheckAnnotation(checkLogin = true,checkVerify = true, checkRequestLegal = true)
+    @AuthCheckAnnotation(checkLogin = false,checkVerify = true, checkRequestLegal = true)
     @RequestMapping("/modifyCompanyFromId")
     @ResponseBody
     public Result modifyCompanyFromId(HttpServletRequest request){
@@ -453,6 +453,7 @@ public class VisitorRecordController extends BaseController {
             return "error";
         }
     }
+    //
     @AuthCheckAnnotation(checkLogin = false)
     @RequestMapping("/findRecordUser")
     @ResponseBody

@@ -110,27 +110,29 @@ public class TableList {
     //APP用户角色关系
     public static final String APP_USER_ROLE= "tbl_app_user_role";
     //打卡规则表
-    public static final String WK_GROUP= "tbl_wk_group";
+    public static final String WK_GROUP= "wk_group";
     //打卡日期
-    public static final String WK_CHECKINDATE = "tbl_wk_checkindate";
+    public static final String WK_CHECKINDATE = "wk_checkindate";
     //打卡时间
-    public static final String WK_CHECKINTIME = "tbl_wk_checkintime";
+    public static final String WK_CHECKINTIME = "wk_checkintime";
     //打卡日期与时间关系表
-    public static final String WK_DATE_TIME_RLAT = "tbl_wk_date_time_rlat";
+    public static final String WK_DATE_TIME_RLAT = "wk_date_time_rlat";
     //打卡规则地址信息
-    public static final String WK_LOC_INFOS = "tbl_wk_loc_infos";
+    public static final String WK_LOC_INFOS = "wk_loc_infos";
     //特殊日期
-    public static final String WK_SPE_DAYS = "tbl_wk_spe_days";
+    public static final String WK_SPE_DAYS = "wk_spe_days";
     //特殊日期时间关系
-    public static final String WK_SPE_DAYS_TIME_RLAT = "tbl_wk_spe_time_rlat";
+    public static final String WK_SPE_DAYS_TIME_RLAT = "wk_spe_time_rlat";
     //用户规则关系表
-    public static final String WK_USER_GROUP_RLAT = "tbl_wk_user_group_rlat";
+    public static final String WK_USER_GROUP_RLAT = "wk_user_group_rlat";
     //白名单
-    public static final String WK_WHITE_LIST = "tbl_wk_white_list";
+    public static final String WK_WHITE_LIST = "wk_white_list";
     //打卡记录
-    public static final String WK_RECORD = "tbl_wk_record";
+    public static final String WK_RECORD = "wk_record";
+    //统计表
+    public static final String WK_DAY_STATISTICS = "wk_day_statistics";
     //请假记录
-    public static final String WK_LEAVE_RECORD = "tbl_wk_leave_record";
+    public static final String WK_LEAVE_RECORD = "wk_leave_record";
     //流程节点
     public static final String FLOW_NODE = "tbl_fl_node";
     //流程审批人
@@ -147,4 +149,5 @@ public class TableList {
     public static final String BURYING_POINT ="tbl_burying_point" ;
 
 
+    public static final String WK_OUTWORK ="wk_outWork" ;
 }

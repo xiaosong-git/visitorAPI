@@ -442,6 +442,46 @@ public class DateUtil {
         String day=formatter.format(nextMinu);
         return day;
     }
+    /**
+     * 秒转时分
+     * 28800 ->  08:00
+     * @param time
+     * @return
+     */
+    public static String secToTime(int time) {
+        StringBuilder stringBuilder = new StringBuilder();
+        Integer hour = time / 3600;
+        Integer minute = time / 60 % 60;
+//        Integer second = time % 60;
+        if(hour<10){
+            stringBuilder.append("0");
+        }
+        stringBuilder.append(hour);
+        stringBuilder.append(":");
+        if(minute < 10){
+            stringBuilder.append("0");
+        }
+        stringBuilder.append(minute);
+        return stringBuilder.toString();
+    }
+
+
+    /**
+     * 时分转秒
+     * 08:00 -> 28800
+     * @param time
+     * @return
+     */
+    public static int timeToSec(String time) {
+        String[] str = time.split(":");
+        Integer hour = Integer.valueOf(str[0]);
+        Integer minute = Integer.valueOf(str[1]);
+        Integer second = 0;
+        second = second + hour * 3600;
+        second = second + minute * 60;
+        return second;
+    }
+
 
     public static void main(String[] args) throws ParseException {
         String x = NextMinu("2019-11-20 00:00:00");

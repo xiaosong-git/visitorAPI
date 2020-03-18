@@ -1594,10 +1594,6 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
         String startDate = BaseUtil.objToStr(visitorRecord.get("startDate"), "");
         String endDate = BaseUtil.objToStr(visitorRecord.get("endDate"), "");
         Integer visitorId = BaseUtil.objToInteger(visitorRecord.get("visitorId"), 0);
-
-//		System.out.println("visitorId ："+visitorId);
-//		System.out.println("userId ："+userId);
-
         if (!visitorId.equals(userId)) {
             System.out.println("被访问者错误");
             return Result.unDataResult("fail", "被访问者错误!");
@@ -1616,7 +1612,7 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
         Integer recordUserId = BaseUtil.objToInteger(visitorRecord.get("userId"), 0);
         //访客信息
         Map<String, Object> userUser = userService.getUserByUserId(recordUserId);
-        String visitor = userUser.get("realName").toString();
+//        String visitor = userUser.get("realName").toString();
         String wxOpenId = BaseUtil.objToStr(userUser.get("wx_open_id"), "");
         saveMap.put("answerContent", answerContent);
         //websocket聊天信息
@@ -1668,13 +1664,12 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
             String companyName = BaseUtil.objToStr(orgComMap.get("companyName"), "无");
             String addr = BaseUtil.objToStr(orgComMap.get("addr"), "无");
             String companyFloor = BaseUtil.objToStr(orgComMap.get("companyFloor"), "无");
-            String roleType = BaseUtil.objToStr(orgComMap.get("roleType"), "无");
+//            String roleType = BaseUtil.objToStr(orgComMap.get("roleType"), "无");
             String accessType = BaseUtil.objToStr(orgComMap.get("accessType"), "0");
             logger.info("accessType=" + accessType);
             saveMap.put("companyId", companyId);
             saveMap.put("orgCode", orgCode);
             //有管理权限
-            if ("manage".equals(roleType) && "applySuccess".equals(cstatus)) {
                 saveMap.put("replyDate", DateUtil.getCurDate());
                 saveMap.put("replyTime", DateUtil.getCurTime());
                 saveMap.put("replyUserId", userId);
@@ -1710,21 +1705,6 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
                 }
             }
         }
-        //同意审核，权限不足，save保存了公司与大楼信息
-        update = update(TableList.VISITOR_RECORD, saveMap);
-        if (update > 0) {
-
-            //推送管理员,让管理员进行审核，用户名
-            Result forwarding = forwarding(visitor, visitorBy, String.valueOf(companyId), startDate);
-            if ("fail".equals(forwarding.getVerify().get("sign"))) {
-                return forwarding;
-            }
-            return Result.unDataResult("success", "权限不足，已保存公司信息并提交公司管理员帮助审核");
-        } else {
-            return Result.unDataResult("fail", "提交公司信息失败");
-        }
-    }
-
     //		//访问推送处理
     public void visitPush(Map<String, Object> visitorRecord, Map<String, Object> userUser, Map<String, Object> visitorUser, Map<String, Object> saveMap, JSONObject msg, String visitorResult, Map<String, String> wxMap) throws Exception {
         logger.info("visitPush");
@@ -2076,7 +2056,7 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
         String coloumSql = "SELECT vr.id,IF(u.realName IS NULL,IF(remarkName is null,'',remarkName),u.realName) realName,u.phone,u.headImgUrl,\n" +
                 "\tvr.visitDate,vr.visitTime,vr.userId,vr.visitorId,vr.reason,vr.cstatus,vr.dateType\n" +
                 ",vr.startDate,vr.endDate,vr.answerContent,vr.orgCode,vr.companyId,vr.recordType,\n" +
-                "vr.replyDate,vr.replyTime,vr.vitype,vr.replyUserId,vr.isReceive,o.org_name,c.companyName,o.accessType";
+                "vr.replyDate,vr.replyTime,vr.vitype,vr.replyUserId,vr.isReceive,o.org_name,c.companyName,c.addr,o.accessType";
         String from = " from " + TableList.VISITOR_RECORD + " vr\n" +
                 "left join " + TableList.USER + " u on u.id=vr.visitorId" +
                 "\n" +
@@ -2324,13 +2304,12 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
         String coloumSql="select *";
         String fromSql =" from (SELECT vr.id,vr.visitorId, Max( startDate ) startDate,endDate,u.realName,idHandleImgUrl,headImgUrl,\n" +
                 "IF( companyName IS NULL, '', companyName ) companyName,\n" +
-                "IF( o.addr IS NULL, '', o.addr ) addr"+" FROM (\n" +
+                "IF( c.addr IS NULL, '', c.addr ) addr"+" FROM (\n" +
                 "select id,IF(userId="+userId+",visitorId,userId) visitorId,startDate,endDate,companyId,orgCode\n" +
                 "from tbl_visitor_record\n" +
                 "where userId="+userId+" or visitorId="+userId+")vr\n" +
-                "LEFT JOIN tbl_user u ON vr.visitorId = u.id\n" +
-                "LEFT JOIN tbl_company c ON c.id = vr.companyId\n" +
-                "LEFT JOIN t_org o ON vr.orgCode = o.org_code" +
+                "LEFT JOIN "+TableList.USER+" u ON vr.visitorId = u.id\n" +
+                "LEFT JOIN "+TableList.COMPANY+" c ON c.id = vr.companyId\n" +
                 " where u.realName is not null\n" +
                 "GROUP BY visitorId order by startDate desc)x";
         logger.info(coloumSql+fromSql);
@@ -2358,7 +2337,7 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
         String fromSql ="from (select vr.id,vr.userId,vr.visitorId,vr.visitDate,vr.visitTime,vr.recordType,vr.startDate,vr.endDate,vr.cstatus,\n" +
                 "IF(vr.replyDate IS NULL,'',vr.replyDate) replyDate,IF(vr.replyTime IS NULL,'',vr.replyTime) replyTime," +
                 "IF( companyName IS NULL, '', companyName ) companyName,\n" +
-                "IF( o.addr IS NULL, '', o.addr ) addr," +
+                "IF( c.addr IS NULL, '', c.addr ) addr," +
                 "(CASE WHEN vr.userId="+userId+" AND vr.recordType=1 THEN u.realName \n" +
                 "WHEN vr.userId="+userId+" AND vr.recordType=2 THEN vu.realName \n" +
                 "WHEN  vr.visitorId="+userId+" AND vr.recordType=1 THEN u.realName  \n" +
@@ -2372,7 +2351,6 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
                 "u.realName visitor,\n" +
                 "vu.realName visited from tbl_visitor_record vr\n"+
                 "        left join tbl_company c on c.id=vr.companyId\n" +
-                "        left join t_org o on vr.orgCode=o.org_code\n" +
                 "        left join tbl_user u on u.id=vr.userId" +
                 "        left join tbl_user vu on vu.id = vr.visitorId" +
                 "        where vu.realName is not null and u.realName is not null and "+and+"((userId="+userId+" and visitorId="+visitorId+") or(userId="+visitorId+" and visitorId="+userId+"))\n" +

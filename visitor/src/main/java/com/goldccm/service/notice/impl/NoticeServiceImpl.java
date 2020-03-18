@@ -31,9 +31,13 @@ public class NoticeServiceImpl extends BaseServiceImpl implements INoticeService
     public Result findNoticeByUser(Integer userId, Integer pageNum, Integer pageSize) {
         Map<String, Object> user = userService.findById(TableList.USER, userId);
         //String relationNo = BaseUtil.objToStr(user.get("relationNo"),null);
-        //String sql = "  from "+TableList.NOTICE +" where relationNo like '%"+relationNo+"%' and castatus = 'normal' order by createDate desc ";
-        String sql = "  from " + TableList.NOTICE + " where  cstatus = 'normal' order by createDate desc ";
-        PageModel pageModel = this.findPage("select * ", sql, pageNum, pageSize);
+//        String sql = "  from "+TableList.NOTICE +" where relationNo like '%"+relationNo+"%' and castatus = 'normal' order by createDate desc ";
+        String sql = "  from tbl_notice n left join t_org o on o.id=n.orgId left join tbl_company c on c.orgId=o.id left join \n" +
+                "tbl_user u on u.companyId=c.id where u.id="+userId+" order by n.createDate desc,n.createTime desc  ";
+        PageModel pageModel = this.findPage("select n.* ", sql, pageNum, pageSize);
+        if (pageModel.getRows().isEmpty()){
+            pageModel=findPage("select * ","from "+TableList.NOTICE +" where orgId=1 order by createDate desc,createTime desc ",pageNum, pageSize);
+        }
         return ResultData.dataResult("success", "获取成功", pageModel);
     }
 

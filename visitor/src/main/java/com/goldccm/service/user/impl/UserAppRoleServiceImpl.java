@@ -68,7 +68,7 @@ public class UserAppRoleServiceImpl extends BaseServiceImpl implements IUserAppR
             if (org!=null) {
                 String appRole = BaseUtil.objToStr(org.get("approle"), "");
                 if (!"".equals(appRole)) {
-                    union = " union " + columSql + fromSql + " where urm.role_id=" + appRole+" and urm.isOpen='T' ";
+                    union = " union " + columSql + fromSql + " where urm.role_id='" + appRole+"' and urm.isOpen='T' ";
                 }
             }
         }
