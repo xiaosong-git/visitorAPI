@@ -422,13 +422,12 @@ public class UserFriendServiceImpl extends BaseServiceImpl implements IUserFrien
             if( phoneUtil.isPhoneLegal(phone)){
                 newPhones.append(phone).append(",");
             }
-
         }
         if (newPhones.length()==0){
             return Result.unDataResult("success","暂无数据");
         }
         newPhones.deleteCharAt(newPhones.length() - 1);
-        logger.info("最终查询的手机号为：{}",newPhones);
+//        logger.info("最终查询的手机号为：{}",newPhones);
 
         String columsql="select * from ";
         String sql = "(select u.id,u.realName,u.phone,u.orgId,u.province,u.city,u.area,u.addr,u.idHandleImgUrl,u.companyId,u.niceName,u.headImgUrl,'同意' applyType, null\n" +

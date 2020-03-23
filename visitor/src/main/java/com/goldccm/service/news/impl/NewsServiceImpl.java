@@ -16,8 +16,29 @@ import java.util.Map;
 @Service("newsServiceImpl")
 public class NewsServiceImpl extends BaseServiceImpl implements INewsService {
     @Override
-    public Result findByStatus(String status, Integer pageNum, Integer pageSize) throws Exception {
-        String sql = "  from "+ TableList.NEWS + " where  newsStatus = '"+status+"' order by newsDate desc";
+    public Result findByStatus(Map<String, Object> paramMap, Integer pageNum, Integer pageSize) throws Exception {
+        Long userId = BaseUtil.objToLong(paramMap.get("userId"), 0L);
+//        String sql = "  from "+ TableList.NEWS + " where  newsStatus = '"+Status.APPLY_STATUS_NORMAL+"' order by newsDate desc";
+//        PageModel pageModel = this.findPage("select * ",sql,pageNum,pageSize);
+//        return ResultData.dataResult("success","获取成功",pageModel);
+        if (userId.equals(0L)){
+            //查询默认新闻
+            String sql = "  from "+ TableList.NEWS + " where  newsStatus = '"+Status.APPLY_STATUS_NORMAL+"' and orgId =1 or orgId is null order by headlines desc, newsDate desc";
+            PageModel pageModel = this.findPage("select * ",sql,pageNum,pageSize);
+            return ResultData.dataResult("success","获取成功",pageModel);
+        }
+        //根据用户id查找relationNo
+        Map<String, Object> relation = findFirstBySql("select o.relation_no from t_org  o  left join tbl_company c on c.orgId=o.id left join tbl_user u on u.companyId =c.id \n" +
+                "where u.id=" + userId);
+        String relationNo="0";
+        if (relation!=null){
+            relationNo=BaseUtil.objToStr(relation.get("relation_no"), "0");
+        }
+        String sql = "  from ((select * from "+ TableList.NEWS + " where  newsStatus = '"+ Status.APPLY_STATUS_NORMAL+"' AND relationNo like concat(('"+relationNo+"'),'%')" +
+                " order by headlines desc,newsDate desc limit 100) " +
+                "union" +
+                " ( select * from tbl_news where  orgId =1 or orgId is null order by headlines desc,newsDate desc  limit 100))x";
+        System.out.println("select * "+sql);
         PageModel pageModel = this.findPage("select * ",sql,pageNum,pageSize);
         return ResultData.dataResult("success","获取成功",pageModel);
     }

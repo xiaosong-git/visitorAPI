@@ -167,6 +167,8 @@ public interface IVisitorRecordService extends IBaseService {
 
 //    Result visitAgree (Map<String, Object> paramMap) throws Exception;
 
+    Map<String, Object> check(Object userId, Object toUserId, Object recordType, String startDate, String endDate);
+
     //我的访问or 我的邀约
     Result myVisitOrInvite(Map<String, Object> paramMap, Integer pageNum, Integer pageSize, Integer recordType);
 
@@ -190,15 +192,9 @@ public interface IVisitorRecordService extends IBaseService {
     Result myVisit(Map<String, Object> paramMap, Integer pageNum, Integer pageSize, Integer recordtypeVisitor);
 
     Result visitorList(Map<String, Object> paramMap);
-
-    Result innerVisitRequest(Map<String, Object> paramMap) throws Exception;
-
-    Result innerVisitResponse(Map<String, Object> paramMap) throws Exception;
-
-    String sendPhotos(String innerUrl) throws Exception;
     //按用户查询记录列表
     Result findRecordUser(Map<String, Object> paramMap);
-
+    //用户详情
     Result findRecordUserDetail(Map<String, Object> paramMap);
     //访问成功列表
     Result visitorSucList(Map<String, Object> paramMap);

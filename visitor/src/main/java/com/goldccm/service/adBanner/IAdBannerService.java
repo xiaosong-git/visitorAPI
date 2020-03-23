@@ -13,8 +13,9 @@ public interface IAdBannerService extends IBaseService {
      * 获取广告
      * @return
      * @throws Exception
+     * @param paramMap
      */
-    Result list() throws Exception;
+    Result list(Map<String, Object> paramMap) throws Exception;
 
     Result bannerList(Map<String, Object> paramMap) throws Exception;
 //    /**

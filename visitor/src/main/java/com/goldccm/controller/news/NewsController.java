@@ -36,7 +36,8 @@ public class NewsController extends BaseController {
     @ResponseBody
     public Result list(HttpServletRequest request, @PathVariable Integer pageNum, @PathVariable Integer pageSize){
         try {
-            return newsService.findByStatus(Status.APPLY_STATUS_NORMAL, pageNum, pageSize);
+            Map<String,Object> paramMap = getParamsToMap(request);
+            return newsService.findByStatus(paramMap, pageNum, pageSize);
         }catch (Exception e){
             e.printStackTrace();
             return Result.unDataResult("fail", "系统异常");

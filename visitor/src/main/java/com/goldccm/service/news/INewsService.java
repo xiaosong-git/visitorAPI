@@ -19,7 +19,7 @@ public interface INewsService extends IBaseService {
      * @return
      * @throws Exception
      */
-    Result findByStatus(String status, Integer pageNum, Integer pageSize) throws Exception;
+    Result findByStatus(Map<String, Object> status, Integer pageNum, Integer pageSize) throws Exception;
 
     Result findNews(Map<String, Object> paramMap);
 }

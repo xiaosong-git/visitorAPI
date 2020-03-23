@@ -116,9 +116,11 @@ public class Base64 {
 		String aa ="1024";
 		String bb =Base64.encode(aa.getBytes("UTF-8"));
 		String cc = new String(Base64.decode("W+ael+emj11bNjg2XVsyMDE5LTEwLTA5IDE1OjE1XVsyMDE5LTExLTA5IDE1OjE1XQ=="),"UTF-8");
+		String dd = new String(Base64.decode("MTg5Mw=="),"UTF-8");
 		System.out.println(bb);
 		System.out.println(cc);
-		
+		System.out.println(dd);
+
 		
 	}
 }

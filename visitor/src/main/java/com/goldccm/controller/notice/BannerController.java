@@ -25,9 +25,10 @@ public class BannerController extends BaseController {
 
     @AuthCheckAnnotation(checkLogin = false,checkVerify = false)
     @RequestMapping("")
-    public @ResponseBody  Result list(){
+    public @ResponseBody  Result list(HttpServletRequest request){
         try {
-            return adBannerService.list();
+            Map<String,Object> paramMap = getParamsToMap(request);
+            return adBannerService.bannerList(paramMap);
         }catch (Exception e){
             e.printStackTrace();
             return Result.unDataResult("fail","系统异常");

@@ -5,9 +5,12 @@ import com.goldccm.model.compose.*;
 import com.goldccm.service.adBanner.IAdBannerService;
 import com.goldccm.service.base.impl.BaseServiceImpl;
 import com.goldccm.service.param.IParamService;
+import com.goldccm.service.user.impl.UserFriendServiceImpl;
 import com.goldccm.util.BaseUtil;
 import com.goldccm.util.RedisUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,14 +24,15 @@ import java.util.Map;
 public class AdBannerService extends BaseServiceImpl implements IAdBannerService {
     @Autowired
     private IParamService paramService;
-
+    Logger logger = LoggerFactory.getLogger(UserFriendServiceImpl.class);
     /**
      * 获取广告
      * @return
      * @throws Exception
+     * @param paramMap
      */
     @Override
-    public Result list() throws Exception {
+    public Result list(Map<String, Object> paramMap) throws Exception {
         List<Map<String,Object>> banners = null;
         String key = "api_adBanner";
         Integer apiNewAuthCheckRedisDbIndex = Integer.valueOf(paramService.findValueByName("apiNewAuthCheckRedisDbIndex"));//存储在缓存中的位置
@@ -70,7 +74,7 @@ public class AdBannerService extends BaseServiceImpl implements IAdBannerService
         Long userId = BaseUtil.objToLong(paramMap.get("userId"), 0L);
         if (userId.equals(0L)){
             //查询默认新闻
-            List list = this.findList(" select * ", "from " + TableList.AD_BANNER + " where orgId is null and status = 1 order by orders desc limit 7 ");
+            List list = this.findList(" select * ", "from " + TableList.AD_BANNER + " where (orgId is null or orgId=1) and status = 1 order by orders desc limit 7 ");
             return ResultData.dataResult("success","获取成功",list);
         }
         //根据用户id查找relationNo
@@ -85,8 +89,9 @@ public class AdBannerService extends BaseServiceImpl implements IAdBannerService
         String sql = "  from ((select * from "+ TableList.AD_BANNER + " where  status = 1 AND relationNo like concat(('"+relationNo+"'),'%')" +
                 " order by orders desc limit 7) " +
                 "union" +
-                " ( select * from "+ TableList.AD_BANNER + " where  orgId is null order by orders desc limit 7 ))x limit 7";
+                " ( select * from "+ TableList.AD_BANNER + " where  (orgId is null or orgId=1) and status = 1  order by orders desc limit 7 ))x limit 7";
         List list = findList("select * ", sql);
+        logger.info("select * "+ sql);
         return ResultData.dataResult("success","获取成功",list);
     }
 }
