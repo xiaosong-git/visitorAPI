@@ -150,4 +150,8 @@ public class TableList {
 
 
     public static final String WK_OUTWORK ="wk_outWork" ;
+    //msg
+    public static final String APP_MSG ="tbl_app_msg" ;
+
+
 }

@@ -97,6 +97,23 @@ public class CompanyUserController extends BaseController {
         }
     }
     /**
+     * 确认记录
+     * @param request
+     * @return
+     */
+    @AuthCheckAnnotation(checkLogin = false,checkVerify = false, checkRequestLegal = false)
+    @RequestMapping("/newFindApplySucOrg")
+    @ResponseBody
+    public Result newFindApplySucOrg(HttpServletRequest request){
+        try {
+            Map<String,Object> paramMap = getParamsToMap(request);
+            return companyUserService.newFindApplySucOrg(paramMap);
+        }catch (Exception e){
+            e.printStackTrace();
+            return Result.unDataResult("fail", "系统异常");
+        }
+    }
+    /**
      * 确认大楼全部记录
      * @param request
      * @return
@@ -108,6 +125,23 @@ public class CompanyUserController extends BaseController {
         try {
             Map<String,Object> paramMap = getParamsToMap(request);
             return companyUserService.findApplyAllSucByOrg(paramMap);
+        }catch (Exception e){
+            e.printStackTrace();
+            return Result.unDataResult("fail", "系统异常");
+        }
+    }
+    /**
+     * 确认大楼全部记录
+     * @param request
+     * @return
+     */
+    @AuthCheckAnnotation(checkLogin = false,checkVerify = false, checkRequestLegal = false)
+    @RequestMapping("/newFindApplyAllSucOrg")
+    @ResponseBody
+    public Result newFindApplyAllSucByOrg(HttpServletRequest request){
+        try {
+            Map<String,Object> paramMap = getParamsToMap(request);
+            return companyUserService.newFindApplyAllSucOrg(paramMap);
         }catch (Exception e){
             e.printStackTrace();
             return Result.unDataResult("fail", "系统异常");

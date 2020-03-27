@@ -143,6 +143,23 @@ public class ForeignController extends BaseController {
             return Result.unDataResult("fail", "系统异常");
         }
     }
+    /**
+     * 访问我的人新接口
+     * @param request
+     * @return
+     */
+    @AuthCheckAnnotation(checkLogin = false,checkVerify = false, checkRequestLegal = false)
+    @RequestMapping("/newFindOrgCode")
+    @ResponseBody
+    public Result newFindOrgCode(HttpServletRequest request){
+        try {
+            Map<String,Object> paramMap = getParamsToMap(request);
+            return foreignService.newFindOrgCode(paramMap);
+        }catch (Exception e){
+            e.printStackTrace();
+            return Result.unDataResult("fail", "系统异常");
+        }
+    }
 
     /**
      * 确认访问数据新接口
@@ -155,6 +172,23 @@ public class ForeignController extends BaseController {
     public Result newFindOrgCodeConfirm(HttpServletRequest request, @PathVariable String pospCode, @PathVariable String orgCode, @PathVariable String idStr){
         try {
             return foreignService.newFindOrgCodeConfirm(pospCode,orgCode,idStr);
+        }catch (Exception e){
+            e.printStackTrace();
+            return Result.unDataResult("fail", "系统异常");
+        }
+    }
+    /**
+     * 确认访问数据新接口
+     * @param request
+     * @return
+     */
+    @AuthCheckAnnotation(checkLogin = false,checkVerify = false, checkRequestLegal = false)
+    @RequestMapping("/newFindOrgCodeConfirm")
+    @ResponseBody
+    public Result newFindOrgCodeConfirm(HttpServletRequest request){
+        try {
+            Map<String,Object> paramMap = getParamsToMap(request);
+            return foreignService.checkOrgCodeConfirm(paramMap);
         }catch (Exception e){
             e.printStackTrace();
             return Result.unDataResult("fail", "系统异常");

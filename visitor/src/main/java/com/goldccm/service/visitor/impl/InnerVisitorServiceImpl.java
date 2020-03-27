@@ -2,7 +2,6 @@ package com.goldccm.service.visitor.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.goldccm.model.compose.PageModel;
 import com.goldccm.model.compose.Result;
 import com.goldccm.model.compose.ResultData;
 import com.goldccm.model.compose.TableList;
@@ -34,7 +33,7 @@ public class InnerVisitorServiceImpl extends BaseServiceImpl implements IInnerVi
     @Autowired
     private IParamService paramService;
     /**
-     * 接收企业用户访问
+     * 接收企业用户访问||邀约
      * A访问企业 B云端 C被访企业
      * 访问时只需提供用户信息，确认访问后去拉取图片信息
      *
@@ -168,6 +167,7 @@ public class InnerVisitorServiceImpl extends BaseServiceImpl implements IInnerVi
         }
 
     }
+    //返回企业接口
     @Override
     public Result innerVisitResponse(Map<String, Object> paramMap) throws Exception {
         Object id = paramMap.get("id");//访客记录id

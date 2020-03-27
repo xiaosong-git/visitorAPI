@@ -17,6 +17,12 @@ import com.goldccm.service.user.IUserService;
 import com.goldccm.util.Base64;
 import com.goldccm.util.*;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.protocol.HTTP;
+import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -387,19 +393,19 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
              */
             // update by cwf  2019/10/15 10:54 Reason:改为加密后进行数据判断 原 idNO 现idNoMw
             // update by cwf  2019/11/6 13:42 Reason:改为回前端加密 原 idNoMW 现 idNO
-            if(this.isExistIdNo(userId.toString(),idNO)){
-                return Result.unDataResult("fail", "该身份证已实名，无法再次进行实名认证！");
-            }
+//            if(this.isExistIdNo(userId.toString(),idNO)){
+//                return Result.unDataResult("fail", "该身份证已实名，无法再次进行实名认证！");
+//            }
 
             try{
-                //实人认证  update by cwf  2019/11/25 11:30 Reason:先查询本地库是否有实名认证 如果没有 则调用CTID认证  判断实人认证是否过期，过期重新走ctid
+                //todo 实人认证  update by cwf  2019/11/25 11:30 Reason:先查询本地库是否有实名认证 如果没有 则调用CTID认证  判断实人认证是否过期，过期重新走ctid
                 String sql="select distinct * from "+TableList.USER_AUTH +" where idNo='"+idNO+"' and realName='"+realName+"'";
                 Map<String, Object> userAuth = findFirstBySql(sql);
                 if (userAuth!=null){
                     idHandleImgUrl=BaseUtil.objToStr(userAuth.get("idHandleImgUrl"),idHandleImgUrl);
                     logger.info("本地实人认证成功上一张成功图片为：{}",idHandleImgUrl);
                 } else {
-                   String photoResult = phoneResult(idNoMW, realName, idHandleImgUrl);
+                   String photoResult = auth(idNoMW, realName, idHandleImgUrl);
                    if (!"success".equals(photoResult)){
                        return Result.unDataResult("fail", photoResult);
                    }
@@ -500,8 +506,51 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
             return resultMap.get("message").toString();
         }
     }
+    public  String auth(String idNO,String realName,String idHandleImgUrl) throws Exception {
+        String string= String.valueOf(System.currentTimeMillis())+new Random().nextInt(10);
+        JSONObject itemJSONObj =new JSONObject();
+        itemJSONObj.put("custid", "1000000007");//账号
+        itemJSONObj.put("txcode", "tx00010");//交易码
+        itemJSONObj.put("productcode", "000010");//业务编码
+        itemJSONObj.put("serialno", string);//流水号
+        itemJSONObj.put("mac", createSign(string));//随机状态码   --验证签名  商户号+订单号+时间+产品编码+秘钥
+        String key="2B207D1341706A7R4160724854065152";
+        String userName =DESUtil.encode(key,realName);
+        String certNo = DESUtil.encode(key,idNO);
+        itemJSONObj.put("userName", userName);
+//        itemJSONObj.put("certNo", "350424199009031238");
+        String imageServerUrl = paramService.findValueByName("imageServerUrl");
+        String photo=Base64.encode(FilesUtils.getImageFromNetByUrl(imageServerUrl+idHandleImgUrl));
+        itemJSONObj.put("certNo", certNo);
+        itemJSONObj.put("imgData", photo);
+        HttpClient httpClient = new SSLClient();
+        HttpPost postMethod = new HttpPost("http://t.pyblkj.cn:8082/wisdom/entrance/pub");
+        StringEntity entityStr= new StringEntity(JSON.toJSONString(itemJSONObj), HTTP.UTF_8);
+        entityStr.setContentType("application/json");
+        postMethod.setEntity(entityStr);
+        HttpResponse resp = httpClient.execute(postMethod);
+        int statusCode = resp.getStatusLine().getStatusCode();
+        ThirdResponseObj responseObj = new ThirdResponseObj();
+        if (200 == statusCode) {
 
-
+            String str = EntityUtils.toString(resp.getEntity(), HTTP.UTF_8);
+            JSONObject jsonObject = JSONObject.parseObject(str);
+            Map resultMap = JSON.parseObject(jsonObject.toString());
+            if ("0".equals(resultMap.get("succ_flag").toString())){
+                return "success";
+            }else{
+                return "身份信息不匹配";
+            }
+        }else{
+            return "系统错误";
+        }
+    }
+    public static String createSign(String str) throws Exception {
+        StringBuilder sb=new StringBuilder();
+        sb.append("1000000007000010").append(str).append("9A0723248F21943R4208534528919630");
+        String newSign = MD5Util.MD5Encode(sb.toString(),"UTF-8");
+        return newSign;
+    }
 
     @Override
     public Map<String, Object> getUserByUserToken(Integer userId, String token) {

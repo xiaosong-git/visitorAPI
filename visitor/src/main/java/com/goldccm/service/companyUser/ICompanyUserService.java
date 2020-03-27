@@ -51,6 +51,22 @@ public interface ICompanyUserService extends IBaseService {
      * @throws Exception
      */
     Result findApplyAllSucByOrg(Map<String, Object> paramMap) throws Exception;
+    //插入用户图片并去除错误图片的记录
+    Result insertUserPhoto(Object rows,String type);
 
     Map<String, Object>  findByUserCompany(Integer userId, Integer compnayId);
+    /**
+     * 新大楼员工确认记录
+     * @param paramMap
+     * @return
+     * @throws Exception
+     */
+    Result newFindApplyAllSucOrg(Map<String, Object> paramMap);
+    /**
+     * 新大楼员工确认记录
+     * @param paramMap
+     * @return
+     * @throws Exception
+     */
+    Result newFindApplySucOrg(Map<String, Object> paramMap);
 }

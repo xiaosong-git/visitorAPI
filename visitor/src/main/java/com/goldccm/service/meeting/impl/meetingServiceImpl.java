@@ -10,6 +10,7 @@ import com.goldccm.service.meeting.IMeetingService;
 import com.goldccm.service.org.impl.OrgServiceImpl;
 import com.goldccm.service.shortMessage.impl.ShortMessageServiceImpl;
 import com.goldccm.service.user.impl.UserServiceImpl;
+import com.goldccm.service.visitor.IForeignService;
 import com.goldccm.util.BaseUtil;
 import com.goldccm.util.DateUtil;
 import com.goldccm.util.GTNotification;
@@ -35,6 +36,10 @@ public class meetingServiceImpl extends BaseServiceImpl implements IMeetingServi
     private ShortMessageServiceImpl shortMessageService;
     @Autowired
     private UserServiceImpl userService;
+    @Autowired
+    private IForeignService foreignService;
+
+
     /**
      * 获取会议室
      * @param paramMap	userId
@@ -484,24 +489,7 @@ public class meetingServiceImpl extends BaseServiceImpl implements IMeetingServi
     public Result isPosp(Map<String, Object> paramMap){
         String orgCode= BaseUtil.objToStr(paramMap.get("orgCode"),"");
         String pospCode= BaseUtil.objToStr(paramMap.get("pospCode"),"");
-        if ("".equals(pospCode)){
-            return Result.unDataResult("fail", "上位机编号缺失!");
-        }
-        // 判断上位机是否正常
-        String orgSql = " select * from " + TableList.ORG + " where org_code = '" + orgCode + "'";
-        System.out.println(orgSql);
-        Map<String, Object> org = findFirstBySql(orgSql);
-        if (org == null) {
-            return Result.unDataResult("fail", "数据异常!");
-        }
-        String orgId = org.get("id").toString();
-        String pospSql = " select * from " + TableList.POSP + " where orgId = '" + orgId + "' and pospCode ='"
-                + pospCode + "' and cstatus='normal'";
-        System.out.println(pospSql);
-        Map<String, Object> posp = findFirstBySql(pospSql);
-        if (posp == null) {
-            return Result.unDataResult("fail", "无此上位机编码" + pospCode + "或者无此大楼编码" + orgCode);
-        }
+        foreignService.existOgrPosp(pospCode,orgCode);
         return Result.unDataResult("success",pospCode);
     }
 

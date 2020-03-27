@@ -134,34 +134,5 @@ public class IInAndOutSerivceImpl extends BaseServiceImpl implements IInAndOutSe
         return Result.ResultCode("success","获取数据成功","100");
     }
 
-    /**
-     * 验证传入上位机密码正确
-     * @param orgCode
-     * @param pospCode
-     * @param sign
-     * @return
-     * @throws Exception
-     */
-    public boolean check(String orgCode,String pospCode,String sign) throws Exception{
 
-        String sql="select privateKey from "+TableList.POSP+" p" +
-                " left join "+TableList.ORG+" o on p.orgId =o.id where org_code='"+orgCode +
-                "' and pospCode='"+pospCode+"'";
-        Map<String, Object> posp = findFirstBySql(sql);
-        try {
-
-            //验证规则orgCode + pospCode+privateKey的md5码是否正确
-            if (posp != null) {
-                String privateKey = BaseUtil.objToStr(posp.get("privateKey"), null);
-                String mySign = MD5Util.MD5(orgCode + pospCode+privateKey);
-                if (mySign.equals(sign)){
-                    return true;
-                }
-            }
-        }catch (Exception e){
-            e.printStackTrace();
-            return false;
-        }
-        return false;
-    }
 }

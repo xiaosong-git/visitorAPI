@@ -82,8 +82,6 @@ public class AdBannerService extends BaseServiceImpl implements IAdBannerService
                 "where u.id=" + userId);
         String relationNo="0";
         if (relation!=null){
-
-
             relationNo=BaseUtil.objToStr(relation.get("relation_no"), "0");
         }
         String sql = "  from ((select * from "+ TableList.AD_BANNER + " where  status = 1 AND relationNo like concat(('"+relationNo+"'),'%')" +

@@ -129,6 +129,7 @@ public class AppVersionService extends BaseServiceImpl implements IAppVersionSer
         Object channel = paramMap.get("channel");
         //获取最新版本信息
         String isoChannel = "AppStore";
+        Result result = null;
         if (channel == null){
             isoChannel = "AppStore";
         }else{
@@ -146,8 +147,12 @@ public class AppVersionService extends BaseServiceImpl implements IAppVersionSer
             appVersionInfo.put("updateUrl",appVersion.get("uploadFile"));//更新地址
             appVersionInfo.put("memo",appVersion.get("memo"));//版本说明
 
-            return ResultData.dataResult("success", "", appVersionInfo);
+            result=ResultData.dataResult("success", "不是最新版本", appVersionInfo);
+        }else{
+            //用户的软件已经是最新版
+            logger.info("-----用户的软件已经是最新版------");
+            result = ResultData.unDataResult("fail","已经是最新版本了！");
         }
-        return ResultData.unDataResult("fail","系统异常");
+        return result;
     }
 }

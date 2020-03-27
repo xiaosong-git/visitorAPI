@@ -15,7 +15,7 @@ public class Constant {
     /**
      * 是否是开发模式，项目部署到正式环境要改为false
      */
-    public static final Boolean IS_DEVELOP = true;
+    public static final Boolean IS_DEVELOP = false;
     /**
      * 时间日期默认格式
      */

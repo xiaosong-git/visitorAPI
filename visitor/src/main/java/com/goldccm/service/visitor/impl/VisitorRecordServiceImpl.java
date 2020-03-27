@@ -1,6 +1,5 @@
 package com.goldccm.service.visitor.impl;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.goldccm.model.compose.*;
 import com.goldccm.persist.base.IBaseDao;
@@ -1196,12 +1195,16 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 
         try {
             //获取登入人ID
-            long userId = BaseUtil.objToLong(session.getAttributes().get("userId"), null);
+            long userId = BaseUtil.objToLong(session.getAttributes().get("userId"), 0L);
             //获取msg中的消息转存数据库
             //recordType 1--访问 2--邀约
             Integer recordType = BaseUtil.objToInteger(msg.get("recordType"), 0);
             //被访人或被约人
             Integer toUserId = BaseUtil.objToInteger(msg.get("toUserId"), 0);
+
+            if(BaseUtil.objToInteger(session.getAttributes().get("userId"), 0).equals(toUserId)){
+                session.sendMessage(new TextMessage(Result.ResultCodeType("fail", "无法对自己访问邀约！", "-1", BaseUtil.objToInteger(msg.get("type"), 2))));
+            }
             String cstatus = BaseUtil.objToStr(msg.get("cstatus"), "applyConfirm");
             String startDate = BaseUtil.objToStr(msg.get("startDate"), "无");
             String endDate = BaseUtil.objToStr(msg.get("endDate"), "无");
@@ -1517,7 +1520,7 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
         for (int i = 0; i < list.size(); i++) {
             managePhone = list.get(i).get("phone").toString();
             // 审核人员
-//            aliasList = new ArrayList();findApplySucByOrg
+//            aliasList = new ArrayList();
 //            aliasList.add(managePhone);
             //批量发送给具有deviceToken的用户
             deviceToken = BaseUtil.objToStr(list.get(i).get("deviceToken"), "");
@@ -1597,8 +1600,8 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
         String endDate = BaseUtil.objToStr(visitorRecord.get("endDate"), "");
         Integer visitorId = BaseUtil.objToInteger(visitorRecord.get("visitorId"), 0);
         if (!visitorId.equals(userId)) {
-            System.out.println("被访问者错误");
-            return Result.unDataResult("fail", "被访问者错误!");
+            System.out.println("访问者与被访者不能为同一人");
+            return Result.unDataResult("fail", "访问者与被访者不能为同一人!");
         }
         Map<String, Object> visitorUser = findById(TableList.USER, userId);
         String visitorBy = visitorUser.get("realName").toString();
