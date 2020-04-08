@@ -110,16 +110,16 @@ public class IWebSoketHandle extends AbstractWebSocketHandler {
                 visitorRecordService.visitReply(session,msg);
             }else{
             //判断是否为好友，非好友则返回信息
-            boolean isFriend = isFriend(session, msg);
+//            boolean isFriend = isFriend(session, msg);
             //是好友
-            if (isFriend){
+//            if (isFriend){
                 //type==4 好友申请数量
                 if (Constant.MASSEGETYPE_NOMAL==type||4==type){
                     webSocketService.dealChat(session,msg);
                 }
                 //申请访问或申请邀约
             }
-             }
+//             }
         }catch (Exception e){
             e.printStackTrace();
             logger.info("发送数据报错.....{}",msgStr);

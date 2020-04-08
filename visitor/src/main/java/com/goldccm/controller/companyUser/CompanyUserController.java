@@ -97,7 +97,7 @@ public class CompanyUserController extends BaseController {
         }
     }
     /**
-     * 确认记录
+     * 新确认记录
      * @param request
      * @return
      */

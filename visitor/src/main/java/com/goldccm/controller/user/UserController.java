@@ -180,7 +180,7 @@ public class UserController extends BaseController {
     }
 
     /**
-     * 判断用户是否已经实名认证
+     * 判断用户是否已经实人认证
      * @Author linyb
      * @Date 2017/4/3 21:15
      */
@@ -190,10 +190,10 @@ public class UserController extends BaseController {
     public Result isVerify(HttpServletRequest request){
         Map paramMap = getParamsToMap(request);
         boolean flag = this.userService.isVerify(Integer.valueOf(Integer.parseInt(paramMap.get("userId") + "")));
-        return flag ? Result.unDataResult("success", "已经实名验证") : Result.unDataResult("fail", "还未实名验证");
+        return flag ? Result.unDataResult("success", "已经实人认证") : Result.unDataResult("fail", "还未实人认证");
     }
     /**
-     * 实名认证
+     * 实人认证
      * @Author linyb
      * @Date 2017/4/3 21:15
      */

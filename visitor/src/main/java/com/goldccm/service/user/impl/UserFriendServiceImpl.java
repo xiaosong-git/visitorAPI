@@ -51,11 +51,11 @@ public class UserFriendServiceImpl extends BaseServiceImpl implements IUserFrien
         String fromSql = " from " + TableList.USER_FRIEND + " uf " +
                 " left join " + TableList.USER + " u on uf.friendId=u.id" +
                 " left join " + TableList.COMPANY + " c on c.id=u.companyId"+
-                " where uf.userId = '"+userId+"' and uf.applyType=1  ";
+                " where uf.userId = '"+userId+"' and uf.applyType=1 and u.id is not null  ";
         logger.info("查询好友{}",columnSql+fromSql);
         List<Map<String,Object>> list = this.findList(columnSql,fromSql);
         return list != null && !list.isEmpty()
-                ? ResultData.dataResult("success","获取通讯录记录成功",list)
+                ? ResultData.dataResult("success","获取成功",list)
                 : Result.unDataResult("success","暂无数据");
     }
 
@@ -128,12 +128,14 @@ public class UserFriendServiceImpl extends BaseServiceImpl implements IUserFrien
                 : Result.unDataResult("success","暂无数据");
     }
     @Override
-    public Integer addFriend(Integer userId,Integer friendId,String remark,String applyType) throws Exception {
+    public Integer addFriend(Integer userId, Integer friendId, String remark, String applyType, String authentication, String remarkMsg) throws Exception {
         Map<String,Object> userFriend = new HashMap<>();
         userFriend.put("userId",userId);
         userFriend.put("friendId",friendId);
         userFriend.put("remark",remark);
         userFriend.put("applyType",applyType);
+        userFriend.put("authentication",authentication);
+        userFriend.put("remarkMsg",remarkMsg);
         return this.save(TableList.USER_FRIEND,userFriend);
     }
     @Override
@@ -154,8 +156,13 @@ public class UserFriendServiceImpl extends BaseServiceImpl implements IUserFrien
         Integer userId = BaseUtil.objToInteger(paramMap.get("userId"), null);
         Integer friendId = BaseUtil.objToInteger(paramMap.get("friendId"), null);
         String remark=BaseUtil.objToStr(paramMap.get("remark"),"");
+        String authentication=BaseUtil.objToStr(paramMap.get("authentication"),"");
+        String remarkMsg=BaseUtil.objToStr(paramMap.get("remarkMsg"),"");
         if (userId==null||friendId==null){
             return  Result.unDataResult(ConsantCode.FAIL,"缺少参数!");
+        }
+        if (userId.equals(friendId)){
+            return Result.unDataResult(ConsantCode.FAIL,"无法添加自己为好友!");
         }
         //如果存在好友申请
         Map<String,Object> ifUserFriend = findFriend(userId,friendId);
@@ -235,7 +242,7 @@ public class UserFriendServiceImpl extends BaseServiceImpl implements IUserFrien
             }
         }
             //添加至数据库 用户id 好友id 备注 applytype为0 对方同意后改为1
-            Integer save = addFriend(userId,friendId,remark,"0");
+            Integer save = addFriend(userId,friendId,remark,"0",authentication,remarkMsg);
         if (save > 0){
             //发送websocket给好友
             for (Map.Entry<Object, WebSocketSession> entry: Constant.SESSIONS.entrySet()){
@@ -354,7 +361,7 @@ public class UserFriendServiceImpl extends BaseServiceImpl implements IUserFrien
             }
             //如果不存在好友记录
         }else{
-            addFriend(userId,friendId,remark,"1");
+            addFriend(userId,friendId,remark,"1","","");
             updateFriendType(friendId,userId,null,1);
             return Result.unDataResult("success","通过好友申请成功");
         }
@@ -384,7 +391,7 @@ public class UserFriendServiceImpl extends BaseServiceImpl implements IUserFrien
        logger.info(columnSql+fromSql+union);
         List<Map<String,Object>> list = this.findList(columnSql,fromSql+union);
         return list != null && !list.isEmpty()
-                ? ResultData.dataResult("success","获取列表成功",list)
+                ? ResultData.dataResult("success","获取成功",list)
                 : Result.unDataResult("success","暂无数据");
     }
     @Override
@@ -396,19 +403,35 @@ public class UserFriendServiceImpl extends BaseServiceImpl implements IUserFrien
         String userId=BaseUtil.objToStr(paramMap.get("userId"),null);
         String friendId=BaseUtil.objToStr(paramMap.get("friendId"),null);
         String remark=BaseUtil.objToStr(paramMap.get("remark"),null);
-        if (userId==null||friendId==null||remark==null){
+        String detail=BaseUtil.objToStr(paramMap.get("detail"),null);
+        if (userId==null||friendId==null){
             return Result.unDataResult("fail","缺少参数！");
         }
+        if (remark==null&&detail==null){
+            return Result.unDataResult("fail","缺少参数！");
+        }
+
         Map<String, Object> updateMap=new HashMap<>();
         updateMap.put("userId",userId);
         updateMap.put("friendId",friendId);
         updateMap.put("remark",remark);
-        int update = baseDao.update(TableList.USER_FRIEND, updateMap);
+        updateMap.put("detail",detail);
+        StringBuffer sql=new StringBuffer("update "+TableList.USER_FRIEND+" set ");
+        if (remark!=null){
+            sql.append("remark='"+remark+"' ");
+        }
+        if (detail!=null){
+            sql.append(" detail='"+detail+"' ");
+        }
+        sql.append(" where userId="+userId+" and friendId="+friendId);
+
+        int update=baseDao.deleteOrUpdate(sql.toString());
+
         if (update>0){
 
-            return Result.unDataResult("success","修改备注成功！");
+            return Result.unDataResult("success","修改成功！");
         }
-        return Result.unDataResult("fail","修改备注失败");
+        return Result.unDataResult("fail","修改失败");
     }
 
     @Override
@@ -424,14 +447,21 @@ public class UserFriendServiceImpl extends BaseServiceImpl implements IUserFrien
             }
         }
         if (newPhones.length()==0){
-            return Result.unDataResult("success","暂无数据");
+            String columsql="select u.id,u.realName,u.phone,u.orgId,u.province,u.city,u.area,u.addr,u.idHandleImgUrl,u.companyId,u.niceName,u.headImgUrl,'同意' applyType, null\n" +
+                    " remark ";
+          String sql=   "from  "+ TableList.USER_FRIEND +" uf  left join "+ TableList.USER +" u on uf.userId=u.id where uf.friendId = '"+userId+"' and uf.applyType=0";
+            logger.info(columsql+sql);
+            List <Map<String, Object>> list=findList(columsql,sql);
+            return list != null && !list.isEmpty()
+                    ? ResultData.dataResult("success","查询用户成功",list)
+                    : Result.unDataResult("success","暂无数据");
         }
         newPhones.deleteCharAt(newPhones.length() - 1);
 //        logger.info("最终查询的手机号为：{}",newPhones);
 
         String columsql="select * from ";
         String sql = "(select u.id,u.realName,u.phone,u.orgId,u.province,u.city,u.area,u.addr,u.idHandleImgUrl,u.companyId,u.niceName,u.headImgUrl,'同意' applyType, null\n" +
-                " remark  from  "+ TableList.USER_FRIEND +" uf  left join "+ TableList.USER +" u on uf.userId=u.id where uf.friendId = '"+userId+"' and uf.applyType=0 \n" +
+                " remark  from  "+ TableList.USER_FRIEND +" uf  left join "+ TableList.USER +" u on uf.userId=u.id where uf.friendId = '"+userId+"'  uf.applyType=0 \n" +
                 " union " +
                 "select u.id,u.realName,u.phone,u.orgId,u.province,u.city,u.area,u.addr,u.idHandleImgUrl,u.companyId,u.niceName,u.headImgUrl," +
                 " case (select  applyType from "+ TableList.USER_FRIEND +" uf where uf.friendId=u.id and uf.userId="+userId+" )  when 0 then '申请中' when 1 then '已添加' else '添加' end \n" +
@@ -446,4 +476,6 @@ public class UserFriendServiceImpl extends BaseServiceImpl implements IUserFrien
                 : Result.unDataResult("success","暂无数据");
 
     }
+
+
 }

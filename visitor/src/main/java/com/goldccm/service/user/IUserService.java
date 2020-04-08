@@ -65,7 +65,7 @@ public interface IUserService extends IBaseService {
     int createUser(String phone, String realName) throws Exception;
 
     /**
-     * 实名认证
+     * 实人认证
      * @Author linyb
      * @Date 2017/4/11 14:23
      */

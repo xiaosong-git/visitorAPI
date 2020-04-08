@@ -25,7 +25,7 @@ import java.util.Map;
  * @author: cwf
  * @create: 2020-03-20 16:59
  **/
-@Service("innerVisitorServiceImpl")
+@Service("innerVisitorService")
 public class InnerVisitorServiceImpl extends BaseServiceImpl implements IInnerVisitorService {
     Logger logger = LoggerFactory.getLogger(InnerVisitorServiceImpl.class);
     @Autowired
@@ -242,7 +242,6 @@ public class InnerVisitorServiceImpl extends BaseServiceImpl implements IInnerVi
                         ;
             }
         }
-        //usr/java/img/innerUser
     }
     @Override
     public String sendPhotos(String innerUrl) throws Exception {

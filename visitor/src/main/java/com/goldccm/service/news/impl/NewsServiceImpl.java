@@ -37,7 +37,7 @@ public class NewsServiceImpl extends BaseServiceImpl implements INewsService {
         String sql = "  from ((select * from "+ TableList.NEWS + " where  newsStatus = '"+ Status.APPLY_STATUS_NORMAL+"' AND relationNo like concat(('"+relationNo+"'),'%')" +
                 " order by headlines desc,newsDate desc limit 100) " +
                 "union" +
-                " ( select * from tbl_news where  orgId =1 or orgId is null order by headlines desc,newsDate desc  limit 100))x";
+                " ( select * from tbl_news where newsStatus = '"+ Status.APPLY_STATUS_NORMAL+"' AND (orgId =1 or orgId is null) order by headlines desc,newsDate desc  limit 100))x";
         System.out.println("select * "+sql);
         PageModel pageModel = this.findPage("select * ",sql,pageNum,pageSize);
         return ResultData.dataResult("success","获取成功",pageModel);
@@ -64,7 +64,7 @@ public class NewsServiceImpl extends BaseServiceImpl implements INewsService {
         String sql = "  from ((select * from "+ TableList.NEWS + " where  newsStatus = '"+ Status.APPLY_STATUS_NORMAL+"' AND relationNo like concat(('"+relationNo+"'),'%')" +
                 " order by headlines desc,newsDate desc limit 100) " +
                 "union" +
-                " ( select * from tbl_news where  orgId is null order by headlines desc,newsDate desc  limit 100))x";
+                " ( select * from tbl_news where newsStatus = '"+ Status.APPLY_STATUS_NORMAL+"' AND  orgId is null order by headlines desc,newsDate desc  limit 100))x";
         System.out.println("select * "+sql);
         PageModel pageModel = this.findPage("select * ",sql,pageNum,pageSize);
         return ResultData.dataResult("success","获取成功",pageModel);

@@ -51,7 +51,7 @@ public class UserFriendController extends BaseController {
      * @param request
      * @return
      */
-    @AuthCheckAnnotation(checkLogin = true,checkVerify = true, checkRequestLegal = true)
+    @AuthCheckAnnotation(checkLogin = false,checkVerify = true, checkRequestLegal = true)
     @RequestMapping("/findPhone")
     @ResponseBody
     public Result findPhone(HttpServletRequest request){
@@ -216,7 +216,7 @@ public class UserFriendController extends BaseController {
      * @return
      *  update by cwf  2019/8/28 16:50 cause
      */
-    @AuthCheckAnnotation(checkLogin = true,checkVerify = true, checkRequestLegal = true)
+    @AuthCheckAnnotation(checkLogin = false,checkVerify = true, checkRequestLegal = true)
     @RequestMapping("/updateFriendRemark")
     @ResponseBody
     public Result updateFriendRemark(HttpServletRequest request){
@@ -246,5 +246,8 @@ public class UserFriendController extends BaseController {
             return Result.unDataResult("fail", "系统异常");
         }
     }
+
+
+
 
 }

@@ -136,12 +136,12 @@ public class VisitorRecordController extends BaseController {
         }
     }
     /**
-     * 非好友访问
+     * 非好友访问+好友访问整合
      * @param request
      * @return
      */
     //checkLogin需要为true
-    @AuthCheckAnnotation(checkLogin = true,checkVerify = false, checkRequestLegal = true)
+    @AuthCheckAnnotation(checkLogin = false,checkVerify = false, checkRequestLegal = true)
     @RequestMapping("/visit")
     @ResponseBody
     public Result visit(HttpServletRequest request){
@@ -327,7 +327,7 @@ public class VisitorRecordController extends BaseController {
         }
     }
     /**
-     * 选择公司并且做权限判断
+     * 回应访问
      * @param request
      * @return com.goldccm.model.compose.Result
      * @throws Exception
@@ -337,10 +337,10 @@ public class VisitorRecordController extends BaseController {
     @AuthCheckAnnotation(checkLogin = false,checkVerify = true, checkRequestLegal = true)
     @RequestMapping("/modifyCompanyFromId")
     @ResponseBody
-    public Result modifyCompanyFromId(HttpServletRequest request){
+    public Result replay(HttpServletRequest request){
         try {
             Map<String,Object> paramMap = getParamsToMap(request);
-            return visitorRecordService.modifyCompanyFromId(paramMap);
+            return visitorRecordService.replay(paramMap);
         }catch (Exception e){
             e.printStackTrace();
             return Result.unDataResult("fail", "系统异常");
@@ -366,7 +366,12 @@ public class VisitorRecordController extends BaseController {
             return Result.unDataResult("fail", "系统异常");
         }
     }
-    //
+
+    /**
+     * 查询用户访问邀约记录
+     * @param request
+     * @return
+     */
     @AuthCheckAnnotation(checkLogin = false)
     @RequestMapping("/findRecordUser")
     @ResponseBody
@@ -379,6 +384,12 @@ public class VisitorRecordController extends BaseController {
             return Result.unDataResult("fail", "系统异常");
         }
     }
+
+    /**
+     * 查询访问邀约记录详情
+     * @param request
+     * @return
+     */
     @AuthCheckAnnotation(checkLogin = false)
     @RequestMapping("/findRecordUserDetail")
     @ResponseBody
@@ -424,7 +435,7 @@ public class VisitorRecordController extends BaseController {
             return Result.unDataResult("fail", "系统异常");
         }
     }
-    //根据条件判断访问我的人，邀约我的人。。。。
+    //根据条件判断访问，邀约成功。。。。
     @AuthCheckAnnotation(checkLogin = false,checkVerify = true, checkRequestLegal = true)
     @RequestMapping("/visitorSucList")
     @ResponseBody

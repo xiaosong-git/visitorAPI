@@ -134,22 +134,22 @@ public class WebSocketServiceimpl extends BaseServiceImpl implements IWebSocketS
         /* 查看谁访问我 我=被访者=visitorId=20 记录状态=recordType=1 阅读状态=未阅读='F' replyDate is null */
         String fromSql = " from(\n" +
                 "select *  from "+TableList.VISITOR_RECORD+" where endDate>SYSDATE() and  isReceive ='F' and cstatus='applyConfirm' and" +
-                " visitorId = "+userId+" and recordType=1 and vitype='A' and replyDate is null\n";
+                " visitorId = "+userId+" and recordType=1  and replyDate is null\n";
         /* 查看谁邀请我去访问 我=访客=userId=20 记录状态=recordType=2 阅读状态=未阅读='F' replyDate is null */
         String union1="union all\n" +
                 "select *  from "+TableList.VISITOR_RECORD+" where endDate>SYSDATE() and  isReceive ='F' and cstatus='applyConfirm' and " +
-                "userId =  "+userId+" and recordType=2 and vitype='A' and replyDate is  null\n";
+                "userId =  "+userId+" and recordType=2  and replyDate is  null\n";
         /* 查看谁回应了我的访问申请 我=访客=userId=20 replyDate is not null回应日期不为空，状态不是申请中 cstatus<>'applyConfirm' 则说明回应 记录状态=recordType=1 */
         String union2="union all\n" +
                 "select *  from tbl_visitor_record where endDate>SYSDATE() and  isReceive ='F' and cstatus<>'applyConfirm' " +
-                "and userId =  "+userId+" and recordType=1 and vitype='A' and replyDate is not null\n";
+                "and userId =  "+userId+" and recordType=1 and replyDate is not null\n";
         /* 查看谁回应了我的邀约申请 我=被访者=visitorId=20 replyDate is not null回应日期不为空，状态不是申请中 cstatus<>'applyConfirm' 则说明回应 记录状态=recordType=1  */
         String union3="union all \n" +
                 "select *  from tbl_visitor_record where endDate>SYSDATE() and  isReceive ='F' and cstatus<>'applyConfirm' " +
-                "and visitorId =  "+userId+" and vitype='A' and recordType=2\n" +
+                "and visitorId =  "+userId+"  and recordType=2\n" +
                 "and replyDate is not null";
         String suffix=")x";
-        System.out.println(coloumSql+fromSql+union1+union2+union3+suffix);
+        System.out.println("获取离线消息sql:"+coloumSql+fromSql+union1+union2+union3+suffix);
         return baseDao.findList(coloumSql, fromSql+union1+union2+union3+suffix);
     }
 

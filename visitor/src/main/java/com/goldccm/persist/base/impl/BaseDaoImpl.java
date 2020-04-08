@@ -190,12 +190,10 @@ public class BaseDaoImpl implements IBaseDao {
         }
         final String sql = sb.substring(0,sb.length()-1)+")";
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbcTemplate.update( new PreparedStatementCreator(){
-                                 public PreparedStatement createPreparedStatement(Connection conn) throws SQLException {
-                                     PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-                                     return ps;
-                                 }
-                             },
+        jdbcTemplate.update(conn -> {
+            PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            return ps;
+        },
                 keyHolder);
         return keyHolder.getKey().intValue();
     }

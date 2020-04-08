@@ -81,9 +81,9 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
 
     @Override
     public List<Map<String, Object>> getListUserByPhone(String phone) {
-        String coloumSql = " select u.id,u.realName,u.phone,u.orgId,u.province,u.city,u.area,u.addr,u.idHandleImgUrl,u.companyId";
+        String coloumSql = " select u.id,u.realName,u.phone,u.orgId,u.province,u.city,u.area,u.addr,u.idHandleImgUrl,u.companyId,headImgUrl";
         String fromSql = " from "+ TableList.USER +" u" +
-                " where u.phone = '"+phone+"' ";
+                " where u.phone = '"+phone+"'  ";
         return baseDao.findList(coloumSql, fromSql);
     }
 
@@ -354,13 +354,12 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
     public Result verify(Map<String, Object> paramMap) {
                 try {
                     paramMap.remove("token");
-                    Integer userId = BaseUtil.objToInteger(paramMap.get("userId"), Integer.valueOf(0));
+                    Integer userId = BaseUtil.objToInteger(paramMap.get("userId"), 0);
 
                     if (isVerify(userId)) {
-                        logger.info("已经实名认证过");
-                        return Result.unDataResult("fail", "已经实名认证过");
+                        logger.info("已经实人认证过");
+                        return Result.unDataResult("fail", "已经实人认证过");
                     }
-
                     /**
                      * 验证 短信验证码
                      */
@@ -394,16 +393,16 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
             // update by cwf  2019/10/15 10:54 Reason:改为加密后进行数据判断 原 idNO 现idNoMw
             // update by cwf  2019/11/6 13:42 Reason:改为回前端加密 原 idNoMW 现 idNO
 //            if(this.isExistIdNo(userId.toString(),idNO)){
-//                return Result.unDataResult("fail", "该身份证已实名，无法再次进行实名认证！");
+//                return Result.unDataResult("fail", "该身份证已实名，无法再次进行实人认证！");
 //            }
 
             try{
-                //todo 实人认证  update by cwf  2019/11/25 11:30 Reason:先查询本地库是否有实名认证 如果没有 则调用CTID认证  判断实人认证是否过期，过期重新走ctid
+                //todo 实人认证  update by cwf  2019/11/25 11:30 Reason:先查询本地库是否有实人认证 如果没有 则调用CTID认证  判断实人认证是否过期，过期重新走ctid
                 String sql="select distinct * from "+TableList.USER_AUTH +" where idNo='"+idNO+"' and realName='"+realName+"'";
                 Map<String, Object> userAuth = findFirstBySql(sql);
                 if (userAuth!=null){
-                    idHandleImgUrl=BaseUtil.objToStr(userAuth.get("idHandleImgUrl"),idHandleImgUrl);
-                    logger.info("本地实人认证成功上一张成功图片为：{}",idHandleImgUrl);
+//                    idHandleImgUrl=BaseUtil.objToStr(userAuth.get("idHandleImgUrl"),idHandleImgUrl);
+//                    logger.info("本地实人认证成功上一张成功图片为：{}",idHandleImgUrl);
                 } else {
                    String photoResult = auth(idNoMW, realName, idHandleImgUrl);
                    if (!"success".equals(photoResult)){
@@ -458,9 +457,9 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
                 logger.info("插入本地实人："+authSave);
                 resultMap.put("isSetTransPwd", BaseUtil.objToStr(userMap.get("isSetTransPwd"),"F"));
                 resultMap.put("validityDate",validityDate);
-                return ResultData.dataResult("success", "实名认证成功", resultMap);
+                return ResultData.dataResult("success", "实人认证成功", resultMap);
             }
-            return Result.unDataResult("fail", "实名认证失败");
+            return Result.unDataResult("fail", "实人认证失败");
         } catch (Exception e) {
             e.printStackTrace();
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();//回滚
@@ -506,6 +505,7 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
             return resultMap.get("message").toString();
         }
     }
+    //新实人认证
     public  String auth(String idNO,String realName,String idHandleImgUrl) throws Exception {
         String string= String.valueOf(System.currentTimeMillis())+new Random().nextInt(10);
         JSONObject itemJSONObj =new JSONObject();

@@ -72,7 +72,7 @@ public class YunPainSmsUtil {
 
     public static Integer MSG_TYPE_DEBIT_CARD = 5;//绑定借记卡
 
-    public static Integer MSG_TYPE_VERIFY = 6;//实名认证
+    public static Integer MSG_TYPE_VERIFY = 6;//实人认证
 
     private final static String APIKEY = "e76ad24176a738b2cc561825b508624a";
 

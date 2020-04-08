@@ -153,7 +153,7 @@ public interface IVisitorRecordService extends IBaseService {
      * @date 2019/7/29 15:43
      */
     int saveVisitRecord(Map<String, Object> paramMap)throws Exception;
-    //非好友访问
+    //非好友访问+好友访问整合
     Result visit (Map<String, Object> paramMap) throws Exception;
     /**
      * webSocket回应邀约
@@ -181,7 +181,7 @@ public interface IVisitorRecordService extends IBaseService {
 
     Result visitForwarding(Map<String, Object> paramMap) throws Exception;
     //访问时填写公司
-    Result modifyCompanyFromId(Map<String, Object> paramMap) throws Exception;
+    Result replay(Map<String, Object> paramMap) throws Exception;
     //接口回应邀约
     Result visitReply(Map<String, Object> paramMap) throws Exception;
     //邀约我的人

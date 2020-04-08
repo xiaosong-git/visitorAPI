@@ -56,6 +56,9 @@ public interface IUserFriendService extends IBaseService {
      * @throws Exception
      */
 //    Result checkFriendByPhoneAndRealName(Map<String, Object> paramMap) throws Exception;
+
+
+
     /**
      * 更新好友申请状态
      * @param userId
@@ -108,7 +111,7 @@ public interface IUserFriendService extends IBaseService {
      * @return
      * @throws Exception
      */
-    Integer addFriend(Integer userId,Integer friendId,String remark,String applyType) throws Exception;
+    Integer addFriend(Integer userId, Integer friendId, String remark, String applyType, String authentication, String remarkMsg) throws Exception;
     /** 
      * 我的好友列表与申请我的陌生人列表
      * @param userId
@@ -126,4 +129,5 @@ public interface IUserFriendService extends IBaseService {
     Result updateFriendRemark(Map<String, Object> paramMap);
     //新的朋友
     Result newFriend(Map<String, Object> paramMap);
+
 }

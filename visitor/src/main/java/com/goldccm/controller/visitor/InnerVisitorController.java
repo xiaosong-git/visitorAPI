@@ -64,6 +64,11 @@ public class InnerVisitorController extends BaseController {
         }
     }
 
+    /**
+     * 下发照片给企业用户
+     * @param request
+     * @return
+     */
     @AuthCheckAnnotation(checkLogin = false)
     @RequestMapping("/sendPhotos")
     @ResponseBody
