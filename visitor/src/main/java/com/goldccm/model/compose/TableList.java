@@ -153,5 +153,9 @@ public class TableList {
     //msg
     public static final String APP_MSG ="tbl_app_msg" ;
 
+    public static final String ABOUT_US ="tbl_about_us" ;
+
+
+
 
 }

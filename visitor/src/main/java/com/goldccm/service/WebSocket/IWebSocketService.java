@@ -87,7 +87,6 @@ public interface IWebSocketService extends IBaseService {
       * @author chenwf
       * @date 2019/7/29 14:26
       */
-     Result sendVisitRcord(WebSocketSession session,Map<String, Object> paramMap) throws Exception;
      /**
       * msg的type为1时处理聊天信息
       * @param session

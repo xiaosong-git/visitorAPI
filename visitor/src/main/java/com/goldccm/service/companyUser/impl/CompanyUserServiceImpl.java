@@ -99,7 +99,7 @@ public class CompanyUserServiceImpl extends BaseServiceImpl implements ICompanyU
      */
     @Override
     public Result findApplySucByOrg(Map<String, Object> paramMap) throws Exception {
-        String orgCode = BaseUtil.objToStr(paramMap.get("orgCode"), null);
+        String orgCode = BaseUtil.objToStr(paramMap.get("org_code"), null);
         String createDate = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
         if (orgCode == null) {
             return Result.unDataResult(ConsantCode.FAIL, "缺少大楼参数!");
@@ -107,13 +107,13 @@ public class CompanyUserServiceImpl extends BaseServiceImpl implements ICompanyU
         return applySucByOrg(orgCode,createDate,null,null,"old");
     }
     /**
-     * 新按获取大楼员工当天员工
+     * 新按获取大楼员工当天员工确认数据
      * @return Result
      */
     @Override
     public Result newFindApplySucOrg(Map<String, Object> paramMap){
-        String orgCode = BaseUtil.objToStr(paramMap.get("orgCode"), null);
-        String pospCode = BaseUtil.objToStr(paramMap.get("pospCode"), null);
+        String orgCode = BaseUtil.objToStr(paramMap.get("org_code"), null);
+        String pospCode = BaseUtil.objToStr(paramMap.get("posp_code"), null);
         String mac = BaseUtil.objToStr(paramMap.get("mac"), null);
         Integer pageNum = BaseUtil.objToInteger(paramMap.get("pageNum"), 1);
         Integer pageSize = BaseUtil.objToInteger(paramMap.get("pageSize"), 10);
@@ -179,7 +179,7 @@ public class CompanyUserServiceImpl extends BaseServiceImpl implements ICompanyU
      */
     @Override
     public Result findApplyAllSucByOrg(Map<String, Object> paramMap) throws Exception {
-        String orgCode = BaseUtil.objToStr(paramMap.get("orgCode"), null);
+        String orgCode = BaseUtil.objToStr(paramMap.get("org_code"), null);
         Integer pageNum = BaseUtil.objToInteger(paramMap.get("pageNum"), 1);
         Integer pageSize = BaseUtil.objToInteger(paramMap.get("pageSize"), 50);
         if (orgCode == null) {
@@ -250,27 +250,35 @@ public class CompanyUserServiceImpl extends BaseServiceImpl implements ICompanyU
     @Override
     public Result insertUserPhoto(Object page,String type) {
         List<Map<String, Object>> rows;
-        if ("page".equals(type)){
-            PageModel  resutl= (PageModel)page;
-            if (resutl.getRows() == null || resutl.getRows().isEmpty()) {
-                //插入图片接口
-                return  Result.unDataResult("success", "暂无数据");
+        try {
+            logger.info("插入照片");
+            if ("page".equals(type)) {
+                PageModel resutl = (PageModel) page;
+                if (resutl.getRows() == null || resutl.getRows().isEmpty()) {
+                    //插入图片接口
+                    return Result.unDataResult("success", "暂无数据");
+                }
+                rows = resutl.getRows();
+            } else {
+                rows = (List<Map<String, Object>>) page;
             }
-            rows = resutl.getRows();
-        }else {
-            rows=(List<Map<String, Object>>)page ;
-        }
-        //错误照片用户id
-        String errorId = insertUserPhoto(rows);
-        if ("".contentEquals(errorId)) {
+            //错误照片用户id
+            String errorId = insertUserPhoto(rows);
+            if ("".contentEquals(errorId)) {
+                return !rows.isEmpty()
+                        ? ResultData.dataResult("success", "获取大楼员工信息成功", page)
+                        : Result.unDataResult("success", "暂无数据");
+            }
             return !rows.isEmpty()
-                    ? ResultData.dataResult("success", "获取大楼员工信息成功", page)
-                    : Result.unDataResult("success", "暂无数据");
+                    ? ResultData.dataResult("success", "获取大楼员工信息成功" + ",错误照片的用户id:" + errorId, page)
+                    : Result.unDataResult("success", ",错误照片的用户id:" + errorId);
+        }catch (Exception e){
+            logger.error("插入图片错误",e);
+            return  null;
         }
-        return !rows.isEmpty()
-                ? ResultData.dataResult("success", "获取大楼员工信息成功" + ",错误照片的用户id:" + errorId, page)
-                : Result.unDataResult("success", ",错误照片的用户id:" + errorId);
+
     }
+
     /**
      * 给每一条记录插入照片
      * @param rows sql查询的记录

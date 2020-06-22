@@ -1,7 +1,9 @@
 package com.goldccm.service.WebSocket.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.goldccm.model.compose.Constant;
+import com.goldccm.model.compose.MsgModel;
 import com.goldccm.model.compose.Result;
 import com.goldccm.model.compose.TableList;
 import com.goldccm.persist.base.IBaseDao;
@@ -78,35 +80,31 @@ public class WebSocketServiceimpl extends BaseServiceImpl implements IWebSocketS
             return Result.unDataResult("success", "无聊天记录需要获取");
         }
         JSONObject obj = new JSONObject();
-        for (Map<String, Object> msgMap : msgList) {
-            String realName=BaseUtil.objToStr(msgMap.get("realName"),"null");
-            String nickName=BaseUtil.objToStr(msgMap.get("niceName"),"null");
-            String headImgUrl=BaseUtil.objToStr(msgMap.get("headImgUrl"),"null");
-            String idHandleImgUrl=BaseUtil.objToStr(msgMap.get("idHandleImgUrl"),"null");
-            for (Map.Entry<String, Object> entry : msgMap.entrySet()) {
-                String mapKey = entry.getKey();
-                Object mapValue = entry.getValue();
-                obj.put(mapKey, mapValue);
 
-            }
-            obj.put("realName",realName);
-            obj.put("nickName",nickName);
-            obj.put("headImgUrl",headImgUrl);
-            obj.put("idHandleImgUrl",idHandleImgUrl);
-            Integer type = BaseUtil.objToInteger(msgMap.get("type"), 0);
-            if (type==4){
+        MsgModel msgModel =new MsgModel();
+        msgModel.setToUserId(toUserId);
+        for (Map<String, Object> msgMap : msgList) {
+            msgModel.setType(BaseUtil.objToInteger(msgMap.get("type"),0));
+            msgModel.setRealName(BaseUtil.objToStr(msgMap.get("realName"), ""));
+            msgModel.setNiceName(BaseUtil.objToStr(msgMap.get("niceName"), ""));
+            msgModel.setHeadImgUrl(BaseUtil.objToStr(msgMap.get("headImgUrl"), ""));
+            msgModel.setHeadImgUrl(BaseUtil.objToStr(msgMap.get("idHandleImgUrl"), ""));
+            msgModel.setFromUserId(BaseUtil.objToLong(msgMap.get("fromUserId"),0L));
+            msgModel.setData(BaseUtil.objToStr(msgMap.get("message"),""));
+//            msgModel.setUpdateTime(BaseUtil.objToStr(msgMap.get("update_time"),""));
+            if (msgModel.getType()==4){
                 String sql="select count(*) c from "+TableList.USER_FRIEND+" where friendId="+toUserId+" and applyType=0";
                 Map<String, Object> count = findFirstBySql(sql);
                 if (count!=null){
                     obj.put("count",count.get("c"));
                 }
             }
-            obj.remove("id");
-            System.out.println(obj.toJSONString());
+            JSONObject jsonObject = JSONObject.parseObject(JSONObject.toJSONString(msgModel));
+            jsonObject.put("message", msgModel.getData());
+            jsonObject.put("updatetime", BaseUtil.objToStr(msgMap.get("update_time"),""));
             //发送给session连接者
-            session.sendMessage(new TextMessage(obj.toJSONString()));
+            session.sendMessage(new TextMessage(JSON.toJSONString(jsonObject)));
         }
-
             if (deleteMessage(toUserId)>0){
                 System.out.println("删除聊天记录成功");
             }
@@ -119,7 +117,8 @@ public class WebSocketServiceimpl extends BaseServiceImpl implements IWebSocketS
         String coloumSql = "select um.*,niceName,realName,headImgUrl ";
         String fromSql = " from " + TableList.USER_MESSAGE + " um " +
                 "left join "+TableList.USER+" u on fromUserId=u.id" +
-                " where toUserId = " + toUserId;
+                " where toUserId = " + toUserId+" and cstatus<>'delete'";
+        log.info("离线聊天消息：{}",coloumSql+fromSql);
         return baseDao.findList(coloumSql, fromSql);
     }
     /**
@@ -130,22 +129,22 @@ public class WebSocketServiceimpl extends BaseServiceImpl implements IWebSocketS
     public List<Map<String, Object>> getVisitRecordByVisitorId( Long userId) {
 
         String coloumSql = " select * ";
-
+        String column="select r.id,r.visitDate,r.visitTime,r.userId,r.visitorId,r.reason,r.cstatus,r.startDate,r.endDate,r.companyId,r.replyDate,r.replyTime,r.recordType,c.addr,u.realName,u.headImgUrl,u.idHandleImgUrl,u.niceName,u.id fromUserId";
         /* 查看谁访问我 我=被访者=visitorId=20 记录状态=recordType=1 阅读状态=未阅读='F' replyDate is null */
         String fromSql = " from(\n" +
-                "select *  from "+TableList.VISITOR_RECORD+" where endDate>SYSDATE() and  isReceive ='F' and cstatus='applyConfirm' and" +
-                " visitorId = "+userId+" and recordType=1  and replyDate is null\n";
+                column+" from tbl_visitor_record r left join tbl_user u on r.userId=u.id left join tbl_company c on r.companyId=c.id\n" +
+                "where  endDate>SYSDATE() and isReceive ='F' and cstatus='applyConfirm' and visitorId = "+userId+" and recordType=1  and replyDate is null\n";
         /* 查看谁邀请我去访问 我=访客=userId=20 记录状态=recordType=2 阅读状态=未阅读='F' replyDate is null */
-        String union1="union all\n" +
-                "select *  from "+TableList.VISITOR_RECORD+" where endDate>SYSDATE() and  isReceive ='F' and cstatus='applyConfirm' and " +
-                "userId =  "+userId+" and recordType=2  and replyDate is  null\n";
+        String union1="union \n" +
+                column+"  from tbl_visitor_record r left join tbl_user u on r.visitorId=u.id left join tbl_company c on r.companyId=c.id \n" +
+                "where endDate>SYSDATE() and isReceive ='F' and cstatus='applyConfirm' and userId =  "+userId+" and recordType=2  and replyDate is  null \n";
         /* 查看谁回应了我的访问申请 我=访客=userId=20 replyDate is not null回应日期不为空，状态不是申请中 cstatus<>'applyConfirm' 则说明回应 记录状态=recordType=1 */
-        String union2="union all\n" +
-                "select *  from tbl_visitor_record where endDate>SYSDATE() and  isReceive ='F' and cstatus<>'applyConfirm' " +
+        String union2="union \n" +
+                column+" from tbl_visitor_record r left join tbl_user u on r.visitorId=u.id left join tbl_company c on r.companyId=c.id  where endDate>SYSDATE() and  isReceive ='F' and cstatus<>'applyConfirm' " +
                 "and userId =  "+userId+" and recordType=1 and replyDate is not null\n";
         /* 查看谁回应了我的邀约申请 我=被访者=visitorId=20 replyDate is not null回应日期不为空，状态不是申请中 cstatus<>'applyConfirm' 则说明回应 记录状态=recordType=1  */
-        String union3="union all \n" +
-                "select *  from tbl_visitor_record where endDate>SYSDATE() and  isReceive ='F' and cstatus<>'applyConfirm' " +
+        String union3="union  \n" +
+                column+"  from tbl_visitor_record r left join tbl_user u on r.userId=u.id left join tbl_company c on r.companyId=c.id  where endDate>SYSDATE() and  isReceive ='F' and cstatus<>'applyConfirm' " +
                 "and visitorId =  "+userId+"  and recordType=2\n" +
                 "and replyDate is not null";
         String suffix=")x";
@@ -182,7 +181,7 @@ public class WebSocketServiceimpl extends BaseServiceImpl implements IWebSocketS
                 obj.put("fromUserId",msgMap.get("userId"));
                 //获取用户信息
                 saveJson(BaseUtil.objToInteger(msgMap.get("userId"),0),obj);
-               // 当recordType=1时 发送人为userId
+                // 当recordType=1时 发送人为userId
             }else if(msgMap.get("recordType")==Constant.RECORDTYPE_INVITE){
                 obj.put("fromUserId",msgMap.get("visitorId"));
                 //获取用户信息
@@ -206,22 +205,44 @@ public class WebSocketServiceimpl extends BaseServiceImpl implements IWebSocketS
         }
         return Result.unDataResult("success", "访问记录获取成功");
     }
-    @Override
-    public Result sendVisitRcord(WebSocketSession session,Map<String, Object> paramMap) throws Exception{
-        JSONObject obj = new JSONObject();
-        for (Map.Entry<String, Object> entry : paramMap.entrySet()) {
-            String mapKey = entry.getKey();
-            Object mapValue = entry.getValue();
-            obj.put(mapKey, mapValue);
-        }
-                //type=2 作为websocket的访问标志
-                obj.put("type", Constant.MASSEGETYPE_VISITOR);
-                System.out.println(obj.toJSONString());
-                session.sendMessage(new TextMessage(obj.toJSONString()));
-
-        return Result.unDataResult("success", "发送记录成功");
-    }
-
+//    @Override
+//    public Result gainVisitRcordfromDb(WebSocketSession session, Long userId) throws Exception {
+//        //1从数据库获取离线邀约消息
+//        List<Map<String, Object>> msgList = getVisitRecordByVisitorId(userId);
+//        if (msgList == null||msgList.isEmpty()) {
+//            System.out.println("无访问记录需要获取");
+//            return Result.unDataResult("success", "无访问记录需要获取");
+//        }
+//        //2.根据list循环发送每一条邀约信息
+//        MsgModel msgModel=new MsgModel();
+//        msgModel.setToUserId(userId);
+//        msgModel.setType(2);
+//        StringBuffer str=new StringBuffer("(");
+//        for (Map<String, Object> msgMap : msgList) {
+//            //判断消息来源 1访问 2 邀约
+//            msgModel.setRealName(BaseUtil.objToStr(msgMap.get("realName"), ""));
+//            msgModel.setNiceName(BaseUtil.objToStr(msgMap.get("niceName"), ""));
+//            msgModel.setHeadImgUrl(BaseUtil.objToStr(msgMap.get("headImgUrl"), ""));
+//            msgModel.setHeadImgUrl(BaseUtil.objToStr(msgMap.get("idHandleImgUrl"), ""));
+//            msgModel.setFromUserId(BaseUtil.objToLong(msgMap.get("fromUserId"),0L));
+//            msgMap.remove("realName");
+//            msgMap.remove("niceName");
+//            msgMap.remove("headImgUrl");
+//            msgMap.remove("idHandleImgUrl");
+//            msgMap.remove("fromUserId");
+//            //fromUserId=谁发送的 当recordType=1时 发送人为userId
+//            msgModel.setData(msgMap);
+//            //发送给session连接者
+//            session.sendMessage(new TextMessage(JSON.toJSONString(msgModel)));
+//           str.append(msgMap.get("id")).append(",");
+//        }
+//        str.deleteCharAt(str.length() - 1).append(")");
+//        String s = String.valueOf(str);
+//        //改变状态
+//        deleteOrUpdate("update "+ TableList.VISITOR_RECORD+" set isReceive='T' where id in"+s);
+//
+//        return Result.unDataResult("success", "访问记录获取成功");
+//    }
     @Override
     public Result dealChat(WebSocketSession session,JSONObject msg) throws Exception{
         //获取主要消息
@@ -231,12 +252,13 @@ public class WebSocketServiceimpl extends BaseServiceImpl implements IWebSocketS
         }
         //获取fromUserId
         long fromUserId=(long)session.getAttributes().get("userId");
+        Map<String, Object> user = findFirstBySql("select idHandleImgUrl,headImgUrl,realName,niceName from " + TableList.USER + " where id =" + fromUserId);
 
         //传输对象
         long toUserId= msg.getInteger("toUserId");
         Integer type= msg.getInteger("type");
         //判断
-        JSONObject obj = new JSONObject();
+//        JSONObject obj = new JSONObject();
         try {
                 System.out.println("查询在线情况+" + Constant.SESSIONS.get(toUserId));
 //                for (Map.Entry<Object, WebSocketSession> entry : Constant.SESSIONS.entrySet()) {
@@ -244,24 +266,27 @@ public class WebSocketServiceimpl extends BaseServiceImpl implements IWebSocketS
 //                }
                 //用户在线，调用发送接口
                 if (Constant.SESSIONS.containsKey(toUserId)) {
-
-                    obj.put("message", msg.getString("message"));
-                    obj.put("toUserId", toUserId);
-                    obj.put("fromUserId", fromUserId);
-                    obj.put("type",type);
-                    obj.put("updateTime", DateUtil.getSystemTime());
-                    //查看用户信息
-                    saveJson((int)fromUserId,obj);
+                    MsgModel msgModel=new MsgModel(1, fromUserId,  toUserId, BaseUtil.objToStr(user.get("idHandleImgUrl"),""), BaseUtil.objToStr(user.get("headImgUrl"),"") , BaseUtil.objToStr(user.get("realName"),"") , BaseUtil.objToStr(user.get("niceName"),"") , content);
+                    String s = JSONObject.toJSONString(msgModel);
+                    JSONObject jsonObject = JSONObject.parseObject(s);
+                    jsonObject.put("message",content);
+//                    obj.put("message", msg.getString("message"));
+//                    obj.put("toUserId", toUserId);
+//                    obj.put("fromUserId", fromUserId);
+//                    obj.put("type",type);
+                    jsonObject.put("updatetime", DateUtil.getSystemTime());
+//                    //查看用户信息
+//                    saveJson((int)fromUserId,obj);
 //                    //查看好友申请数量
-                    if (type==4){
-                        String sql="select count(*) c from "+TableList.USER_FRIEND+" where friendId="+toUserId+" and applyType=0";
-                        Map<String, Object> count = findFirstBySql(sql);
-                        if (count!=null){
-                            obj.put("count",count.get("c"));
-                        }
-                    }
-                    sendMessageToUser(Constant.SESSIONS.get(toUserId), fromUserId, (long)toUserId, content,(long) type, new TextMessage(obj.toJSONString()));
-
+//                    if (type==4){
+//                        String sql="select count(*) c from "+TableList.USER_FRIEND+" where friendId="+toUserId+" and applyType=0";
+//                        Map<String, Object> count = findFirstBySql(sql);
+//                        if (count!=null){
+//                            obj.put("count",count.get("c"));
+//                        }
+//                    }
+//                    String toUserString = JSON.toJSONString(msgModel);
+                    Constant.SESSIONS.get(toUserId).sendMessage(new TextMessage(jsonObject.toJSONString()));
                     session.sendMessage(new TextMessage(Result.ResultCodeType("success","发送成功","200",type)));
                     //用户不在线，插入数据库
                 } else {
@@ -271,8 +296,6 @@ public class WebSocketServiceimpl extends BaseServiceImpl implements IWebSocketS
                         //发送推送
                         Map<String, Object> toUserMap = findById(TableList.USER, (int) toUserId);
                         String deviceToken = BaseUtil.objToStr(toUserMap.get("deviceToken"), "");
-//                        String deviceType = BaseUtil.objToStr(toUserMap.get("deviceType"), "0");
-//                        String isOnlineApp = BaseUtil.objToStr(toUserMap.get("isOnlineApp"), "T");
                             String notification_title="您有一条聊天消息需处理！";
                             if (type==4){
                                 notification_title="您有一条好友申请需处理！";
@@ -280,13 +303,11 @@ public class WebSocketServiceimpl extends BaseServiceImpl implements IWebSocketS
                           String  phone = BaseUtil.objToStr(toUserMap.get("phone"), "0");
                         //个推
                          GTNotification.Single(deviceToken, phone, notification_title, content, content);
-//                         shortMessageService.YMNotification(deviceToken,deviceType,notification_title,content,isOnlineApp);
                     }else {
                         session.sendMessage(new TextMessage(Result.ResultCodeType("fail","发送失败","-1",type)));
                     }
-                    log.info("插入成功,当前id" + istrue);
+                    log.info("存入聊天信息成功,当前id" + istrue);
                 }
-
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -296,8 +317,8 @@ public class WebSocketServiceimpl extends BaseServiceImpl implements IWebSocketS
     @Override
     public int deleteMessage(Long toUserId) throws Exception {
 
-        String sql = "delete from " +TableList.USER_MESSAGE +
-                " where  toUserId="+toUserId ;
+        String sql = "update  " +TableList.USER_MESSAGE +
+                " set cstatus='delete' where  toUserId="+toUserId ;
         return baseDao.deleteOrUpdate(sql);
     }
 

@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.ModelAndView;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
@@ -20,6 +20,7 @@ import java.util.Map;
  */
 @Controller
 @RequestMapping("/qrcode")
+@ApiIgnore
 public class QrcodeController extends BaseController{
     @Autowired
     private QrcodeServiceImpl qrcodeService;
@@ -39,6 +40,19 @@ public class QrcodeController extends BaseController{
             return Result.unDataResult("fail","获取二维码失败！");
         }
     }
+    @AuthCheckAnnotation(checkLogin = false, checkVerify = false, checkRequestLegal = false)
+    @RequestMapping("/otherQrcode")
+    @ResponseBody
+    public Result otherQrcode(HttpServletRequest request){
+        try {
+            Map<String,Object> paramMap = getParamsToMap(request);
+            System.out.println("进入otherQrcode");
+            return qrcodeService.dealQrcode(paramMap);
 
+        }catch (Exception e){
+            e.printStackTrace();
+            return Result.unDataResult("fail","获取二维码失败！");
+        }
+    }
 
 }

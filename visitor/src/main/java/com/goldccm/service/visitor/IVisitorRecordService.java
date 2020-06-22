@@ -126,12 +126,12 @@ public interface IVisitorRecordService extends IBaseService {
      *
      */
     Result uploadAccessRecord(String pospCode,String orgCode,String visitId,String inOrOut,String visitDate,String visitTime) throws Exception;
-    /** 
+    /**
      * 公司后台管理发送邀约
-     * @param paramMap	 
-     * @return com.goldccm.model.compose.Result 
-     * @throws Exception    
-     * @author chenwf 
+     * @param paramMap
+     * @return com.goldccm.model.compose.Result
+     * @throws Exception
+     * @author chenwf
      * @date 2019/8/21 15:34
      */
     Result sendShortMessage(Map<String, Object> paramMap) throws Exception;
@@ -144,19 +144,26 @@ public interface IVisitorRecordService extends IBaseService {
      * @date 2019/8/22 11:23
      */
     Result dealQrcodeUrl(Map<String, Object> paramMap) throws Exception;
-    /** 
+    /**
      * 保存访客申请记录
-     * @param paramMap	 
-     * @return int 
-     * @throws Exception    
-     * @author chenwf 
+     * @param paramMap
+     * @return int
+     * @throws Exception
+     * @author chenwf
      * @date 2019/7/29 15:43
      */
     int saveVisitRecord(Map<String, Object> paramMap)throws Exception;
     //非好友访问+好友访问整合
     Result visit (Map<String, Object> paramMap) throws Exception;
+    //回应访问
+    Result replay(Map<String, Object> paramMap) throws Exception;
+    //非好友邀约+好友邀约整合
+    Result inviteStranger(Map<String, Object> paramMap) throws Exception;
+
+    //接口回应邀约
+    Result visitReply(Map<String, Object> paramMap) throws Exception;
     /**
-     * webSocket回应邀约
+     * websocket回应邀约
      */
     void visitReply (WebSocketSession session,JSONObject msg) throws Exception;
     /**
@@ -176,18 +183,15 @@ public interface IVisitorRecordService extends IBaseService {
 
 
     Result updateRecord(Map<String, Object> paramMap) throws Exception;
-    
+
     Result forwarding(String visitor, String visitorBy, String companyId, String startDate) throws Exception;
 
     Result visitForwarding(Map<String, Object> paramMap) throws Exception;
-    //访问时填写公司
-    Result replay(Map<String, Object> paramMap) throws Exception;
-    //接口回应邀约
-    Result visitReply(Map<String, Object> paramMap) throws Exception;
+
+
     //邀约我的人
     Result inviteMine(Map<String, Object> paramMap, Integer pageNum, Integer pageSize, Integer recordtype);
-    //非好友邀约
-    Result InviteStranger(Map<String, Object> paramMap) throws Exception;
+
 
     Result myVisit(Map<String, Object> paramMap, Integer pageNum, Integer pageSize, Integer recordtypeVisitor);
 

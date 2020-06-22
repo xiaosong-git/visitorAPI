@@ -19,4 +19,11 @@ public interface IQrcodeService extends IBaseService{
     public Map<String,Object> getByCdKey(String cdkey,String csStatus);
 
     Result getVisitQrcode(Map<String, Object> paramMap) throws Exception;
+
+    /**
+     * 处理第三方二维码
+     * @param paramMap 参数
+     * @return
+     */
+    Result dealQrcode(Map<String, Object> paramMap) throws Exception;
 }

@@ -56,7 +56,7 @@ public class YunPainSmsUtil {
 
     public static String CHECK_CODE_VISITORBY = "【朋悦比邻】您好，您有一条预约访客申请已审核，审核结果：visitorResult，被访者:visitorBy,访问时间:visitorDateTime";
 
-    public static Integer MSG_TYPE_VISITOR = 4;//审核
+    public static Integer MSG_TYPE_VISITOR = 4;//邀约审核
 
     public static String CHECK_CODE_VISITOR = "【朋悦比邻】您好，您有一条预约访客需审核，访问者:visitor1，被访者:visitorBy,访问时间:visitorDateTime";
 
@@ -64,13 +64,20 @@ public class YunPainSmsUtil {
 
     public static String CHECK_CODE_VERIFY = "【朋悦比邻】您好，您有一条预约访客需审核，访问者:visitor1,访问时间:visitorDateTime";
 
-    public static Integer MSG_TYPE_INVITE = 6;//邀请
+    public static Integer MSG_TYPE_INVITE_QRCODE = 6;//邀请
 
-    public static String CHECK_CODE_INVITE = "【朋悦比邻】visitorBy，您好，companyName的accName请您于visitorDateTime —— endDateTime到:companyAddr进行访谈，请使用链接中的二维码通行：url\n";
+    public static String CHECK_CODE_INVITE_QRCODE = "【朋悦比邻】visitorBy，您好，companyName的accName请您于visitorDateTime —— endDateTime到:companyAddr进行访谈，请使用链接中的二维码通行：url\n";
 
     public static Integer MSG_TYPE_VISITORBY_QRCODE = 7;//访客
 
     public static String CHECK_CODE_VISITORBY_QRCODE = "【朋悦比邻】您好，您有一条预约访客申请已审核，审核结果：#visitorResult#，被访者:#visitorBy#,访问时间:#visitorDateTime#，通行时请使用链接中的二维码通行，请点击：#url#";
+
+    public static Integer MSG_TYPE_INVITE = 8;//邀约
+
+    public static String CHECK_CODE_INVITE = "【朋悦比邻】您好，您有一条预约访客需审核，邀约者:visitor1，邀约时间:visitorDateTime";
+    public static Integer MSG_TYPE_INVITE_REPLY = 9;//邀约回应
+
+    public static String CHECK_CODE_INVITE_REPLY = "【朋悦比邻】您好，您有一条邀约申请已审核，审核结果：#visitorResult#，访问者:visitor1,访问时间:visitorDateTime";
 
     private final static String APIKEY = "a8c29253d3e40dfa59b0f677bdd3f6fd";
 
@@ -110,13 +117,13 @@ public class YunPainSmsUtil {
             msg= msg.replace("phone", mobile);
             content= msg.replace("limit", limit);
         }else if(MSG_TYPE_VISITORBY == type){
-            //访客
+            //审核
             msg = CHECK_CODE_VISITORBY;
             msg= msg.replace("visitorResult", visitorResult);
             msg= msg.replace("visitorBy", visitorBy);
             content= msg.replace("visitorDateTime", visitorDateTime);
-        }else if(MSG_TYPE_VISITOR == type){
-            //审核
+        }else if(MSG_TYPE_VISITOR == type){//4
+            //访问
             msg = CHECK_CODE_VISITOR;
             msg= msg.replace("visitor1", visitor);
             msg= msg.replace("visitorBy", visitorBy);
@@ -126,10 +133,10 @@ public class YunPainSmsUtil {
             msg = CHECK_CODE_VERIFY;
             msg= msg.replace("visitor1", visitor);
             content= msg.replace("visitorDateTime", visitorDateTime);
-        }else if(MSG_TYPE_INVITE==type){
+        }else if(MSG_TYPE_INVITE_QRCODE==type){
 //            "【朋悦比邻】visitorBy，您好，companyName的accName邀请您于visitorDateTime —— endDateTime到:companyAddr进行访谈，同意请点击：#url\n";
 
-            msg = CHECK_CODE_INVITE;
+            msg = CHECK_CODE_INVITE_QRCODE;
             msg= msg.replace("accName", visitor);
             msg=msg.replace("visitorBy",visitorBy);
             msg=msg.replace("companyName",limit);
@@ -143,6 +150,18 @@ public class YunPainSmsUtil {
             msg= msg.replace("#visitorBy#", visitorBy);
             msg=msg.replace("#url#",checkCode);
             content= msg.replace("#visitorDateTime#", visitorDateTime);
+        }else if(MSG_TYPE_INVITE.equals(type)){//8
+            msg = CHECK_CODE_INVITE;
+            msg= msg.replace("visitor1", visitor);
+
+            content= msg.replace("visitorDateTime", visitorDateTime);
+
+        }else if(MSG_TYPE_INVITE_REPLY.equals(type)){//9
+            msg = CHECK_CODE_INVITE_REPLY;
+            msg= msg.replace("visitor1", visitor);
+            msg= msg.replace("#visitorResult#", visitorResult);
+            content= msg.replace("visitorDateTime", visitorDateTime);
+
         }
         System.out.println("发送短信的内容： "+content);
         Map<String, String> params = new HashMap<String, String>();
@@ -286,10 +305,14 @@ public class YunPainSmsUtil {
       }
      
      public static void main(String[] args) throws Exception{
+         String msg = CHECK_CODE_INVITE;
+         msg= msg.replace("visitor1", "陈维发");
 
-         String sid =Base64.encode((String.valueOf(150)).getBytes("UTF-8"));
-         String sendMsg =	YunPainSmsUtil.sendSmsCode(Constant.URL+sid,"18150797748",YunPainSmsUtil.MSG_TYPE_VISITORBY_QRCODE,null,null,
-                 "审核已通过","fafa","2019-09-20 10:19",null);
+         msg=msg.replace("visitorDateTime", "23");
+         System.out.println(msg);
+//         String sid =Base64.encode((String.valueOf(150)).getBytes("UTF-8"));
+//         String sendMsg =	YunPainSmsUtil.sendSmsCode(Constant.URL+sid,"18150797748",YunPainSmsUtil.MSG_TYPE_VISITORBY_QRCODE,null,null,
+//                 "审核已通过","fafa","2019-09-20 10:19",null);
 //         sendSmsCode("c", "18150797748", 6, DateUtil.getCurDate(), "4", "hoho", "fafa",DateUtil.getCurTime(), "guigui");
 //         sendSmsCode("c", "18150797748", 2, "1", "4", null, null,DateUtil.getCurTime(), null);
 

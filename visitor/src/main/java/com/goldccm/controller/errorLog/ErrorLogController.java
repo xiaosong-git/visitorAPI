@@ -4,7 +4,9 @@ import com.goldccm.annotation.AuthCheckAnnotation;
 import com.goldccm.controller.base.BaseController;
 import com.goldccm.model.compose.Result;
 import com.goldccm.service.errorLog.IErrorLogService;
+import io.swagger.annotations.Api;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -15,13 +17,14 @@ import java.util.Map;
 
 @Controller
 @RequestMapping(value = "/errorLog")
+@Api(tags="错误日志",value = "错误日志")
 public class ErrorLogController extends BaseController {
 
     @Resource(name = "errorLogService")
     private IErrorLogService errorLogService;
 
     @AuthCheckAnnotation(checkLogin = false,checkVerify = false, checkRequestLegal = false,checkOtherLegal = true)
-    @RequestMapping(value = "/uploadErrorLog")
+    @PostMapping(value = "/uploadErrorLog")
     @ResponseBody
     public Result uploadErrorLog(HttpServletRequest request) throws Exception {
         try {

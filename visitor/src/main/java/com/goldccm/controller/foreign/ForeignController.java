@@ -9,6 +9,8 @@ import com.goldccm.controller.base.BaseController;
 import com.goldccm.model.compose.Result;
 import com.goldccm.service.visitor.IForeignService;
 import com.goldccm.service.visitor.IVisitorRecordService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +24,7 @@ import java.util.Map;
  */
 @Controller
 @RequestMapping("/foreign")
+@Api(tags="上位机拉取访客",value = "上位机拉取访客相关接口")
 public class ForeignController extends BaseController {
 
     @Autowired
@@ -34,8 +37,9 @@ public class ForeignController extends BaseController {
      * @return
      */
     @AuthCheckAnnotation(checkLogin = false,checkVerify = false, checkRequestLegal = false)
-    @RequestMapping("/findOrgCode/{pospCode}/{orgCode}/{pageNum}/{pageSize}")
+    @GetMapping("/findOrgCode/{pospCode}/{orgCode}/{pageNum}/{pageSize}")
     @ResponseBody
+    @ApiOperation(value = "访问我的人",notes = "根据用户id查找待审核信息")
     public Result findOrgCode(HttpServletRequest request, @PathVariable String pospCode, @PathVariable String orgCode, @PathVariable Integer pageNum, @PathVariable Integer pageSize){
         try {
             return visitorRecordService.findOrgCode(pospCode,orgCode,pageNum,pageSize);
@@ -51,7 +55,7 @@ public class ForeignController extends BaseController {
      * @return
      */
     @AuthCheckAnnotation(checkLogin = false,checkVerify = false, checkRequestLegal = false)
-    @RequestMapping("/findBySoleCode/{pospCode}/{orgCode}/{soleCode}/{visitId}")
+    @GetMapping("/findBySoleCode/{pospCode}/{orgCode}/{soleCode}/{visitId}")
     @ResponseBody
     public Result findBySoleCode(HttpServletRequest request, @PathVariable String pospCode, @PathVariable String orgCode, @PathVariable String soleCode, @PathVariable String visitId){
         try {
@@ -68,7 +72,7 @@ public class ForeignController extends BaseController {
      * @return
      */
     @AuthCheckAnnotation(checkLogin = false,checkVerify = false, checkRequestLegal = false)
-    @RequestMapping("/findOrgCodeConfirm/{pospCode}/{orgCode}/{isData}")
+    @GetMapping("/findOrgCodeConfirm/{pospCode}/{orgCode}/{isData}")
     @ResponseBody
     public Result findOrgCodeConfirm(HttpServletRequest request, @PathVariable String pospCode, @PathVariable String orgCode, @PathVariable String isData){
         try {
@@ -91,7 +95,7 @@ public class ForeignController extends BaseController {
      *
      */
     @AuthCheckAnnotation(checkLogin = false,checkVerify = false, checkRequestLegal = false)
-    @RequestMapping( value = "/uploadBySingle",method = RequestMethod.POST)
+    @PostMapping("/uploadBySingle")
     @ResponseBody
     public Result uploadScanRecode(HttpServletRequest request,String pospCode,String orgCode,String visitId,String inOrOut,String visitDate,String visitTime) throws Exception {
 
@@ -133,7 +137,7 @@ public class ForeignController extends BaseController {
      * @return
      */
     @AuthCheckAnnotation(checkLogin = false,checkVerify = false, checkRequestLegal = false)
-    @RequestMapping("/newFindOrgCode/{pospCode}/{orgCode}/{pageNum}/{pageSize}")
+    @GetMapping("/newFindOrgCode/{pospCode}/{orgCode}/{pageNum}/{pageSize}")
     @ResponseBody
     public Result newFindOrgCode(HttpServletRequest request, @PathVariable String pospCode, @PathVariable String orgCode, @PathVariable Integer pageNum, @PathVariable Integer pageSize){
         try {
@@ -149,7 +153,7 @@ public class ForeignController extends BaseController {
      * @return
      */
     @AuthCheckAnnotation(checkLogin = false,checkVerify = false, checkRequestLegal = false)
-    @RequestMapping("/newFindOrgCode")
+    @PostMapping("/newFindOrgCode")
     @ResponseBody
     public Result newFindOrgCode(HttpServletRequest request){
         try {
@@ -167,7 +171,7 @@ public class ForeignController extends BaseController {
      * @return
      */
     @AuthCheckAnnotation(checkLogin = false,checkVerify = false, checkRequestLegal = false)
-    @RequestMapping("/newFindOrgCodeConfirm/{pospCode}/{orgCode}/{idStr}")
+    @GetMapping("/newFindOrgCodeConfirm/{pospCode}/{orgCode}/{idStr}")
     @ResponseBody
     public Result newFindOrgCodeConfirm(HttpServletRequest request, @PathVariable String pospCode, @PathVariable String orgCode, @PathVariable String idStr){
         try {
@@ -178,12 +182,12 @@ public class ForeignController extends BaseController {
         }
     }
     /**
-     * 确认访问数据新接口
+     * 确认访问数据新接口，需要秘钥
      * @param request
      * @return
      */
     @AuthCheckAnnotation(checkLogin = false,checkVerify = false, checkRequestLegal = false)
-    @RequestMapping("/newFindOrgCodeConfirm")
+    @PostMapping("/newFindOrgCodeConfirm")
     @ResponseBody
     public Result newFindOrgCodeConfirm(HttpServletRequest request){
         try {

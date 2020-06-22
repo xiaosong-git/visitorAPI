@@ -9,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
@@ -21,6 +22,7 @@ import java.util.Map;
  **/
 @Controller
 @RequestMapping("/flow")
+@ApiIgnore
 public class FlowController extends BaseController {
 
     @Autowired

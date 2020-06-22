@@ -57,7 +57,8 @@ public class ForeignServiceImpl extends BaseServiceImpl implements IForeignServi
         logger.info(columnSql+fromSql);
         PageModel page = this.findPage(columnSql, fromSql, pageNum, pageSize);
         //有数据 获取图片并插入
-        return companyUserService.insertUserPhoto(page,"page");
+
+            return companyUserService.insertUserPhoto(page,"page");
 
     }
     public Result newFindOrgCode(Map<String, Object> paramMap) {
@@ -136,9 +137,10 @@ public class ForeignServiceImpl extends BaseServiceImpl implements IForeignServi
         return confirmSql(pospCode, orgCode, idStr);
     }
     public Result confirmSql(String pospCode, String orgCode, String idStr) {
-
+        logger.info("准备更新{}",idStr);
         int update = deleteOrUpdate("update " + TableList.VISITOR_RECORD + " set isFlag='T' where id in (" + idStr + ")");
         if (update > 0) {
+            logger.info("更新{}成功",idStr);
             return Result.success();
         }
         return Result.fail();

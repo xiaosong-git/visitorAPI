@@ -421,7 +421,7 @@ public class UserFriendServiceImpl extends BaseServiceImpl implements IUserFrien
             sql.append("remark='"+remark+"' ");
         }
         if (detail!=null){
-            sql.append(" detail='"+detail+"' ");
+            sql.append(" , detail='"+detail+"' ");
         }
         sql.append(" where userId="+userId+" and friendId="+friendId);
 

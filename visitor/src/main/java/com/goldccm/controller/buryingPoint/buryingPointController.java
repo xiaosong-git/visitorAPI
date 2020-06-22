@@ -4,8 +4,11 @@ import com.goldccm.annotation.AuthCheckAnnotation;
 import com.goldccm.controller.base.BaseController;
 import com.goldccm.model.compose.Result;
 import com.goldccm.service.buryingPoint.BuryingPointService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -20,6 +23,7 @@ import java.util.Map;
  **/
 @Controller
 @RequestMapping("/buryingPoint")
+@Api(tags="埋点",value = "埋点")
 public class buryingPointController extends BaseController {
     @Autowired
     private BuryingPointService buryingPointService;
@@ -29,7 +33,9 @@ public class buryingPointController extends BaseController {
      * @Date 2019/11/4 21:33
      */
     @AuthCheckAnnotation(checkLogin = false,checkVerify = false)
-    @RequestMapping("/save")
+    @PostMapping("/save")
+    @ApiOperation(value="保存埋点")
+
     @ResponseBody
     public Result save(HttpServletRequest request){
 

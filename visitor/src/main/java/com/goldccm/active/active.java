@@ -6,9 +6,6 @@ package com.goldccm.active;
  * @author: cwf
  * @create: 2019-12-02 23:10
  **/
-import java.net.Socket;
-import java.util.Date;
-
 //import org.apache.activemq.transport.stomp.StompConnection;
 
 // 消息生产者

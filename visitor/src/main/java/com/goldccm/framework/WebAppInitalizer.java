@@ -37,6 +37,7 @@ public class WebAppInitalizer extends AbstractAnnotationConfigDispatcherServletI
      */
     @Override
     protected Class<?>[] getServletConfigClasses() {
+
         return new Class<?>[]{WebConfig.class};
     }
     /**
@@ -46,6 +47,7 @@ public class WebAppInitalizer extends AbstractAnnotationConfigDispatcherServletI
      */
     @Override
     protected String[] getServletMappings() {
+
         return new String[]{"/"};
     }
 
@@ -71,11 +73,13 @@ public class WebAppInitalizer extends AbstractAnnotationConfigDispatcherServletI
     public void onStartup(ServletContext servletContext) throws ServletException {
         super.onStartup(servletContext);
         //增加过滤器，并且设置过滤的规则
-
         /*FilterRegistration.Dynamic filter = servletContext.addFilter("loginFilter",LoginFilter.class);
         filter.addMappingForUrlPatterns(null,false,"*//*");*/
-
-
+        /**
+         *         设置环境为dev还是prod
+         */
+        servletContext.setInitParameter(
+                "spring.profiles.active", "dev");
 
         //servletContext.addListener();
         /*servletContext.addListener(ProjectStartInit.class);*/

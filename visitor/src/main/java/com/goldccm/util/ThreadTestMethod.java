@@ -22,7 +22,7 @@ public class ThreadTestMethod implements Runnable {
 
     public static void main(String[] args) throws Exception {
         ThreadTestMethod count=new ThreadTestMethod();
-        for (int i=0;i<=2;i++){
+        for (int i=0;i<=0;i++){
             Thread thread=new Thread(count);
             thread.start();
         }
@@ -46,14 +46,14 @@ public class ThreadTestMethod implements Runnable {
             itemJSONObj.put("productcode", "000010");//业务编码
             itemJSONObj.put("serialno", string);//流水号
             itemJSONObj.put("mac", createSign(string));//随机状态码   --验证签名  商户号+订单号+时间+产品编码+秘钥
-            itemJSONObj.put("userName", "吴桂民");
-            itemJSONObj.put("certNo", "350424199009031238");
-            itemJSONObj.put("imgData", Configuration.GetImageStrFromPath("C:\\Users\\Administrator\\Desktop\\biddata\\63D2B2E647C03C149AB7FC45D93E9024.png",30));
+            itemJSONObj.put("userName", "陈维发");
+            itemJSONObj.put("certNo", "350121199306180330");
+            itemJSONObj.put("imgData", Configuration.GetImageStrFromPath("D:\\test\\tempotos\\oFw0JwGlkNWM9DByJR8C76hSgYuc\\1582625012971.jpg",30));
 
             HttpClient httpClient = new SSLClient();
             //HttpPost postMethod = new HttpPost("http://t.pyblkj.cn:8082/wisdom/entrance/pub");
            // HttpPost postMethod = new HttpPost("http://localhost:8080/wisdom-new/entrance/pub");
-            HttpPost postMethod = new HttpPost("http://yzb.free-http.svipss.top/wisdom-new/entrance/pub");
+            HttpPost postMethod = new HttpPost("http://t.pyblkj.cn:8082/wisdom/entrance/pub");
             StringEntity entityStr= new StringEntity(JSON.toJSONString(itemJSONObj), HTTP.UTF_8);
             entityStr.setContentType("application/json");
             postMethod.setEntity(entityStr);
@@ -61,7 +61,7 @@ public class ThreadTestMethod implements Runnable {
             int statusCode = resp.getStatusLine().getStatusCode();
             ThirdResponseObj responseObj = new ThirdResponseObj();
 
-            String path = "E:\\zhong_dun\\test.txt";
+            String path = "D:\\test.txt";
             BufferedWriter out = new BufferedWriter(
                     new OutputStreamWriter(new FileOutputStream(path,true)));
 

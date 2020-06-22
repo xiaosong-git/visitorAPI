@@ -105,7 +105,9 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
                 return false;
             }
             Object verifyObj = user.get("isAuth");
-            if (verifyObj == null) return false;
+            if (verifyObj == null) {
+                return false;
+            }
             isAuth = verifyObj+"";
             //redis修改
             RedisUtil.setStr(key, isAuth, apiNewAuthCheckRedisDbIndex, null);
@@ -304,16 +306,28 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
        if(!flag){
             return Result.unDataResult("fail","验证码错误");
         }
-        paramMap.remove("code");
-        paramMap.remove("sysPwd");
         //添加用户信息
-        int userId = createUser(phone, "");
-        if(userId < 1){
-            return Result.unDataResult("fail","注册失败");
-        }
-        //添加用户账户表
-        return creatAccount(userId,sysPwd);
+        return  createNewUser(phone, sysPwd);
     }
+
+    private Result createNewUser(String phone, String sysPwd) {
+        Map<String, Object> paramMap =new HashMap<>();
+        //添加用户信息
+        paramMap.put("createDate",DateUtil.getCurDate());
+        paramMap.put("createTime",DateUtil.getCurTime());
+        paramMap.put("token","T");
+        paramMap.put("loginName",phone);
+        paramMap.put("isAuth","F");
+        paramMap.put("phone",phone);
+        paramMap.put("realName","");
+        paramMap.put("workKey", NumberUtil.getRandomWorkKey(10));
+        paramMap.put("isSetTransPwd","F");
+        paramMap.put("soleCode",OrderNoUtil.genOrderNo("C", 16));
+        int save = this.save(TableList.USER, paramMap);
+
+        return creatAccount(save,sysPwd);
+    }
+
     /**
      * 根据userId创建账户
      */
@@ -340,7 +354,7 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
         Date date = new Date();
         paramMap.put("createDate",new SimpleDateFormat("yyyy-MM-dd").format(date));
         paramMap.put("createTime",new SimpleDateFormat("HH:mm:ss").format(date));
-        paramMap.put("token",UUID.randomUUID().toString());
+        paramMap.put("token","F");
         paramMap.put("loginName",phone);
         paramMap.put("isAuth","F");
         paramMap.put("phone",phone);
@@ -348,7 +362,13 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
         paramMap.put("workKey", NumberUtil.getRandomWorkKey(10));
         paramMap.put("isSetTransPwd","F");
         paramMap.put("soleCode",OrderNoUtil.genOrderNo("C", 16));
-       return this.save(TableList.USER, paramMap);
+        int save = this.save(TableList.USER, paramMap);
+        Map<String,Object> account=new HashMap<>();
+        account.put("userId",save);
+        account.put("sysPwd","670b14728ad9902aecba32e22fa4f6bd");
+        account.put("cstatus","normal");
+        this.save(TableList.USER_ACCOUNT,account);
+        return save;
     }
     @Override
     public Result verify(Map<String, Object> paramMap) {
@@ -404,7 +424,9 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
 //                    idHandleImgUrl=BaseUtil.objToStr(userAuth.get("idHandleImgUrl"),idHandleImgUrl);
 //                    logger.info("本地实人认证成功上一张成功图片为：{}",idHandleImgUrl);
                 } else {
+                   logger.info("上传图片为："+idHandleImgUrl);
                    String photoResult = auth(idNoMW, realName, idHandleImgUrl);
+
                    if (!"success".equals(photoResult)){
                        return Result.unDataResult("fail", photoResult);
                    }

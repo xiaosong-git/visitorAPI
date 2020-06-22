@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
@@ -20,6 +21,8 @@ import java.util.Map;
  **/
 @Controller
 @RequestMapping("/statistics")
+@ApiIgnore
+
 public class StatisticsContorller extends BaseController {
     @Autowired
     private StatisticsService statisticsService;

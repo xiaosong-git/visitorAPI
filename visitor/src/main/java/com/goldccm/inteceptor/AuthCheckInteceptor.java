@@ -2,6 +2,7 @@ package com.goldccm.inteceptor;
 
 import com.alibaba.fastjson.JSONObject;
 import com.goldccm.annotation.AuthCheckAnnotation;
+import com.goldccm.model.compose.Constant;
 import com.goldccm.model.compose.Result;
 import com.goldccm.model.compose.TableList;
 import com.goldccm.service.param.IParamService;
@@ -52,6 +53,10 @@ public class AuthCheckInteceptor extends HandlerInterceptorAdapter {
             writer.flush();
             writer.close();
             return false;
+        }
+        //测试环境关闭参数
+        if (Constant.IS_DEVELOP){
+            return true;
         }
         HandlerMethod methodHandler=(HandlerMethod) handler;
         AuthCheckAnnotation auth = methodHandler.getMethodAnnotation(AuthCheckAnnotation.class);

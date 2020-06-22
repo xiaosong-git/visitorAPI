@@ -5,11 +5,11 @@ import com.goldccm.controller.base.BaseController;
 import com.goldccm.model.compose.Result;
 import com.goldccm.service.code.ICodeService;
 import com.goldccm.util.BaseUtil;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
@@ -20,6 +20,7 @@ import java.util.Map;
  */
 @Controller
 @RequestMapping("/code")
+@Api(tags="验证码",value = "验证码")
 public class CodeController extends BaseController {
 
     @Autowired
@@ -31,15 +32,17 @@ public class CodeController extends BaseController {
      * @Date 2017/4/3 16:05
      */
     @AuthCheckAnnotation(checkLogin = false,checkVerify = false)
-    @RequestMapping("/sendCode/{phone}/{type}")
+    @GetMapping("/sendCode/{phone}/{type}")
     @ResponseBody
+    @ApiOperation(value = "发送验证码")
     public Result sendCode(@PathVariable String phone, @PathVariable Integer type) {
         return codeService.sendMsg(phone,type,null,null,null,null);
     }
 
     @AuthCheckAnnotation(checkLogin = false,checkVerify = false)
-    @RequestMapping("/verifyCode")
+    @PostMapping("/verifyCode")
     @ResponseBody
+    @ApiOperation(value = "验证验证码")
     public Result verifyCode(HttpServletRequest request) {
         try {
             Map<String,Object> paramMap = getParamsToMap(request);

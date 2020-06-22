@@ -6,7 +6,6 @@ import com.goldccm.controller.base.BaseController;
 import com.goldccm.model.compose.Constant;
 import com.goldccm.model.compose.Result;
 import com.goldccm.service.visitor.IVisitorRecordService;
-import com.goldccm.util.BaseUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -416,7 +415,7 @@ public class VisitorRecordController extends BaseController {
     public Result inviteStranger(HttpServletRequest request){
         try {
             Map<String,Object> paramMap = getParamsToMap(request);
-            return visitorRecordService.InviteStranger(paramMap);
+            return visitorRecordService.inviteStranger(paramMap);
         }catch (Exception e){
             e.printStackTrace();
             return Result.unDataResult("fail", "系统异常");

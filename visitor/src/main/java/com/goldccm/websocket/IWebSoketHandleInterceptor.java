@@ -11,7 +11,6 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Enumeration;
 import java.util.Map;
 
 
@@ -27,11 +26,11 @@ public class IWebSoketHandleInterceptor implements HandshakeInterceptor {
                 HttpServletRequest servletRequest = ((ServletServerHttpRequest) request).getServletRequest();
 
                 // 获取请求连接之前的token参数.
-                Enumeration enu = servletRequest.getParameterNames();
+//                Enumeration enu = servletRequest.getParameterNames();
                 long userId =Long.parseLong(servletRequest.getParameter("userId"));
                 String  token =(servletRequest.getParameter("token"));
                 Map<String,Object> user = userService.getUserByUserToken((int)userId, token);
-                if (user.isEmpty()||user==null){
+                if (user.isEmpty()){
                     return false;
                 }
                logger.info("userId:"+userId+ ", token:"+token);

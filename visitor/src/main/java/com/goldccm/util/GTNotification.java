@@ -23,16 +23,16 @@ public class GTNotification {
 
     private static String appId = "VAnoRfQ8kk69vx2rrR9tS4";
     private static String appKey = "dnYA43YSz16MGwebloMGA6";
-    private static String masterSecret = "Hr87hFYtt08cDbhIauIsY6";
+    private static String masterSecret = "g4zRVmEd258kBkSNuHRPQ4";
 //    static String CID = "3d2e89613f875ac8fecf1568a8d06e9d";
     // 别名推送方式
 //     static String Alias = "18150797748";
     static String host = "http://sdk.open.api.igexin.com/apiex.htm";
 
     public static void main(String[] args) throws Exception {
-        Single("ArqKTPlVqIobb-ov2Kp6RvpVKXGMAsIbrDDNLwnqUVZe","15659154890","素芬","素芬","透传");
-//        Single("32d7047feb5e24dcafa91656a13b350e","18150797748","发","发","发");
-////        Single("9fde86d15925a4eb3bb14f0feade83fb","18150797748","塑封","塑封","塑封");
+//        Single("ArqKTPlVqIobb-ov2Kp6RvpVKXGMAsIbrDDNLwnqUVZe","15659154890","素芬","素芬","透传");
+        Single("9b192f2b35044540bda50ca79ffef5cf","18150797748","发","发","发");
+//        Single("9fde86d15925a4eb3bb14f0feade83fb","18150797748","塑封","塑封","塑封");
 //        Single("d23bedd070498c0c4f0fdd20fb2b2f68","18150797748","发哥","发哥","塑封");
 //        Single("683a18644fd5f8bcdf5555f1a9a083fd","18150797748","宋伟","宋伟","宋伟");
     }

@@ -29,35 +29,35 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-core</artifactId>
-            <version>4.2.6.RELEASE</version>
+            <version>4.3.25.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>4.2.6.RELEASE</version>
+            <version>4.3.25.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-beans</artifactId>
-            <version>4.2.6.RELEASE</version>
+            <version>4.3.25.RELEASE</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-webmvc</artifactId>
-            <version>4.2.6.RELEASE</version>
+            <version>4.3.25.RELEASE</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-jdbc</artifactId>
-            <version>4.2.6.RELEASE</version>
+            <version>4.3.25.RELEASE</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context-support</artifactId>
-            <version>4.2.6.RELEASE</version>
+            <version>4.3.25.RELEASE</version>
         </dependency>
         <!-- websocket依赖包-->
         <dependency>
@@ -75,12 +75,12 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-websocket</artifactId>
-            <version>4.2.6.RELEASE</version>
+            <version>4.3.25.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-messaging</artifactId>
-            <version>4.2.6.RELEASE</version>
+            <version>4.3.25.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.aspectj</groupId>
@@ -257,7 +257,7 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
-            <version>4.2.6.RELEASE</version>
+            <version>4.3.25.RELEASE</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -278,15 +278,41 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
-            <version>4.2.6.RELEASE</version>
+            <version>4.3.25.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>com.gexin.platform</groupId>
             <artifactId>gexin-rp-sdk-http</artifactId>
             <version>4.1.0.5</version>
         </dependency>
-
-<!--        stomp-->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.6</version>
+        </dependency>
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger2</artifactId>
+            <version>2.9.2</version>
+        </dependency>
+        <!--注释掉springfox-swagger-ui-->
+        <!--                <dependency>-->
+        <!--                    <groupId>io.springfox</groupId>-->
+        <!--                    <artifactId>springfox-swagger-ui</artifactId>-->
+        <!--                    <version>2.9.2</version>-->
+        <!--                </dependency>-->
+        <!--添加swagger-ui-layer-->
+        <dependency>
+            <groupId>com.github.caspar-chen</groupId>
+            <artifactId>swagger-ui-layer</artifactId>
+            <version>1.1.3</version>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>3.6.0</version>
+        </dependency>
+        <!--        stomp-->
 <!--        <dependency>-->
 <!--            <groupId>io.projectreactor</groupId>-->
 <!--            <artifactId>reactor-core</artifactId>-->

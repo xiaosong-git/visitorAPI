@@ -5,12 +5,12 @@ import com.goldccm.annotation.AuthCheckAnnotation;
 import com.goldccm.controller.base.BaseController;
 import com.goldccm.model.compose.Result;
 import com.goldccm.service.checkInWork.CheckInWorkService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
@@ -23,6 +23,7 @@ import java.util.Map;
  **/
 @Controller
 @RequestMapping("/work")
+@Api(tags="打卡",value = "打卡")
 public class checkInWorkController extends BaseController {
 
     @Autowired
@@ -35,6 +36,7 @@ public class checkInWorkController extends BaseController {
     @AuthCheckAnnotation(checkLogin = false,checkVerify = false)
     @RequestMapping(value = "addGroup", method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
     @ResponseBody
+    @ApiIgnore
     public Result addGroup(@RequestBody JSONObject jsonObject){
 
         try {
@@ -56,6 +58,7 @@ public class checkInWorkController extends BaseController {
     @AuthCheckAnnotation(checkLogin = false)
     @RequestMapping("/gainWork")
     @ResponseBody
+    @ApiIgnore
     public Result gainWorkOne(HttpServletRequest request){
         try {
             Map<String,Object> paramMap = getParamsToMap(request);
@@ -75,7 +78,7 @@ public class checkInWorkController extends BaseController {
      * @Date 2019/11/4 21:33
      */
     @AuthCheckAnnotation(checkLogin = false)
-    @RequestMapping("/saveWork")
+    @PostMapping("/saveWork")
     @ResponseBody
     public Result saveWork(HttpServletRequest request){
         try {
@@ -98,6 +101,7 @@ public class checkInWorkController extends BaseController {
     @AuthCheckAnnotation(checkLogin = false)
     @RequestMapping("/outWork")
     @ResponseBody
+    @ApiIgnore
     public Result outWork(HttpServletRequest request){
         try {
             Map<String,Object> paramMap = getParamsToMap(request);
@@ -119,6 +123,7 @@ public class checkInWorkController extends BaseController {
     @AuthCheckAnnotation(checkLogin = false)
     @RequestMapping("/gainGroupIndex")
     @ResponseBody
+    @ApiIgnore
     public Result gainGroupIndex(HttpServletRequest request){
         try {
             Map<String,Object> paramMap = getParamsToMap(request);
@@ -140,6 +145,7 @@ public class checkInWorkController extends BaseController {
     @AuthCheckAnnotation(checkLogin = false)
     @RequestMapping("/gainGroupDetail")
     @ResponseBody
+    @ApiIgnore
     public Result gainGroupDetail(HttpServletRequest request){
         try {
             Map<String,Object> paramMap = getParamsToMap(request);
@@ -162,6 +168,7 @@ public class checkInWorkController extends BaseController {
     @AuthCheckAnnotation(checkLogin = false)
     @RequestMapping("/gain/month/statistics")
     @ResponseBody
+    @ApiIgnore
     public Result gainMonthStatistics(HttpServletRequest request){
         try {
             Map<String,Object> paramMap = getParamsToMap(request);
@@ -183,6 +190,7 @@ public class checkInWorkController extends BaseController {
     @AuthCheckAnnotation(checkLogin = false)
     @RequestMapping("/companyUser")
     @ResponseBody
+    @ApiIgnore
     public Result companyUser(HttpServletRequest request){
         try {
             Map<String,Object> paramMap = getParamsToMap(request);
@@ -204,6 +212,7 @@ public class checkInWorkController extends BaseController {
     @AuthCheckAnnotation(checkLogin = false)
     @RequestMapping("/effective")
     @ResponseBody
+    @ApiIgnore
     public Result effective(HttpServletRequest request){
         try {
             Map<String,Object> paramMap = getParamsToMap(request);
@@ -225,6 +234,7 @@ public class checkInWorkController extends BaseController {
     @AuthCheckAnnotation(checkLogin = false)
     @RequestMapping("/gainDay")
     @ResponseBody
+    @ApiIgnore
     public Result gainDay(HttpServletRequest request){
         try {
             Map<String,Object> paramMap = getParamsToMap(request);

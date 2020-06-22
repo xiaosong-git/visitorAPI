@@ -1,11 +1,18 @@
 package com.goldccm.service.code.impl;
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.goldccm.model.compose.Result;
+import com.goldccm.model.compose.ResultData;
 import com.goldccm.model.compose.TableList;
 import com.goldccm.persist.base.IBaseDao;
 import com.goldccm.service.base.impl.BaseServiceImpl;
 import com.goldccm.service.code.IQrcodeService;
 import com.goldccm.util.Base64;
 import com.goldccm.util.BaseUtil;
+import com.goldccm.util.MD5Util;
+import com.google.common.base.Splitter;
+import okhttp3.*;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,5 +84,41 @@ public class QrcodeServiceImpl extends BaseServiceImpl implements IQrcodeService
         //返回加密后字符串
         String ret=publiTitle+"|"+Base64.encode(mainText.getBytes("UTF-8"));
         return Result.unDataResult("success",ret);
+    }
+    @Override
+    public Result dealQrcode(Map<String, Object> paramMap) throws Exception {
+        String url = BaseUtil.objToStr(paramMap.get("url"), "");
+        if("".equals(url)){
+            return Result.unDataResult("fail","url不能为空");
+        }
+        String params = url.substring(url.indexOf("?") + 1);
+        Map<String, String> split = Splitter.on("&").withKeyValueSeparator("=").split(params);
+        String stringA="s="+split.get("s")+"&u="+split.get("u");
+        String stringSignTemp=stringA+"&key=7223f404580c466db94d027f576be3d7";
+        String sign= MD5Util.MD5(stringSignTemp).toLowerCase();
+        logger.info("sign:"+sign);
+        OkHttpClient client = new OkHttpClient().newBuilder()
+                .build();
+        MediaType mediaType = MediaType.parse("text/plain");
+        RequestBody body = new MultipartBody.Builder().setType(MultipartBody.FORM)
+                .addFormDataPart("s", split.get("s"))
+                .addFormDataPart("u", split.get("u"))
+                .addFormDataPart("sign", sign)
+                .build();
+        Request request = new Request.Builder()
+                .url("http://hb2.doone.com.cn/api/checkUserStatus")
+                .method("POST", body)
+                .build();
+
+        Response response = client.newCall(request).execute();
+        String responseBody = response.body().string();
+        logger.info("responseBody:{}",responseBody);
+        JSONObject parse = JSON.parseObject(responseBody);
+        JSONObject data = JSON.parseObject(parse.getString("data"));
+        String code = data.getString("code");
+        String resultSign="1".equals(code)?"success":"fail";
+
+        return ResultData.dataResult(resultSign,data.getString("message"),data.get("user"));
+
     }
 }
