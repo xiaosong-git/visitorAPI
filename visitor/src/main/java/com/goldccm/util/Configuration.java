@@ -1,6 +1,7 @@
 package com.goldccm.util;
 
 import net.coobird.thumbnailator.Thumbnails;
+import org.apache.commons.io.FileUtils;
 import sun.misc.BASE64Encoder;
 
 import java.io.ByteArrayInputStream;
@@ -41,7 +42,8 @@ public class Configuration {
         byte[] data = null;
         // 读取图片字节数组
         try {
-            in = new FileInputStream(imgPath);
+//            in = new FileInputStream(imgPath);
+            in =FilesUtils.getStreamByUrl(imgPath);
             data = new byte[in.available()];
             in.read(data);
             in.close();

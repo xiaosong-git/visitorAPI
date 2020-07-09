@@ -85,6 +85,7 @@ public class QrcodeServiceImpl extends BaseServiceImpl implements IQrcodeService
         String ret=publiTitle+"|"+Base64.encode(mainText.getBytes("UTF-8"));
         return Result.unDataResult("success",ret);
     }
+    //处理京东网
     @Override
     public Result dealQrcode(Map<String, Object> paramMap) throws Exception {
         String url = BaseUtil.objToStr(paramMap.get("url"), "");

@@ -197,7 +197,7 @@ public class UserController extends BaseController {
      * @Author linyb
      * @Date 2017/4/3 21:15
      */
-    @AuthCheckAnnotation(checkLogin = true,checkVerify = false, checkRequestLegal = true)
+    @AuthCheckAnnotation(checkLogin = false,checkVerify = false, checkRequestLegal = true)
     @RequestMapping("/verify")
     @ResponseBody
     public Result verify(HttpServletRequest request){

@@ -1,5 +1,6 @@
 package com.goldccm.service.user.impl;
 
+import cn.hutool.crypto.SmUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.goldccm.model.compose.*;
@@ -16,6 +17,7 @@ import com.goldccm.service.user.IUserAccountService;
 import com.goldccm.service.user.IUserService;
 import com.goldccm.util.Base64;
 import com.goldccm.util.*;
+import com.goldccm.util.newworld.NewWorldAuth;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -383,12 +385,7 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
                     /**
                      * 验证 短信验证码
                      */
-            /*String phone = BaseUtil.objToStr(paramMap.get("phone"), null);
-            String code = BaseUtil.objToStr(paramMap.get("code"), null);
-            boolean flag = this.codeService.verifyCode(phone, code, 1).booleanValue();
-            if (!flag) {
-                return Result.unDataResult("fail", "验证码错误");
-            }*/
+
             String idNO = BaseUtil.objToStr(paramMap.get("idNO"), null);
             String realName = URLDecoder.decode(BaseUtil.objToStr(paramMap.get("realName"), null), "UTF-8");
             if(idNO == null){
@@ -396,7 +393,6 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
             }
             String workKey = keyService.findKeyByStatus("normal").toString();
             // update by cwf  2019/10/15 10:36 Reason:暂时修改为后端加密
-//            String idNoMW = DESUtil.encode(workKey,idNO);
             //原先为前端加密后端解密
             String idNoMW = DESUtil.decode(workKey, idNO);
 //            String idNoMW = idNO;
@@ -407,30 +403,39 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
             if(idHandleImgUrl == null){
                 return Result.unDataResult("fail", "图片上传失败，请稍后再试!");
             }
-            /**
-             * 验证 身份证
-             */
-            // update by cwf  2019/10/15 10:54 Reason:改为加密后进行数据判断 原 idNO 现idNoMw
-            // update by cwf  2019/11/6 13:42 Reason:改为回前端加密 原 idNoMW 现 idNO
-//            if(this.isExistIdNo(userId.toString(),idNO)){
-//                return Result.unDataResult("fail", "该身份证已实名，无法再次进行实人认证！");
-//            }
-
+                    String bid="";
             try{
                 //todo 实人认证  update by cwf  2019/11/25 11:30 Reason:先查询本地库是否有实人认证 如果没有 则调用CTID认证  判断实人认证是否过期，过期重新走ctid
-                String sql="select distinct * from "+TableList.USER_AUTH +" where idNo='"+idNO+"' and realName='"+realName+"'";
-                Map<String, Object> userAuth = findFirstBySql(sql);
-                if (userAuth!=null){
+//                String sql="select distinct * from "+TableList.USER_AUTH +" where idNo='"+idNO+"' and realName='"+realName+"'";
+//                Map<String, Object> userAuth = findFirstBySql(sql);
+//                if (userAuth!=null){
 //                    idHandleImgUrl=BaseUtil.objToStr(userAuth.get("idHandleImgUrl"),idHandleImgUrl);
 //                    logger.info("本地实人认证成功上一张成功图片为：{}",idHandleImgUrl);
-                } else {
+//                } else {
                    logger.info("上传图片为："+idHandleImgUrl);
-                   String photoResult = auth(idNoMW, realName, idHandleImgUrl);
+                String imageServerUrl = paramService.findValueByName("imageServerUrl");
+                String photoData = Base64.encode(FilesUtils.compressUnderSize(FilesUtils.getImageFromNetByUrl(imageServerUrl + idHandleImgUrl), 40960L));
+                JSONObject returnObject = NewWorldAuth.sendPost(idNoMW, realName, photoData);
+
+                if ("0".equals(returnObject.getString("code"))){
+                    String data=returnObject.getString("data");
+                    if (StringUtils.isNotBlank(data)){
+                        data = SmUtil.sm4(NewWorldAuth.SERVER_KEY.getBytes()).decryptStrFromBase64(data);
+                        JSONObject value = JSON.parseObject(data);
+                        logger.info("data信息为{}",value.toJSONString());
+                        bid = value.getString("bid");
+                        logger.info("服务端响应解密后数据：" + returnObject);
+                    }
+                }else{
+                    logger.info("失败原因：{}",returnObject.getString("msg"));
+//                    return Result.unDataResult("fail", returnObject.getString("msg"));
+                }
+                   String photoResult = auth(idNoMW, realName, photoData);
 
                    if (!"success".equals(photoResult)){
                        return Result.unDataResult("fail", photoResult);
                    }
-               }
+//               }
             }catch (Exception e){
                 e.printStackTrace();
                 return Result.unDataResult("fail", "图片上传出错!");
@@ -443,12 +448,10 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
             //暂时注释
 //            String idType = URLDecoder.decode(BaseUtil.objToStr(paramMap.get("idType"), null), "UTF-8");
 
-            Date date = new Date();
-            String authDate = new SimpleDateFormat("yyyy-MM-dd").format(date);
-            String authTime = new SimpleDateFormat("HH:mm:ss").format(date);
             Map verifyMap = new HashMap();
-            verifyMap.put("authDate", authDate);
-            verifyMap.put("authTime", authTime);
+            verifyMap.put("bid",bid);
+            verifyMap.put("authDate", DateUtil.getCurDate());
+            verifyMap.put("authTime",  DateUtil.getCurTime());
             verifyMap.put("id", BigInteger.valueOf(userId.intValue()));
             verifyMap.put("idHandleImgUrl", idHandleImgUrl);
             verifyMap.put("realName", realName);
@@ -541,10 +544,11 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
         String certNo = DESUtil.encode(key,idNO);
         itemJSONObj.put("userName", userName);
 //        itemJSONObj.put("certNo", "350424199009031238");
-        String imageServerUrl = paramService.findValueByName("imageServerUrl");
-        String photo=Base64.encode(FilesUtils.getImageFromNetByUrl(imageServerUrl+idHandleImgUrl));
+//        String imageServerUrl = paramService.findValueByName("imageServerUrl");
+//        String photo=Base64.encode(FilesUtils.getImageFromNetByUrl(imageServerUrl+idHandleImgUrl));
+//        String photo=Configuration.GetImageStrFromPath(imageServerUrl+idHandleImgUrl, 30);
         itemJSONObj.put("certNo", certNo);
-        itemJSONObj.put("imgData", photo);
+        itemJSONObj.put("imgData", idHandleImgUrl);
         HttpClient httpClient = new SSLClient();
         HttpPost postMethod = new HttpPost("http://t.pyblkj.cn:8082/wisdom/entrance/pub");
         StringEntity entityStr= new StringEntity(JSON.toJSONString(itemJSONObj), HTTP.UTF_8);
@@ -552,16 +556,20 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
         postMethod.setEntity(entityStr);
         HttpResponse resp = httpClient.execute(postMethod);
         int statusCode = resp.getStatusLine().getStatusCode();
-        ThirdResponseObj responseObj = new ThirdResponseObj();
         if (200 == statusCode) {
 
             String str = EntityUtils.toString(resp.getEntity(), HTTP.UTF_8);
             JSONObject jsonObject = JSONObject.parseObject(str);
             Map resultMap = JSON.parseObject(jsonObject.toString());
+            System.out.println(resultMap.toString());
+            logger.info("比对成功？{}","0".equals(resultMap.get("succ_flag").toString()));
+            System.out.println("0".equals(resultMap.get("succ_flag").toString()));
             if ("0".equals(resultMap.get("succ_flag").toString())){
+                logger.info("比对成功");
                 return "success";
             }else{
-                return "身份信息不匹配";
+                logger.info("比对失败");
+                return resultMap.get("resultMsg").toString();
             }
         }else{
             return "系统错误";

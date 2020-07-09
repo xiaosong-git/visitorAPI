@@ -43,7 +43,7 @@ public class VisitPushServiceImpl extends BaseServiceImpl implements IVisitPushS
 
         JSONObject jsonObject = new JSONObject();
         if (url != null) {
-            jsonObject.put("url", openid);
+            jsonObject.put("url", url);
         }
         jsonObject.put("touser", openid);   // openid
         if (Constant.IS_DEVELOP) {//测试环境
@@ -188,13 +188,13 @@ public class VisitPushServiceImpl extends BaseServiceImpl implements IVisitPushS
 //        }
         //个推不在线，发送短信
         if ("F".equals(isOnlineApp)) {
-            codeService.sendMsg(visitorPhone, shortType, visitorResult, userName, startDate, userName);
+            codeService.sendMsg(visitorPhone, shortType, visitorResult, visitorName, startDate, userName);
             logger.info(visitorName + "：发送短信推送成功");
         } else {//个推在线 发送个推
             boolean single = GTNotification.Single(deviceToken, visitorPhone, notification_title, msg_content, msg_content);
             logger.info("发送个推成功{}", visitorName);
             if (!single) {//发送个推失败，则发送短信
-                codeService.sendMsg(visitorPhone, shortType, visitorResult, userName, startDate, userName);
+                codeService.sendMsg(visitorPhone, shortType, visitorResult, visitorName, startDate, userName);
                 logger.info(visitorName + "：发送短信推送成功");
             }
         }

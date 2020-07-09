@@ -882,16 +882,16 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
                 "where c.id=" + companyId;
         Map<String, Object> company = findFirstBySql(companySql);
         //判断数据库中是否有邀约信息
-        String recordSql = "select * from " + TableList.VISITOR_RECORD +
-                " where userId=" + userId + " and " +
-                "visitorId= " + loginId + " and startDate='" + startTime + "' and endDate='" + endTime + "'";
-        System.out.println(recordSql);
-        Map<String, Object> record = findFirstBySql(recordSql);
-        if (record != null) {
-            if ("T".equals(record.get("isReceive"))) {
-                return Result.unDataResult("fail", "已存在的邀约申请！请勿重复提交！");
-            }
-        }
+//        String recordSql = "select * from " + TableList.VISITOR_RECORD +
+//                " where userId=" + userId + " and " +
+//                "visitorId= " + loginId + " and startDate='" + startTime + "' and endDate='" + endTime + "'";
+//        System.out.println(recordSql);
+//        Map<String, Object> record = findFirstBySql(recordSql);
+//        if (record != null) {
+//            if ("T".equals(record.get("isReceive"))) {
+//                return Result.unDataResult("fail", "已存在的邀约申请！请勿重复提交！");
+//            }
+//        }
         Map<String, Object> saveMap = new HashMap<>();
         saveMap.put("userId", userId);
         saveMap.put("visitorId", loginId);
@@ -1027,13 +1027,13 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
         Map<String, Object> user = findFirstBySql(sql);
         //如果是访问recordType=1
         //查询内部是否有邀约信息
-        Map<String, Object> check = check(userId, visitorId, 1, startDate, endDate);
-        //如果是邀约recordType=2 访客与被访者在数据库中位置调换
-        if (check != null) {
-            //发送回消息
-            logger.info(startDate + "该时间段" + endDate + "内已存在访问信息");
-            return Result.unDataResult("fail", "在" + startDate + "——" + endDate + "内已存在访问信息");
-        }
+//        Map<String, Object> check = check(userId, visitorId, 1, startDate, endDate);
+//        //如果是邀约recordType=2 访客与被访者在数据库中位置调换
+//        if (check != null) {
+//            //发送回消息
+//            logger.info(startDate + "该时间段" + endDate + "内已存在访问信息");
+//            return Result.unDataResult("fail", "在" + startDate + "——" + endDate + "内已存在访问信息");
+//        }
         Map<String, Object> visitRecord = new HashMap<>();
         visitRecord.put("userId", userId);
         visitRecord.put("visitorId", visitorId);
@@ -1056,7 +1056,7 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
                 }
             }
             //访问
-            visitPushService.visitPush(startDate,user,visitor,visitRecord,4);
+            visitPushService.visitPush(startDate,user,visitor,visitRecord,5);
             return Result.unDataResult("success", "访问成功");
         } else {
             return Result.unDataResult("fail", "访问失败");
@@ -1433,6 +1433,7 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
                     obj.put("type", Constant.MASSEGETYPE_REPLY);
                     obj.put("fromUserId", userId);
                     obj.put("toUserId", msg.get("toUserId"));
+                    obj.put("updatetime",DateUtil.getSystemTime());
                     System.out.println("发送给toUser的消息为+" + obj);
                     Constant.SESSIONS.get(toUserId).sendMessage(new TextMessage(obj.toJSONString()));
                     //不在线推送
@@ -1638,6 +1639,7 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
                 msg.put("id", saveVisitRecord);
                 msg.put("visitDate", DateUtil.getCurDate());
                 msg.put("visitTime", DateUtil.getCurTime());
+                msg.put("updatetime",DateUtil.getSystemTime());
                 msg.put("dateType", "limitPeriod");
                 msg.put("answerContent", "null");
                 msg.put("replyDate", "null");

@@ -163,7 +163,7 @@ public class CompanyUserServiceImpl extends BaseServiceImpl implements ICompanyU
                 "left join " + TableList.USER + " u on ovu.userId=u.id \n" +
                 "left join " + TableList.ORG + " org on org.id=ovu.orgId   " +
                 "where org.org_code='" + orgCode + "'  and u.isAuth = 'T' and DATE_FORMAT(ovu.createDate, '%Y-%m-%d') = '" + create_date + "'))x";
-               System.out.println(columnSql+fromSql);
+               logger.info(columnSql+fromSql);
 
         PageModel page = findPage("select * ",columnSql+fromSql, pageNum, pageSize);
         List<Map<String, Object>> rows = page.getRows();

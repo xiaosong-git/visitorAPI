@@ -1,10 +1,14 @@
 package com.goldccm.util;
 
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.Arrays;
 
+import javax.imageio.ImageIO;
 import javax.imageio.stream.FileImageInputStream;
 import javax.servlet.http.HttpServletResponse;
 
@@ -141,6 +145,24 @@ public class FilesUtils {
 	    }
 	    return null;
 	}
+	/**
+	 * 获取网络地址图片
+	 * @param strUrl
+	 * @return
+	 */
+	public static InputStream getStreamByUrl(String strUrl) {
+		try {
+			URL url = new URL(strUrl);
+			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+			conn.setRequestMethod("GET");
+			conn.setConnectTimeout(5 * 1000);
+			InputStream inStream = conn.getInputStream();// 通过输入流获取图片数据// 得到图片的二进制数据
+			return inStream;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 
 	   /**
 	 * 从输入流中获取数据
@@ -194,4 +216,54 @@ public class FilesUtils {
 			}
 		}
 	}
+
+	/**
+	 * 将图片压缩
+	 * @param srcImgData
+	 * @param maxSize  10240L （10KB）
+	 * @return
+	 * @throws Exception
+	 */
+
+	public static byte[] compressUnderSize(byte[] srcImgData, long maxSize)
+			throws Exception {
+		double scale = 0.9;
+		byte[] imgData = Arrays.copyOf(srcImgData, srcImgData.length);
+
+		if (imgData.length > maxSize) {
+			do {
+				try {
+					imgData = compress(imgData, scale);
+
+				} catch (IOException e) {
+					throw new IllegalStateException("压缩图片过程中出错，请及时联系管理员！", e);
+				}
+
+			} while (imgData.length > maxSize);
+		}
+
+		return imgData;
+	}
+
+	public static byte[] compress(byte[] srcImgData, double scale)
+			throws IOException {
+		BufferedImage bi = ImageIO.read(new ByteArrayInputStream(srcImgData));
+		int width = (int) (bi.getWidth() * scale); // 源图宽度
+		int height = (int) (bi.getHeight() * scale); // 源图高度
+
+		Image image = bi.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+		BufferedImage tag = new BufferedImage(width, height,
+				BufferedImage.TYPE_INT_RGB);
+
+		Graphics g = tag.getGraphics();
+		g.setColor(Color.RED);
+		g.drawImage(image, 0, 0, null); // 绘制处理后的图
+		g.dispose();
+
+		ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+		ImageIO.write(tag, "JPEG", bOut);
+
+		return bOut.toByteArray();
+	}
+
 }

@@ -129,7 +129,7 @@ public class WebSocketServiceimpl extends BaseServiceImpl implements IWebSocketS
     public List<Map<String, Object>> getVisitRecordByVisitorId( Long userId) {
 
         String coloumSql = " select * ";
-        String column="select r.id,r.visitDate,r.visitTime,r.userId,r.visitorId,r.reason,r.cstatus,r.startDate,r.endDate,r.companyId,r.replyDate,r.replyTime,r.recordType,c.addr,u.realName,u.headImgUrl,u.idHandleImgUrl,u.niceName,u.id fromUserId";
+        String column="select r.id,CONCAT(visitDate,' ',visitTime) updatetime,r.userId,r.visitorId,r.reason,r.cstatus,r.startDate,r.endDate,r.companyId,r.replyDate,r.replyTime,r.recordType,c.addr,u.realName,u.headImgUrl,u.idHandleImgUrl,u.niceName,u.id fromUserId";
         /* 查看谁访问我 我=被访者=visitorId=20 记录状态=recordType=1 阅读状态=未阅读='F' replyDate is null */
         String fromSql = " from(\n" +
                 column+" from tbl_visitor_record r left join tbl_user u on r.userId=u.id left join tbl_company c on r.companyId=c.id\n" +

@@ -15,7 +15,7 @@ public class Constant {
     /**
      * 是否是开发模式，项目部署到正式环境要改为false
      */
-    public static final Boolean IS_DEVELOP = true;
+    public static final Boolean IS_DEVELOP = false;
     /**
      * 时间日期默认格式
      */
@@ -56,7 +56,7 @@ public class Constant {
     //访客url
     public static final String URL="f.pyblkj.cn/q?id=";
 
-    public static final String DEV_WX_URL="http://47.106.82.190/pybl/";
+    public static final String DEV_WX_URL="http://fager.pyblkj.cn/pybl/";
     public static final String PORD_WX_URL="http://f.pyblkj.cn/pybl/";
 
 //    public static final String URL="http://47.106.82.190:8082/visitor/qrcode.jsp?id=";

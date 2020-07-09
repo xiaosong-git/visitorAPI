@@ -79,7 +79,7 @@ public class WebAppInitalizer extends AbstractAnnotationConfigDispatcherServletI
          *         设置环境为dev还是prod
          */
         servletContext.setInitParameter(
-                "spring.profiles.active", "dev");
+                "spring.profiles.active", "prod");
 
         //servletContext.addListener();
         /*servletContext.addListener(ProjectStartInit.class);*/
