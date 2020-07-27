@@ -4,8 +4,10 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.crypto.SmUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.goldccm.model.compose.Result;
-import com.goldccm.util.*;
+import com.goldccm.util.Base64;
+import com.goldccm.util.DESUtil;
+import com.goldccm.util.FilesUtils;
+import com.goldccm.util.ThreadTestMethod;
 import okhttp3.*;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -40,13 +42,15 @@ public class NewWorldAuth {
         jsonObject.put("idType","411");
         jsonObject.put("name",name);
         jsonObject.put("number",number);
-        jsonObject.put("photoData", photoData);
+        if (photoData!=null) {
+            jsonObject.put("photoData", photoData);
+        }
         String body =jsonObject.toJSONString();
-        System.out.println("客户端加密前发送数据：" + body);
+//        System.out.println("客户端加密前发送数据：" + body);
         String  bodyStr = SmUtil.sm4(SERVER_KEY.getBytes()).encryptBase64(body);
-        System.out.println("客户端加密后发送数据：" + bodyStr);
+//        System.out.println("客户端加密后发送数据：" + bodyStr);
         String sign= SignUtil.orgCheck(ORG_ID,time,bodyStr,SERVER_KEY);
-        System.out.println("sign：" + sign);
+//        System.out.println("sign：" + sign);
 
         OkHttpClient client = new OkHttpClient().newBuilder()
                 .build();
@@ -80,30 +84,32 @@ public class NewWorldAuth {
     }
 
     public static void main(String[] args) throws Exception {
+        String s="E68873C1AEE0B83BA357158D37A6D96683BD55AE5D5FF1BF";
         String key = "iB4drRzSrC";
-        String s="21BEB13C6565AE4F0FE89E5E21282082B719BD526E8D1217";
         String decode = DESUtil.decode(key, s);
 //        sendPost("陈维发","350121199306180330",Configuration.GetImageStrFromPath("http://47.98.205.206/imgserver/" + "user/125/1593398235082.jpg", 40));
-//        sendPost("陈维发","350121199306180330", Base64.encode((FilesUtils.getImageFromNetByUrl("http://47.98.205.206/imgserver/" + "user/125/1594131603531.jpg"))));
-        byte[] imageFromNetByUrl = FilesUtils.getImageFromNetByUrl("http://47.98.205.206/imgserver/" + "user/2021/1594200468327.jpg");
+//        JSONObject jsonObject = sendPost( "350121199306180330","陈维发", Base64.encode((FilesUtils.getImageFromNetByUrl("http://47.98.205.206/imgserver/" + "user/125/1594131603531.jpg"))));
+        byte[] imageFromNetByUrl = FilesUtils.getImageFromNetByUrl("http://47.98.205.206/imgserver/" + "user/2311/1595465561486.jpg");
         logger.info("imageFromNetByUrl:{}",imageFromNetByUrl);
         byte[] data = FilesUtils.compressUnderSize(imageFromNetByUrl, 40960L);
         logger.info("data:{}",data);
-        logger.info("压缩前后对比{}", Arrays.equals(imageFromNetByUrl,data));
-        JSONObject jsonObject = sendPost(decode, "许玲馨", Base64.encode(data));
-        if ("0".equals(jsonObject.getString("code"))){
-            String data1=jsonObject.getString("data1");
-            if (StringUtils.isNotBlank(data1)){
-                data1 = SmUtil.sm4(NewWorldAuth.SERVER_KEY.getBytes()).decryptStrFromBase64(data1);
-                JSONObject value = JSON.parseObject(data1);
-                logger.info("data信息为{}",value.toJSONString());
-                  String  bid = value.getString("bid");
-                logger.info("服务端响应解密后数据：" + jsonObject);
-            }
-        }else{
-            logger.info("失败原因：{}",jsonObject.getString("msg"));
-        }
-//        ThreadTestMethod.auth(decode, "易超", Base64.encode(data));
+//        logger.info("压缩前后对比{}", Arrays.equals(imageFromNetByUrl,data));
+//        JSONObject jsonObject = sendPost(decode, "刘丹灵", Base64.encode(data));
+////        JSONObject jsonObject = sendPost("350121199306180330", "陈维发", Base64.encode(data));
+//        if ("0".equals(jsonObject.getString("code"))){
+//            String data1=jsonObject.getString("data");
+//            if (StringUtils.isNotBlank(data1)){
+//                data1 = SmUtil.sm4(NewWorldAuth.SERVER_KEY.getBytes()).decryptStrFromBase64(data1);
+//                JSONObject value = JSON.parseObject(data1);
+//                System.out.println(data1);
+//                logger.info("data信息为{}",value.toJSONString());
+//                  String  bid = value.getString("bid");
+//                logger.info("服务端响应解密后数据：" + jsonObject);
+//            }
+//        }else{
+//            logger.info("失败原因：{}",jsonObject.getString("msg"));
+//        }
+        ThreadTestMethod.auth("35010219870905364X", "刘丹灵", Base64.encode(data));
 
 //        ThreadTestMethod.phoneResult(decode,"易超","user/2021/1594200468327.jpg");
     }

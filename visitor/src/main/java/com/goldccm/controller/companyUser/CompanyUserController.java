@@ -208,4 +208,25 @@ public class CompanyUserController extends BaseController {
             return Result.unDataResult("fail", "系统异常");
         }
     }
+
+    /**
+     * 查询访客所拥有的公司
+     * @param request
+     * @return
+     */
+    @AuthCheckAnnotation(checkLogin = false,checkVerify = false, checkRequestLegal = false)
+    @PostMapping("/applySucConfirm")
+    @ResponseBody
+    @ApiOperation(value = "确认下发成功",notes = "确认下发成功")
+    @ApiImplicitParam(name = "idStr",value="以逗号隔开的id字符串",dataType="int",paramType="query",defaultValue = "1",required = true)
+    public Result applySucConfirm(HttpServletRequest request){
+        try {
+            Map<String,Object> paramMap = getParamsToMap(request);
+            //将访客id重命名调用公司
+            return companyUserService.applySucConfirm(paramMap);
+        }catch (Exception e){
+            e.printStackTrace();
+            return Result.unDataResult("fail", "系统异常");
+        }
+    }
 }

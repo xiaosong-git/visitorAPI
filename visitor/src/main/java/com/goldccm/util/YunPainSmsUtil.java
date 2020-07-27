@@ -2,7 +2,6 @@ package com.goldccm.util;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.goldccm.model.compose.Constant;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -313,7 +312,7 @@ public class YunPainSmsUtil {
 //         String sid =Base64.encode((String.valueOf(150)).getBytes("UTF-8"));
 //         String sendMsg =	YunPainSmsUtil.sendSmsCode(Constant.URL+sid,"18150797748",YunPainSmsUtil.MSG_TYPE_VISITORBY_QRCODE,null,null,
 //                 "审核已通过","fafa","2019-09-20 10:19",null);
-//         sendSmsCode("c", "18150797748", 6, DateUtil.getCurDate(), "4", "hoho", "fafa",DateUtil.getCurTime(), "guigui");
+         sendSmsCode("c", "18150797748", 6, DateUtil.getCurDate(), "4", "hoho", "fafa",DateUtil.getCurTime(), "guigui");
 //         sendSmsCode("c", "18150797748", 2, "1", "4", null, null,DateUtil.getCurTime(), null);
 
 //         Map<String, String> params = new HashMap<String, String>();

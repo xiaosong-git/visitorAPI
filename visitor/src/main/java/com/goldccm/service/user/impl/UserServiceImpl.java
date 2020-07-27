@@ -414,10 +414,12 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
 //                } else {
                    logger.info("上传图片为："+idHandleImgUrl);
                 String imageServerUrl = paramService.findValueByName("imageServerUrl");
-                String photoData = Base64.encode(FilesUtils.compressUnderSize(FilesUtils.getImageFromNetByUrl(imageServerUrl + idHandleImgUrl), 40960L));
+//                String photoData = Base64.encode(FilesUtils.compressUnderSize(FilesUtils.getImageFromNetByUrl(imageServerUrl + idHandleImgUrl), 40960L));
+                String photoData = Base64.encode(FilesUtils.getImageFromNetByUrl(imageServerUrl + idHandleImgUrl));
                 JSONObject returnObject = NewWorldAuth.sendPost(idNoMW, realName, photoData);
 
-                if ("0".equals(returnObject.getString("code"))){
+                boolean code = "0".equals(returnObject.getString("code"));
+                if (code){
                     String data=returnObject.getString("data");
                     if (StringUtils.isNotBlank(data)){
                         data = SmUtil.sm4(NewWorldAuth.SERVER_KEY.getBytes()).decryptStrFromBase64(data);
@@ -432,13 +434,13 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
                 }
                    String photoResult = auth(idNoMW, realName, photoData);
 
-                   if (!"success".equals(photoResult)){
+                   if (!"success".equals(photoResult)&&!code){
                        return Result.unDataResult("fail", photoResult);
                    }
 //               }
             }catch (Exception e){
-                e.printStackTrace();
-                return Result.unDataResult("fail", "图片上传出错!");
+                logger.info("实人认证出错！",e);
+                return Result.unDataResult("fail", "实人认证出错!");
             }
 
             String address = BaseUtil.objToStr(paramMap.get("address"), null);

@@ -35,5 +35,17 @@ public class ErrorLogController extends BaseController {
             return Result.unDataResult("fail", "系统异常");
         }
     }
+    @AuthCheckAnnotation(checkLogin = false,checkVerify = false, checkRequestLegal = false,checkOtherLegal = false)
+    @PostMapping(value = "/test")
+    @ResponseBody
+    public Result test(HttpServletRequest request) throws Exception {
+        try {
+            Map<String,Object> paramMap = getParamsToMap(request);
+            return errorLogService.test(paramMap);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Result.unDataResult("fail", "系统异常");
+        }
+    }
 
 }

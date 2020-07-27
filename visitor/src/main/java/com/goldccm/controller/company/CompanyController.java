@@ -7,7 +7,6 @@ import com.goldccm.model.compose.Result;
 import com.goldccm.service.company.ICompanyService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -34,7 +33,7 @@ public class CompanyController extends BaseController {
      * @param request
      * @return
      */
-    @AuthCheckAnnotation(checkLogin = true,checkVerify = true, checkRequestLegal = true)
+    @AuthCheckAnnotation(checkLogin = false,checkVerify = true, checkRequestLegal = true)
     @PostMapping("/requestCompany")
     @ResponseBody
     @ApiOperation(value = "根据orgId请求公司",notes = "不知道干嘛用的接口，可能已经废除了")

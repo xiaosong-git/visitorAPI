@@ -141,7 +141,9 @@ public class ForeignController extends BaseController {
     @ResponseBody
     public Result newFindOrgCode(HttpServletRequest request, @PathVariable String pospCode, @PathVariable String orgCode, @PathVariable Integer pageNum, @PathVariable Integer pageSize){
         try {
-            return foreignService.FindOrgCode(pospCode,orgCode,pageNum,pageSize);
+            Map<String,Object> paramMap = getParamsToMap(request);
+            Object companyId = paramMap.get("companyId");
+            return foreignService.FindOrgCode(pospCode,orgCode,companyId,pageNum,pageSize);
         }catch (Exception e){
             e.printStackTrace();
             return Result.unDataResult("fail", "系统异常");
@@ -175,7 +177,9 @@ public class ForeignController extends BaseController {
     @ResponseBody
     public Result newFindOrgCodeConfirm(HttpServletRequest request, @PathVariable String pospCode, @PathVariable String orgCode, @PathVariable String idStr){
         try {
-            return foreignService.newFindOrgCodeConfirm(pospCode,orgCode,idStr);
+            Map<String,Object> paramMap = getParamsToMap(request);
+            Object companyId = paramMap.get("companyId");
+            return foreignService.newFindOrgCodeConfirm(pospCode,orgCode,companyId,idStr);
         }catch (Exception e){
             e.printStackTrace();
             return Result.unDataResult("fail", "系统异常");

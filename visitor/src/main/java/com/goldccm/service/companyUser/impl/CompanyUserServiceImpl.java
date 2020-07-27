@@ -101,10 +101,12 @@ public class CompanyUserServiceImpl extends BaseServiceImpl implements ICompanyU
     public Result findApplySucByOrg(Map<String, Object> paramMap) throws Exception {
         String orgCode = BaseUtil.objToStr(paramMap.get("org_code"), null);
         String createDate = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        Integer pageNum = BaseUtil.objToInteger(paramMap.get("pageNum"), null);
+        Integer pageSize = BaseUtil.objToInteger(paramMap.get("pageSize"), null);
         if (orgCode == null) {
             return Result.unDataResult(ConsantCode.FAIL, "缺少大楼参数!");
         }
-        return applySucByOrg(orgCode,createDate,null,null,"old");
+        return applySucByOrg(orgCode,createDate,pageNum,pageSize,"old");
     }
     /**
      * 新按获取大楼员工当天员工确认数据
@@ -134,18 +136,32 @@ public class CompanyUserServiceImpl extends BaseServiceImpl implements ICompanyU
     }
 
     /**
+     * 确认下发上位机
+     * @param paramMap
+     * @return
+     */
+    @Override
+    public Result applySucConfirm(Map<String, Object> paramMap) {
+        String idStr = BaseUtil.objToStr(paramMap.get("idStr"),null);
+        if (idStr==null){
+            return ResultData.unDataResult("fail","请传入idStr");
+        }
+        return confirmSql(idStr);
+    }
+
+    /**
      * 获取大楼当天员工查询
      * @param orgCode  大楼编号
      * @param create_date 日期
      * @param type 新旧接口 new old
      * @return Result
      */
-
+    //todo 增加一个companyId
     public Result applySucByOrg(String orgCode , String create_date,Integer pageNum,Integer pageSize,String type){
 
         String columnSql = " from ((select cu.id,cu.companyId,cu.sectionId,cu.userId,cu.userName,cu.createDate,cu.createTime," +
                 "cu.roleType,cu.status,cu.currentStatus,cu.postId,u.idHandleImgUrl idHandleImgUrl,u.idType idType," +
-                "u.idNO idNO,c.companyFloor companyFloor,u.phone ";
+                "u.idNO idNO,c.companyFloor companyFloor,u.phone ,u.bid";
         String fromSql = " from " + TableList.COMPANY_USER + " cu " +
                 " left join " + TableList.USER + " u on cu.userId=u.id" +
                 " left join " + TableList.COMPANY + " c on cu.companyId=c.id" +
@@ -154,21 +170,22 @@ public class CompanyUserServiceImpl extends BaseServiceImpl implements ICompanyU
                 " left join " + TableList.DICT_ITEM + " d on d.dict_code='companyUserRoleType' and d.item_code=cu.roleType " +
                 " left join " + TableList.DICT_ITEM + " i on i.dict_code='companyUserStatus' and i.item_code=cu.status " +
                 " where og.org_code = '" + orgCode + "' and cu.status = 'applySuc' and (u.authDate = '" + create_date + "' or " +
-                " cu.createDate='" + create_date + "')" + " and u.isAuth = 'T') "
+                " cu.createDate='" + create_date + "')" + " and u.isAuth = 'T' ) "
                 +
                 " UNION  " +
                 " (select null id ,u.companyid  ,null sectionId, userId, userName, ovu.createDate,ovu.createtime, roleType,status," +
-                "currentStatus, postId,u.idHandleImgUrl,u.idType ,u.idno idNO,null companyFloor,u.phone " +
+                "currentStatus, postId,u.idHandleImgUrl,u.idType ,u.idno idNO,null companyFloor,u.phone,u.bid " +
                 " from " + TableList.ORG_VIP_USER + " ovu\n" +
                 "left join " + TableList.USER + " u on ovu.userId=u.id \n" +
                 "left join " + TableList.ORG + " org on org.id=ovu.orgId   " +
                 "where org.org_code='" + orgCode + "'  and u.isAuth = 'T' and DATE_FORMAT(ovu.createDate, '%Y-%m-%d') = '" + create_date + "'))x";
                logger.info(columnSql+fromSql);
 
-        PageModel page = findPage("select * ",columnSql+fromSql, pageNum, pageSize);
+        PageModel page = findPage("select * ",columnSql+fromSql, pageNum, pageSize==null?50:pageSize);
         List<Map<String, Object>> rows = page.getRows();
-
-        return "new".equals(type)? insertUserPhoto(page,"page"):insertUserPhoto(rows,"rows");
+        //返回值类型page有带页数
+         type = pageNum == null && pageSize == null ? "old" : "new";
+        return  "new".equals(type)? insertUserPhoto(page,"page"):insertUserPhoto(rows,"rows");
     }
 
     /**
@@ -219,7 +236,7 @@ public class CompanyUserServiceImpl extends BaseServiceImpl implements ICompanyU
     public Result applyAllSucOrg(String orgCode, Integer pageNum, Integer pageSize) {
         String columnSql = "select * ";
         String fromSql = "from (select cu.id,cu.companyId,cu.sectionId,cu.userId,cu.userName,cu.createDate,cu.createTime," +
-                "                cu.roleType,cu.status,cu.currentStatus,cu.postId,u.idHandleImgUrl idHandleImgUrl,u.idType idType, " +
+                "                cu.roleType,cu.status,cu.currentStatus,cu.postId,u.idHandleImgUrl idHandleImgUrl,u.idType idType,u.bid ," +
                 "                u.idNO idNO,c.companyFloor companyFloor,u.phone from " + TableList.COMPANY_USER + " cu " +
                 " left join " + TableList.USER + " u on cu.userId=u.id" +
                 " left join " + TableList.COMPANY + " c on cu.companyId=c.id" +
@@ -227,11 +244,11 @@ public class CompanyUserServiceImpl extends BaseServiceImpl implements ICompanyU
                 " join" + TableList.ORG + " og on c.orgid=og.id" +
                 " left join " + TableList.DICT_ITEM + " d on d.dict_code='companyUserRoleType' and d.item_code=cu.roleType " +
                 " left join " + TableList.DICT_ITEM + " i on i.dict_code='companyUserStatus' and i.item_code=cu.status " +
-                " where og.org_code = '" + orgCode + "' and cu.status = 'applySuc' " + " and u.isAuth = 'T' and cu.currentStatus='normal' "
+                " where og.org_code = '" + orgCode + "' and cu.status = 'applySuc' " + " and u.isAuth = 'T' and cu.currentStatus='normal'  "
                 +
                 " UNION all " +
                 " select null id ,u.companyid  ,null sectionId, userId, userName, ovu.createDate,ovu.createtime, roleType,status," +
-                "currentStatus, postId,u.idHandleImgUrl,u.idType ,u.idno idNO,null companyFloor,u.phone " +
+                "currentStatus, postId,u.idHandleImgUrl,u.idType ,u.idno idNO,null companyFloor,u.phone,u.bid " +
                 " from " + TableList.ORG_VIP_USER + " ovu\n" +
                 "left join " + TableList.USER + " u on ovu.userId=u.id \n" +
                 "left join " + TableList.ORG + " org on org.id=ovu.orgId   " +
@@ -249,16 +266,17 @@ public class CompanyUserServiceImpl extends BaseServiceImpl implements ICompanyU
      */
     @Override
     public Result insertUserPhoto(Object page,String type) {
+        //todo   update by cwf  2020-07-09 17:07 Reason: 获取裁剪后的图片
         List<Map<String, Object>> rows;
         try {
-            logger.info("插入照片");
+            logger.info("拉取员工时插入照片");
             if ("page".equals(type)) {
-                PageModel resutl = (PageModel) page;
-                if (resutl.getRows() == null || resutl.getRows().isEmpty()) {
+                PageModel result = (PageModel) page;
+                if (result.getRows() == null || result.getRows().isEmpty()) {
                     //插入图片接口
-                    return Result.unDataResult("success", "暂无数据");
+                    return ResultData.dataResult("success", "暂无数据",page);
                 }
-                rows = resutl.getRows();
+                rows = result.getRows();
             } else {
                 rows = (List<Map<String, Object>>) page;
             }
@@ -313,5 +331,14 @@ public class CompanyUserServiceImpl extends BaseServiceImpl implements ICompanyU
         return companyUser;
     }
 
+    public Result confirmSql( String idStr) {
+        logger.info("准备更新{}", idStr);
+        int update = deleteOrUpdate("update " + TableList.COMPANY_USER + " set isFlag='T' where id in (" + idStr + ")");
+        if (update > 0) {
+            logger.info("更新{}成功", idStr);
+            return Result.success();
+        }
+        return Result.fail();
+    }
 
 }

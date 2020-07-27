@@ -12,9 +12,14 @@ import javax.imageio.ImageIO;
 import javax.imageio.stream.FileImageInputStream;
 import javax.servlet.http.HttpServletResponse;
 
+import com.goldccm.util.newworld.NewWorldAuth;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FilesUtils {
+
+	static Logger logger = LoggerFactory.getLogger(FilesUtils.class);
 	/**
 	 * 生成Byte流 TODO
 	 * 
@@ -231,11 +236,13 @@ public class FilesUtils {
 		byte[] imgData = Arrays.copyOf(srcImgData, srcImgData.length);
 
 		if (imgData.length > maxSize) {
+			logger.info("准备下发图片大小{}",imgData.length);
 			do {
 				try {
 					imgData = compress(imgData, scale);
 
 				} catch (IOException e) {
+					logger.error("压缩图片过程中出错，请及时联系管理员！", e);
 					throw new IllegalStateException("压缩图片过程中出错，请及时联系管理员！", e);
 				}
 

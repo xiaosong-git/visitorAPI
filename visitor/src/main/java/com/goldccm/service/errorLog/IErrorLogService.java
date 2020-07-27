@@ -22,6 +22,8 @@ public interface IErrorLogService extends IBaseService {
      */
     Result saveErrorLog(Map<String, Object> request) throws Exception;
 
+    Result test(Map<String, Object> paramMap);
+
 //    List findErrorLog(Map<String,Object> paramMap) throws Exception;
 }
 

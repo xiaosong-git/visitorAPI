@@ -69,4 +69,6 @@ public interface ICompanyUserService extends IBaseService {
      * @throws Exception
      */
     Result newFindApplySucOrg(Map<String, Object> paramMap);
+
+    Result applySucConfirm(Map<String, Object> paramMap);
 }
