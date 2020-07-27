@@ -93,23 +93,23 @@ public class NewWorldAuth {
         logger.info("imageFromNetByUrl:{}",imageFromNetByUrl);
         byte[] data = FilesUtils.compressUnderSize(imageFromNetByUrl, 40960L);
         logger.info("data:{}",data);
-//        logger.info("压缩前后对比{}", Arrays.equals(imageFromNetByUrl,data));
-//        JSONObject jsonObject = sendPost(decode, "刘丹灵", Base64.encode(data));
-////        JSONObject jsonObject = sendPost("350121199306180330", "陈维发", Base64.encode(data));
-//        if ("0".equals(jsonObject.getString("code"))){
-//            String data1=jsonObject.getString("data");
-//            if (StringUtils.isNotBlank(data1)){
-//                data1 = SmUtil.sm4(NewWorldAuth.SERVER_KEY.getBytes()).decryptStrFromBase64(data1);
-//                JSONObject value = JSON.parseObject(data1);
-//                System.out.println(data1);
-//                logger.info("data信息为{}",value.toJSONString());
-//                  String  bid = value.getString("bid");
-//                logger.info("服务端响应解密后数据：" + jsonObject);
-//            }
-//        }else{
-//            logger.info("失败原因：{}",jsonObject.getString("msg"));
-//        }
-        ThreadTestMethod.auth("35010219870905364X", "刘丹灵", Base64.encode(data));
+        logger.info("压缩前后对比{}", Arrays.equals(imageFromNetByUrl,data));
+        JSONObject jsonObject = sendPost(decode, "刘丹灵", Base64.encode(data));
+//        JSONObject jsonObject = sendPost("350121199306180330", "陈维发", Base64.encode(data));
+        if ("0".equals(jsonObject.getString("code"))){
+            String data1=jsonObject.getString("data");
+            if (StringUtils.isNotBlank(data1)){
+                data1 = SmUtil.sm4(NewWorldAuth.SERVER_KEY.getBytes()).decryptStrFromBase64(data1);
+                JSONObject value = JSON.parseObject(data1);
+                System.out.println(data1);
+                logger.info("data信息为{}",value.toJSONString());
+                  String  bid = value.getString("bid");
+                logger.info("服务端响应解密后数据：" + jsonObject);
+            }
+        }else{
+            logger.info("失败原因：{}",jsonObject.getString("msg"));
+        }
+//        ThreadTestMethod.auth("35010219870905364X", "刘丹灵", Base64.encode(data));
 
 //        ThreadTestMethod.phoneResult(decode,"易超","user/2021/1594200468327.jpg");
     }
