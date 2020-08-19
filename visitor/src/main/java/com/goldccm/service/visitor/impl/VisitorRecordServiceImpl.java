@@ -1125,7 +1125,7 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
                 orgComMap = findFirstBySql("select org_code,org_name,accessType,companyName,c.addr,roleType from  " + TableList.ORG + " o " +
                         "left join " + TableList.COMPANY + " c on c.orgId=o.id left join " + TableList.COMPANY_USER + " cu on cu.companyId=c.id " +
                         " where c.id=" + companyId + " and userId=" + visitorId + " and cu.currentStatus ='normal'  and cu.status ='applySuc' ");
-                System.out.println("select org_code,org_name,accessType,companyName,c.addr,roleType from  " + TableList.ORG + " o " +
+                logger.info("select org_code,org_name,accessType,companyName,c.addr,roleType from  " + TableList.ORG + " o " +
                         "left join " + TableList.COMPANY + " c on c.orgId=o.id left join " + TableList.COMPANY_USER + " cu on cu.companyId=c.id " +
                         " where c.id=" + companyId + " and userId=" + visitorId + " and cu.`currentStatus` ='normal' and cu.status ='applySuc' ");
             }
@@ -1141,7 +1141,7 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 //                String accessType = BaseUtil.objToStr(orgComMap.get("accessType"), "0");
 //            logger.info("accessType=" + accessType);
             visitorRecord.put("orgCode", orgCode);
-
+            visitorRecord.put("isCompanyFlag","F");
             update = update(TableList.VISITOR_RECORD, visitorRecord);
         }
         if (update > 0) {
@@ -1222,13 +1222,13 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
         Map<String, Object> company = findFirstBySql(companySql);
         String addr = BaseUtil.objToStr(company.get("addr"), "");
         //查看是否重复邀约 如果是邀约recordType=2 访客与被访者在数据库中位置调换
-        Map<String, Object> check = check(userId, visitorId, 2, startDate, endDate);
-
-        if (check != null) {
-            //发送回消息
-            logger.info(startDate + "该时间段" + endDate + "内已经有邀约信息存在");
-            return Result.unDataResult("fail", "在" + startDate + "——" + endDate + "内已经有邀约信息存在");
-        }
+//        Map<String, Object> check = check(userId, visitorId, 2, startDate, endDate);
+//
+//        if (check != null) {
+//            //发送回消息
+//            logger.info(startDate + "该时间段" + endDate + "内已经有邀约信息存在");
+//            return Result.unDataResult("fail", "在" + startDate + "——" + endDate + "内已经有邀约信息存在");
+//        }
         //被邀约者/访客Id
         Map<String, Object> visitRecord = new HashMap<>();
         visitRecord.put("userId", userId);

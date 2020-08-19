@@ -143,7 +143,8 @@ public class ForeignController extends BaseController {
         try {
             Map<String,Object> paramMap = getParamsToMap(request);
             Object companyId = paramMap.get("companyId");
-            return foreignService.FindOrgCode(pospCode,orgCode,companyId,pageNum,pageSize);
+            Object sectionId = paramMap.get("sectionId");
+            return foreignService.FindOrgCode(pospCode,orgCode,companyId,sectionId,pageNum,pageSize);
         }catch (Exception e){
             e.printStackTrace();
             return Result.unDataResult("fail", "系统异常");
@@ -179,7 +180,8 @@ public class ForeignController extends BaseController {
         try {
             Map<String,Object> paramMap = getParamsToMap(request);
             Object companyId = paramMap.get("companyId");
-            return foreignService.newFindOrgCodeConfirm(pospCode,orgCode,companyId,idStr);
+            Object sectionId = paramMap.get("sectionId");
+            return foreignService.newFindOrgCodeConfirm(pospCode,orgCode,companyId,sectionId,idStr);
         }catch (Exception e){
             e.printStackTrace();
             return Result.unDataResult("fail", "系统异常");

@@ -151,8 +151,8 @@ public class InnerVisitorServiceImpl extends BaseServiceImpl implements IInnerVi
             }
         }
         //查询重复
-        Map<String, Object> check = visitorRecordService.check(visitInnerUser.get("id"), user.get("id"), 1, startDate, endDate);
-        if (check == null) {
+//        Map<String, Object> check = visitorRecordService.check(visitInnerUser.get("id"), user.get("id"), 1, startDate, endDate);
+//        if (check == null) {
             int save = save(TableList.VISITOR_RECORD, visitRecord);
             if (save > 0) {
                 // todo 返回A公司云端数据库id
@@ -161,10 +161,10 @@ public class InnerVisitorServiceImpl extends BaseServiceImpl implements IInnerVi
                 logger.error("非好友访问失败,{}访问{}", userRealName, realName);
                 return Result.unDataResult("fail", "操作失败");
             }
-        } else {
-            logger.info(startDate + "该时间段" + endDate + "内已经有邀约信息存在");
-            return Result.unDataResult("fail", "在" + startDate + "——" + endDate + "内已经有访问信息存在");
-        }
+//        } else {
+//            logger.info(startDate + "该时间段" + endDate + "内已经有邀约信息存在");
+//            return Result.unDataResult("fail", "在" + startDate + "——" + endDate + "内已经有访问信息存在");
+//        }
 
     }
     //返回企业接口

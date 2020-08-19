@@ -249,20 +249,21 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
                 result.put("user",user);
                 String  applyType="";
                 String  companyName="";
-
+                String addr="";
                 if (user.get("companyId")!=null){
-                    Map<String,Object> conpany =this.findById(TableList.COMPANY,Integer.parseInt(BaseUtil.objToStr(user.get("companyId"),null)));
+                    Map<String,Object> company =this.findById(TableList.COMPANY,Integer.parseInt(BaseUtil.objToStr(user.get("companyId"),null)));
 
-                    if(conpany!=null){
-                    if (conpany.get("applyType")!=null){
-                        applyType = conpany.get("applyType").toString();
-                    }
-                    if (conpany.get("companyName")!=null){
-                        companyName = conpany.get("companyName").toString();
+                    if(company!=null) {
+                        if (company.get("applyType") != null) {
+                            applyType = company.get("applyType").toString();
+                        }
+                        if (company.get("companyName") != null) {
+                            companyName = company.get("companyName").toString();
+                        }
+                        addr=BaseUtil.objToStr(company.get("addr"),"");
                     }
                 }
-                }
-
+                user.put("addr",addr);
                 user.put("applyType",applyType);
                 user.put("companyName",companyName);
                 //增加获取orgCode
@@ -389,6 +390,7 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
             String idNO = BaseUtil.objToStr(paramMap.get("idNO"), null);
             String realName = URLDecoder.decode(BaseUtil.objToStr(paramMap.get("realName"), null), "UTF-8");
             if(idNO == null){
+
                 return Result.unDataResult("fail", "身份证不能为空!");
             }
             String workKey = keyService.findKeyByStatus("normal").toString();
@@ -417,19 +419,18 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
 //                String photoData = Base64.encode(FilesUtils.compressUnderSize(FilesUtils.getImageFromNetByUrl(imageServerUrl + idHandleImgUrl), 40960L));
                 String photoData = Base64.encode(FilesUtils.getImageFromNetByUrl(imageServerUrl + idHandleImgUrl));
                 JSONObject returnObject = NewWorldAuth.sendPost(idNoMW, realName, photoData);
-
                 boolean code = "0".equals(returnObject.getString("code"));
                 if (code){
                     String data=returnObject.getString("data");
                     if (StringUtils.isNotBlank(data)){
                         data = SmUtil.sm4(NewWorldAuth.SERVER_KEY.getBytes()).decryptStrFromBase64(data);
                         JSONObject value = JSON.parseObject(data);
-                        logger.info("data信息为{}",value.toJSONString());
+                        logger.info("data信息为{}",value.toJSONString()+"idNo:"+idNO);
                         bid = value.getString("bid");
                         logger.info("服务端响应解密后数据：" + returnObject);
                     }
                 }else{
-                    logger.info("失败原因：{}",returnObject.getString("msg"));
+                    logger.info("失败原因：{}",returnObject.getString("msg")+"idNo:"+idNO);
 //                    return Result.unDataResult("fail", returnObject.getString("msg"));
                 }
                    String photoResult = auth(idNoMW, realName, photoData);
@@ -878,13 +879,16 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
                 result.put("user",user);
                 String  applyType="";
                 String  companyName="";
+                String addr="";
                 if (user.get("companyId")!=null){
                     Map<String,Object> company =this.findById(TableList.COMPANY,Integer.parseInt(user.get("companyId").toString()));
                     if (company!=null){
                         applyType = BaseUtil.objToStr(company.get("applyType"),"");
                         companyName = BaseUtil.objToStr(company.get("companyName"),"");
+                        addr=BaseUtil.objToStr(company.get("addr"),"");
                     }
                 }
+                user.put("addr",addr);
                 user.put("companyName",companyName);
                 user.put("applyType",applyType);
                 //增加获取orgCode
@@ -1029,9 +1033,9 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
         if (userId==null || companyId==null || StringUtils.isBlank(role)){
             return  Result.unDataResult(ConsantCode.FAIL,"缺少参数!");
         }
-        Map<String,Object> conpany =this.findById(TableList.COMPANY, companyId);
+        Map<String,Object> company =this.findById(TableList.COMPANY, companyId);
         //* update by cwf  2019/9/26 14:16 Reason:空值判断
-        if (conpany==null) {
+        if (company==null) {
             return Result.unDataResult("fail","修改失败,该公司不存在！");
         }
         Map<String, Object> update = new HashMap<String, Object>();
@@ -1043,11 +1047,11 @@ public class UserServiceImpl extends BaseServiceImpl implements IUserService {
             String applyType = "";
             String companyName = "";
             Map<String,Object> map = new HashMap<String, Object>();
-                if (conpany.get("applyType") != null) {
-                    applyType = conpany.get("applyType").toString();
+                if (company.get("applyType") != null) {
+                    applyType = company.get("applyType").toString();
                 }
-                if (conpany.get("companyName") != null) {
-                    companyName = conpany.get("companyName").toString();
+                if (company.get("companyName") != null) {
+                    companyName = company.get("companyName").toString();
                 }
 
             map.put("applyType",applyType);

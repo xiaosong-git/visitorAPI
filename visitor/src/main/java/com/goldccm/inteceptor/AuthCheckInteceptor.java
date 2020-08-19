@@ -135,6 +135,7 @@ public class AuthCheckInteceptor extends HandlerInterceptorAdapter {
                             return false;
                         }
                         if(TokenUtil.checkRequestLegal(userIdStr, factor, token, threshold)){
+
                             return true;
                         }else{
                             response.setCharacterEncoding("UTF-8");

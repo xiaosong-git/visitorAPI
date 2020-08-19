@@ -35,26 +35,32 @@ public class ForeignServiceImpl extends BaseServiceImpl implements IForeignServi
     private ICompanyUserService companyUserService;
 
     @Override
-    public Result FindOrgCode(String pospCode, String orgCode, Object companyId, Integer pageNum, Integer pageSize) {
+    public Result FindOrgCode(String pospCode, String orgCode, Object companyId, Object sectionId, Integer pageNum, Integer pageSize) {
 
         Result result = existOgrPosp(pospCode, orgCode);
         if (result.getVerify().get("sign").equals("fail")) {
             return result;
         }
-        return findOrgCodeSql(pospCode, orgCode, companyId,pageNum, pageSize);
+        return findOrgCodeSql(pospCode, orgCode, companyId,sectionId,pageNum, pageSize);
     }
 
-    public Result findOrgCodeSql(String pospCode, String orgCode,Object companyId, Integer pageNum, Integer pageSize) {
+    public Result findOrgCodeSql(String pospCode, String orgCode, Object companyId, Object sectionId, Integer pageNum, Integer pageSize) {
         String andSql="";
+        String leftJoin="";
         if (companyId!=null){
             andSql=" and vr.companyId ="+companyId+" and isCompanyFlag='F'";
+            if (sectionId!=null){
+                andSql= "and vr.companyId ="+companyId+" and cu.sectionId="+sectionId+" and isSectionFlag='F' AND vr.visitorId=cu.userId ";
+                //连接公司员工表
+                leftJoin="LEFT JOIN tbl_company_user cu ON cu.companyId = c.id ";
+            }
         }else {
             andSql=" and isFlag='F'";
         }
         String columnSql = "select vr.id visitId,vr.userId,vr.visitDate,vr.visitTime,vr.orgCode,vr.dateType,vr.startDate,vr.endDate,u.realName userRealName,u.idType userIdType,u.idNO userIdNO,u.soleCode soleCode,u.idHandleImgUrl idHandleImgUrl,u.bid,c.companyFloor companyFloor,v.realName vistorRealName,v.idType vistorIdType,v.idNO visitorIdNO,o.province province,o.city city";
         String fromSql = " from " + TableList.VISITOR_RECORD + " vr " + " left join " + TableList.USER
                 + " v on vr.visitorId=v.id" + " left join " + TableList.USER + " u on vr.userId=u.id" + " left join " + TableList.COMPANY + " c on vr.companyId=c.id"
-                + " left join " + TableList.ORG + " o on v.orgId=o.id"
+                + " left join " + TableList.ORG + " o on v.orgId=o.id "+leftJoin
                 + " where vr.cstatus='applySuccess' and vr.orgCode = '" + orgCode + "' "+andSql
                 + " and vr.startDate<=date_add(now(),interval +30 minute) and vr.endDate>= date_add(now(),interval -30 minute)  order by vr.id";
         logger.info(columnSql + fromSql);
@@ -70,6 +76,7 @@ public class ForeignServiceImpl extends BaseServiceImpl implements IForeignServi
         String pospCode = BaseUtil.objToStr(paramMap.get("pospCode"), null);
         String mac = BaseUtil.objToStr(paramMap.get("mac"), null);
         String companyId = BaseUtil.objToStr(paramMap.get("companyId"), null);
+        String sectionId = BaseUtil.objToStr(paramMap.get("sectionId"), null);
         if (orgCode == null || pospCode == null || mac == null) {
             return Result.unDataResult("fail", "大楼编号与上位机编号与mac不能为空");
         }
@@ -85,7 +92,7 @@ public class ForeignServiceImpl extends BaseServiceImpl implements IForeignServi
         }
         Integer pageNum = BaseUtil.objToInteger(paramMap.get("pageNum"), 0);
         Integer pageSize = BaseUtil.objToInteger(paramMap.get("pageSize"), 10);
-        return FindOrgCode(pospCode, orgCode, companyId, pageNum, pageSize);
+        return FindOrgCode(pospCode, orgCode, companyId,sectionId, pageNum, pageSize);
     }
 
     //上位机rsa校验
@@ -135,21 +142,24 @@ public class ForeignServiceImpl extends BaseServiceImpl implements IForeignServi
     }
 
     @Override
-    public Result newFindOrgCodeConfirm(String pospCode, String orgCode, Object companyId, String idStr) {
+    public Result newFindOrgCodeConfirm(String pospCode, String orgCode, Object companyId, Object sectionId, String idStr) {
         Result result = existOgrPosp(pospCode, orgCode);
         if (result.getVerify().get("sign").equals("fail")) {
             return result;
         }
-        return confirmSql(pospCode, orgCode,companyId, idStr);
+        return confirmSql(pospCode, orgCode,companyId,sectionId, idStr);
     }
 
-    public Result confirmSql(String pospCode, String orgCode, Object companyId, String idStr) {
+    public Result confirmSql(String pospCode, String orgCode, Object companyId, Object sectionId, String idStr) {
         logger.info("准备更新{}", idStr);
         String updateSql="update " + TableList.VISITOR_RECORD  ;
         String whereSql=" where id in (" + idStr + ")";
         String setSql=" set isFlag='T'";
         if (companyId!=null){
             setSql=" set isCompanyFlag='T' ";
+            if (sectionId!=null){
+                setSql=" set isSectionFlag='T' ";
+            }
         }
         int update = deleteOrUpdate(updateSql+setSql+whereSql  );
         if (update > 0) {
@@ -166,6 +176,7 @@ public class ForeignServiceImpl extends BaseServiceImpl implements IForeignServi
         String idStr = BaseUtil.objToStr(paramMap.get("idStr"), "");
         String mac = BaseUtil.objToStr(paramMap.get("mac"), "");
         String companyId = BaseUtil.objToStr(paramMap.get("companyId"), "");
+        String sectionId = BaseUtil.objToStr(paramMap.get("sectionId"), "");
         if (orgCode == null || pospCode == null || mac == null) {
             return Result.unDataResult("fail", "大楼编号与上位机编号与mac不能为空");
         }
@@ -179,6 +190,6 @@ public class ForeignServiceImpl extends BaseServiceImpl implements IForeignServi
             return rsaPosp;
         }
         //更新数据
-        return confirmSql(pospCode, orgCode, companyId, idStr);
+        return confirmSql(pospCode, orgCode, companyId, sectionId, idStr);
     }
 }

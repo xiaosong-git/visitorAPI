@@ -159,8 +159,8 @@ public class CompanyUserServiceImpl extends BaseServiceImpl implements ICompanyU
     //todo 增加一个companyId
     public Result applySucByOrg(String orgCode , String create_date,Integer pageNum,Integer pageSize,String type){
 
-        String columnSql = " from ((select cu.id,cu.companyId,cu.sectionId,cu.userId,cu.userName,cu.createDate,cu.createTime," +
-                "cu.roleType,cu.status,cu.currentStatus,cu.postId,u.idHandleImgUrl idHandleImgUrl,u.idType idType," +
+        String columnSql = " from ( (select cu.id,cu.companyId,cu.sectionId,cu.userId,cu.userName,if( cu.createDate<u.authDate,u.authDate,cu.createDate) createDate,cu.createTime," +
+                "cu.roleType,cu.status,max(currentStatus) currentStatus,cu.postId,u.idHandleImgUrl idHandleImgUrl,u.idType idType," +
                 "u.idNO idNO,c.companyFloor companyFloor,u.phone ,u.bid";
         String fromSql = " from " + TableList.COMPANY_USER + " cu " +
                 " left join " + TableList.USER + " u on cu.userId=u.id" +
@@ -169,16 +169,16 @@ public class CompanyUserServiceImpl extends BaseServiceImpl implements ICompanyU
                 " join" + TableList.ORG + " og on c.orgid=og.id" +
                 " left join " + TableList.DICT_ITEM + " d on d.dict_code='companyUserRoleType' and d.item_code=cu.roleType " +
                 " left join " + TableList.DICT_ITEM + " i on i.dict_code='companyUserStatus' and i.item_code=cu.status " +
-                " where og.org_code = '" + orgCode + "' and cu.status = 'applySuc' and (u.authDate = '" + create_date + "' or " +
-                " cu.createDate='" + create_date + "')" + " and u.isAuth = 'T' ) "
-                +
+                " where og.org_code = '" + orgCode + "' and cu.status = 'applySuc' and u.isAuth = 'T' and ((u.authDate = '" + create_date + "' or " +
+                " cu.createDate='" + create_date + "') and currentStatus='normal') or (cu.createDate= '"+create_date+"' and currentStatus='deleted')" +
+                " GROUP BY `companyId`,userId\n ) "+
                 " UNION  " +
                 " (select null id ,u.companyid  ,null sectionId, userId, userName, ovu.createDate,ovu.createtime, roleType,status," +
                 "currentStatus, postId,u.idHandleImgUrl,u.idType ,u.idno idNO,null companyFloor,u.phone,u.bid " +
                 " from " + TableList.ORG_VIP_USER + " ovu\n" +
                 "left join " + TableList.USER + " u on ovu.userId=u.id \n" +
                 "left join " + TableList.ORG + " org on org.id=ovu.orgId   " +
-                "where org.org_code='" + orgCode + "'  and u.isAuth = 'T' and DATE_FORMAT(ovu.createDate, '%Y-%m-%d') = '" + create_date + "'))x";
+                "where org.org_code='" + orgCode + "'  and u.isAuth = 'T' and (DATE_FORMAT(ovu.`updateTime`,  '%Y-%m-%d') = '" + create_date + "' or DATE_FORMAT(ovu.createDate, '%Y-%m-%d') = '" + create_date + "')))x";
                logger.info(columnSql+fromSql);
 
         PageModel page = findPage("select * ",columnSql+fromSql, pageNum, pageSize==null?50:pageSize);

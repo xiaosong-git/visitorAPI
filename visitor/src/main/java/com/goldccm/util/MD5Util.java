@@ -89,7 +89,8 @@ public class MD5Util {
 
     public static void main(String[] args) throws Exception {
 
-        String s = "abc&2&1&1&1569811676678|W0M0MzQ3NzIzNjA5NDI1OTIwXVvlj7bpnJZdWzEyQTEzQ0ZFMDA0MDc0RTBERDVBMzJFRjkxMDM0QzEzQTc0QUU0NEVBQTk4NUU4Q11b6ZmI57u05Y+RXVsxODE1MDc5Nzc0OF1baGx4el1bMjAxOS0wOS0yMCAxMDo1MF1bMjAxOS0wOS0yMCAxMjo1MF0=";
+//        String s = "abc&2&1&1&1569811676678|W0M0MzQ3NzIzNjA5NDI1OTIwXVvlj7bpnJZdWzEyQTEzQ0ZFMDA0MDc0RTBERDVBMzJFRjkxMDM0QzEzQTc0QUU0NEVBQTk4NUU4Q11b6ZmI57u05Y+RXVsxODE1MDc5Nzc0OF1baGx4el1bMjAxOS0wOS0yMCAxMDo1MF1bMjAxOS0wOS0yMCAxMjo1MF0=";
+        String s = "123";
 
         System.out.println(MD5(s));
         System.out.println(MD5Encode(s));

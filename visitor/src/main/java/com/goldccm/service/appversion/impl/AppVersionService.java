@@ -8,6 +8,7 @@ import com.goldccm.model.compose.TableList;
 import com.goldccm.service.appversion.IAppVersionService;
 import com.goldccm.service.base.impl.BaseServiceImpl;
 import com.goldccm.service.param.IParamService;
+import com.goldccm.util.BaseUtil;
 import com.goldccm.util.RedisUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -127,6 +128,7 @@ public class AppVersionService extends BaseServiceImpl implements IAppVersionSer
      */
     public Result updateIos(String appType,Map<String,Object> paramMap) throws Exception{
         Object channel = paramMap.get("channel");
+        Integer versionNum = BaseUtil.objToInteger(paramMap.get("versionNum"),0);
         //获取最新版本信息
         String isoChannel = "AppStore";
         Result result = null;

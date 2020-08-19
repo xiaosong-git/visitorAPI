@@ -40,6 +40,7 @@ public class QrcodeController extends BaseController{
             return Result.unDataResult("fail","获取二维码失败！");
         }
     }
+    //新东网二维码
     @AuthCheckAnnotation(checkLogin = false, checkVerify = false, checkRequestLegal = false)
     @RequestMapping("/otherQrcode")
     @ResponseBody
