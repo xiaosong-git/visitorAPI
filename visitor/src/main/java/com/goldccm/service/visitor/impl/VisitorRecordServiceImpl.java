@@ -1063,14 +1063,15 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
                     visitRecord.put(entry.getKey(), "无");
                 }
             }
+            //todo 批量生成访问记录--还未验证代码准确性
             if (userIds!=null){
                 StringBuffer prefixSql = new StringBuffer("insert into " + TableList.VISITOR_RECORD + "(userId,visitorId,cstatus,visitDate,visitTime,reason,startDate,endDate,vitype,recordType,pid) values");
                 StringBuffer suffixSql = new StringBuffer();
                 String[] split = userIds.split(",");
-                for (String s : split) {
-                    suffixSql.append("(" + s + "," + visitorId + ","+"applyConfirm,"+DateUtil.getCurDate()+","+DateUtil.getCurTime()+","+reason+","+startDate+","+endDate+",'F',"+"1,"+saveVisitRecord+"),");
+                for (String uid : split) {
+                    suffixSql.append("(" + uid + "," + visitorId + ","+"applyConfirm,"+DateUtil.getCurDate()+","+DateUtil.getCurTime()+","+reason+","+startDate+","+endDate+",'F',"+"1,"+saveVisitRecord+"),");
                 }
-                //todo 批量生成访问记录
+
                 int[] ints = baseDao.batchUpdate(prefixSql + suffixSql.substring(0, suffixSql.length() - 1));
             }
             //访问
