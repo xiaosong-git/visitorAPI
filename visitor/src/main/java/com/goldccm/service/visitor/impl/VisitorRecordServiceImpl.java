@@ -977,6 +977,9 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
         String startDate = BaseUtil.objToStr(paramMap.get("startDate"), "");
         String endDate = BaseUtil.objToStr(paramMap.get("endDate"), "");
         String reason = BaseUtil.objToStr(paramMap.get("reason"), "");
+        // update by cwf  2020-08-19 15:30 Reason:访问邀约新增随行人员以及车辆的接口
+        String userIds= BaseUtil.objToStr(paramMap.get("userIds"), null);
+        String carNumber= BaseUtil.objToStr(paramMap.get("carNumber"), null);
         String sql;
         if (userId == null) {
             return Result.unDataResult(ConsantCode.FAIL, "缺少用户参数!");
@@ -1045,7 +1048,12 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
         visitRecord.put("endDate", endDate);
         visitRecord.put("vitype", "F");
         visitRecord.put("recordType", 1);
+        //todo 新增车牌号
+        if (carNumber!=null&&!"".equals(carNumber)){
+            visitRecord.put("carNumber",carNumber);
+        }
         //记录访问记录
+        //todo 访问邀约新增随行人员以及车辆
         int saveVisitRecord = save(TableList.VISITOR_RECORD, visitRecord);
         if (saveVisitRecord > 0) {
             visitRecord.put("id",saveVisitRecord);
@@ -1054,6 +1062,16 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
                 if (entry.getValue() == null) {
                     visitRecord.put(entry.getKey(), "无");
                 }
+            }
+            if (userIds!=null){
+                StringBuffer prefixSql = new StringBuffer("insert into " + TableList.VISITOR_RECORD + "(userId,visitorId,cstatus,visitDate,visitTime,reason,startDate,endDate,vitype,recordType,pid) values");
+                StringBuffer suffixSql = new StringBuffer();
+                String[] split = userIds.split(",");
+                for (String s : split) {
+                    suffixSql.append("(" + s + "," + visitorId + ","+"applyConfirm,"+DateUtil.getCurDate()+","+DateUtil.getCurTime()+","+reason+","+startDate+","+endDate+",'F',"+"1,"+saveVisitRecord+"),");
+                }
+                //todo 批量生成访问记录
+                int[] ints = baseDao.batchUpdate(prefixSql + suffixSql.substring(0, suffixSql.length() - 1));
             }
             //访问
             visitPushService.visitPush(startDate,user,visitor,visitRecord,5);
