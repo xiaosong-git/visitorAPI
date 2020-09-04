@@ -95,7 +95,6 @@ public class VisitPushServiceImpl extends BaseServiceImpl implements IVisitPushS
             Integer errcode = BaseUtil.objToInteger(resultMap.get("errcode"), 2333);
             String errmsg = BaseUtil.objToStr(resultMap.get("errmsg"), "");
             if (errcode == 0) {
-
                 // 发送成功
                 logger.info("发送微信模板成功，url:{}", url);
             } else {

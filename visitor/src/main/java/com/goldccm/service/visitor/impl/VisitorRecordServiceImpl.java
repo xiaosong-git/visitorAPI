@@ -324,23 +324,41 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
             return Result.unDataResult("fail", "已经过了有效期，请通知您的客户重新预约!");
         }
         //访客记录
-        Map<String, Object> visitorRecord = new HashMap<String, Object>();
-        visitorRecord.put("replyDate", DateUtil.getCurDate());
-        visitorRecord.put("replyTime", DateUtil.getCurTime());
+
+
+//        Map<String, Object> visitorRecord = new HashMap<String, Object>();
+//        visitorRecord.put("replyDate", DateUtil.getCurDate());
+//        visitorRecord.put("replyTime", DateUtil.getCurTime());
+
+
+        StringBuilder setSql = new StringBuilder();
+        setSql.append("replyDate = '"+ DateUtil.getCurDate()+"'");
+        setSql.append(",replyTime = '"+ DateUtil.getCurTime()+"'");
+
 
         String visitorResult = "";
         if ("applySuccess".equals(cstatus)) {
             String dateType = BaseUtil.objToStr(paramMap.get("dateType"), null);
             String startDate = BaseUtil.objToStr(paramMap.get("startDate"), null);
             String endDate = BaseUtil.objToStr(paramMap.get("endDate"), null);
-            visitorRecord.put("cstatus", cstatus);
-            visitorRecord.put("dateType", dateType);
-            visitorRecord.put("startDate", startDate);
-            visitorRecord.put("endDate", endDate);
+//            visitorRecord.put("cstatus", cstatus);
+//            visitorRecord.put("dateType", dateType);
+//            visitorRecord.put("startDate", startDate);
+//            visitorRecord.put("endDate", endDate);
+
+            setSql.append(",cstatus = '"+ cstatus+"'");
+            setSql.append(",dateType = '"+ dateType+"'");
+            setSql.append(",startDate = '"+ startDate+"'");
+            setSql.append(",endDate = '"+ endDate+"'");
+
+
             visitorResult = "接受访问";
         } else if ("applyFail".equals(cstatus)) {
-            visitorRecord.put("cstatus", cstatus);
-            visitorRecord.put("answerContent", answerContent);
+//            visitorRecord.put("cstatus", cstatus);
+//            visitorRecord.put("answerContent", answerContent);
+
+            setSql.append(",cstatus = '"+ cstatus+"'");
+            setSql.append(",answerContent = '"+ answerContent+"'");
             visitorResult = "拒绝访问";
         }
         String visitorDateTime = BaseUtil.objToStr(paramMap.get("startDate"), null);
@@ -351,9 +369,13 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
         // 访客信息phone
         String phone = userUser.get("phone").toString();
 
-        visitorRecord.put("id", id);
+       // visitorRecord.put("id", id);
 
-        Integer update = this.update(TableList.VISITOR_RECORD, visitorRecord);
+        String whereSql ="where id ="+id+" or pid = "+id;
+
+        //Integer update = this.update(TableList.VISITOR_RECORD, visitorRecord);
+        Integer update = this.deleteOrUpdate("update "+TableList.VISITOR_RECORD+" set "+setSql.toString() + whereSql);
+
 
         if (update > 0) {
             // 审核结果
@@ -1069,7 +1091,7 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
                 StringBuffer suffixSql = new StringBuffer();
                 String[] split = userIds.split(",");
                 for (String uid : split) {
-                    suffixSql.append("(" + uid + "," + visitorId + ","+"applyConfirm,"+DateUtil.getCurDate()+","+DateUtil.getCurTime()+","+reason+","+startDate+","+endDate+",'F',"+"1,"+saveVisitRecord+"),");
+                    suffixSql.append("(" + uid + "," + visitorId + ","+"'applyConfirm','"+DateUtil.getCurDate()+"','"+DateUtil.getCurTime()+"','"+reason+"','"+startDate+"','"+endDate+"','F',"+"1,"+saveVisitRecord+"),");
                 }
 
                 int[] ints = baseDao.batchUpdate(prefixSql + suffixSql.substring(0, suffixSql.length() - 1));
@@ -1122,6 +1144,19 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
         visitorRecord.put("replyTime", DateUtil.getCurTime());
         visitorRecord.put("replyUserId", visitorId);
         visitorRecord.put("companyId", companyId);
+
+
+        StringBuilder setSql = new StringBuilder();
+        setSql.append("answerContent =  '"+answerContent+"'");
+        setSql.append(",cstatus = '"+cstatus+"'");
+        setSql.append(",replyDate = '"+DateUtil.getCurDate()+"'");
+        setSql.append(",replyTime = '"+DateUtil.getCurTime()+"'");
+        setSql.append(",replyUserId = '"+visitorId+"'");
+        setSql.append(",companyId = '"+companyId+"'");
+        String whereSql ="where id ="+id+" or pid = "+id;
+        //Integer update = this.update(TableList.VISITOR_RECORD, visitorRecord);
+
+
         //访客Id 访问者
         //访客信息
         Map<String, Object> visitor = userService.getUserByUserId(visitorId);
@@ -1133,11 +1168,15 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
         Long longUserId = Long.valueOf(userId);
         boolean isUserOnline = Constant.SESSIONS.containsKey(longUserId);
         if (isUserOnline) {
-            visitorRecord.put("isReceive", "T");
+            //visitorRecord.put("isReceive", "T");
+            setSql.append(",isReceive = 'T'");
         }
         //更新
         if ("applyFail".equals(cstatus)) {
-            update = update(TableList.VISITOR_RECORD, visitorRecord);
+            //update = update(TableList.VISITOR_RECORD, visitorRecord);
+            update = this.deleteOrUpdate("update "+TableList.VISITOR_RECORD+" set "+setSql.toString() + whereSql);
+
+
         } else {
             Map<String, Object> orgComMap = new HashMap<>();
             if (companyId != 0) {
@@ -1159,9 +1198,13 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 ////            String roleType = BaseUtil.objToStr(orgComMap.get("roleType"), "无");
 //                String accessType = BaseUtil.objToStr(orgComMap.get("accessType"), "0");
 //            logger.info("accessType=" + accessType);
-            visitorRecord.put("orgCode", orgCode);
-            visitorRecord.put("isCompanyFlag","F");
-            update = update(TableList.VISITOR_RECORD, visitorRecord);
+            //visitorRecord.put("orgCode", orgCode);
+            //visitorRecord.put("isCompanyFlag","F");
+           // update = update(TableList.VISITOR_RECORD, visitorRecord);
+
+            setSql.append(",orgCode =  '"+orgCode+"'");
+            setSql.append(",isCompanyFlag = '"+cstatus+"'");
+            update = this.deleteOrUpdate("update "+TableList.VISITOR_RECORD+" set "+setSql.toString() + whereSql);
         }
         if (update > 0) {
             JSONObject msg = new JSONObject();
@@ -1196,6 +1239,11 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
         String startDate = BaseUtil.objToStr(paramMap.get("startDate"), "");
         String endDate = BaseUtil.objToStr(paramMap.get("endDate"), "");
         String reason = BaseUtil.objToStr(paramMap.get("reason"), "");
+
+        // update by cwf  2020-08-19 15:30 Reason:访问邀约新增随行人员以及车辆的接口
+        String userIds= BaseUtil.objToStr(paramMap.get("userIds"), null);
+        String carNumber= BaseUtil.objToStr(paramMap.get("carNumber"), null);
+
         //我的公司id
         Integer companyId = BaseUtil.objToInteger(paramMap.get("companyId"), 0);
         Map<String, Object> user;
@@ -1268,6 +1316,13 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
         visitRecord.put("orgCode", orgCode);
         visitRecord.put("companyId", companyId);
         visitRecord.put("recordType", 2);
+
+
+        //todo 新增车牌号
+        if (carNumber!=null&&!"".equals(carNumber)){
+            visitRecord.put("carNumber",carNumber);
+        }
+
         //提示为非好友邀约
 //        visitRecord.put("answerContent", "非好友邀约");
         //记录访问记录
@@ -1275,6 +1330,7 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
 
         if (saveVisitRecord > 0) {
             visitRecord.put("id",saveVisitRecord);
+
             for (Map.Entry<String, Object> entry : visitRecord.entrySet()) {
                 if (entry.getValue() == null) {
                     visitRecord.put(entry.getKey(), "无");
@@ -1285,6 +1341,16 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
                 String url = Constant.URL + encode;
                 YunPainSmsUtil.sendSmsCode(url, phone, 6, addr, companyName, endDate, userName, startDate, visitorName);
             }else{
+                //todo 批量生成访问记录--还未验证代码准确性
+                if (userIds!=null){
+                    StringBuffer prefixSql = new StringBuffer("insert into " + TableList.VISITOR_RECORD + "(userId,visitorId,cstatus,visitDate,visitTime,reason,startDate,endDate,vitype,recordType,pid) values");
+                    StringBuffer suffixSql = new StringBuffer();
+                    String[] split = userIds.split(",");
+                    for (String uid : split) {
+                        suffixSql.append("(" + uid + "," + visitorId + ","+"'applyConfirm','"+DateUtil.getCurDate()+"','"+DateUtil.getCurTime()+"','"+reason+"','"+startDate+"','"+endDate+"','F',"+"1,"+saveVisitRecord+"),");
+                    }
+                    int[] ints = baseDao.batchUpdate(prefixSql + suffixSql.substring(0, suffixSql.length() - 1));
+                }
 
                 visitPushService.visitPush(startDate,visitor,user,visitRecord,8);
             }
@@ -1314,15 +1380,31 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
             if (id == null || userId == null || cstatus == null) {
                 return Result.unDataResult("fail", "缺少参数");
             }
-            updateMap.put("id", id);
-            updateMap.put("replyUserId", userId);
-            updateMap.put("replyDate", DateUtil.getCurDate());
-            updateMap.put("replyTime", DateUtil.getCurTime());
-            updateMap.put("cstatus", cstatus);
-            updateMap.put("answerContent", answerContent);
-            updateMap.put("isReceive", "F");
 
-            int update = update(TableList.VISITOR_RECORD, updateMap);
+
+
+//            updateMap.put("id", id);
+//            updateMap.put("replyUserId", userId);
+//            updateMap.put("replyDate", DateUtil.getCurDate());
+//            updateMap.put("replyTime", DateUtil.getCurTime());
+//            updateMap.put("cstatus", cstatus);
+//            updateMap.put("answerContent", answerContent);
+//            updateMap.put("isReceive", "F");
+
+//            int update = update(TableList.VISITOR_RECORD, updateMap);
+
+            StringBuilder setSql = new StringBuilder();
+            setSql.append("replyUserId = "+userId);
+            setSql.append(",replyDate = '"+DateUtil.getCurDate()+"'");
+            setSql.append(",replyTime = '"+DateUtil.getCurTime()+"'");
+            setSql.append(",cstatus = '"+cstatus+"'");
+            setSql.append(",answerContent = '"+answerContent+"'");
+            setSql.append(",isReceive = 'F'");
+            String whereSql ="where id ="+id+" or pid = "+id;
+            //Integer update = this.update(TableList.VISITOR_RECORD, visitorRecord);
+            Integer update = this.deleteOrUpdate("update "+TableList.VISITOR_RECORD+" set "+setSql.toString() + whereSql);
+
+
             String apply = "同意";
             if ("applyFail".equals(cstatus)) {
                 apply = "拒绝";
@@ -1763,11 +1845,30 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
         if (id == 0) {
             Result.unDataResult("fail", "id不能为空");
         }
-        String sql = "select vr.*,realName,niceName,sex,idHandleImgUrl,headImgUrl,c.companyName,c.addr from " + TableList.VISITOR_RECORD + " vr left join " + TableList.USER + " u" +
+        String sql = "select vr.*,u.realName,u.niceName,u.sex,u.idHandleImgUrl,u.headImgUrl,c.companyName,c.addr,carNumber,u2.realName as userName " ;
+        String fromSql = " from " + TableList.VISITOR_RECORD + " vr left join " + TableList.USER + " u" +
                 " on u.id=vr.visitorId " +
+                " left join "+ TableList.USER + " u2 on u2.id=vr.userId "+
                 " left join " + TableList.COMPANY + " c on c.id=vr.companyId " +
-                "where vr.id=" + id;
-        Map<String, Object> recordMap = findFirstBySql(sql);
+                "where vr.id=" + id +" or pid = "+id;
+        List<Map<String, Object>> list = findList(sql,fromSql);
+
+        Map<String, Object> recordMap =new HashMap<>();
+        String entourage =""; //随行人员
+        for(Map<String, Object> map : list)
+        {
+            //pid 为空，为主访问记录,否则是随行人员将人员姓名添加到对应的字段
+            if(map.get("pid")==null || "".equals(map.get("pid").toString())) {
+                recordMap = map;
+            }else{
+                entourage+=map.get("userName")+",";
+            }
+        }
+        if(entourage.length()>1)
+        {
+            entourage = entourage.substring(0,entourage.length()-1);
+        }
+        recordMap.put("entourage",entourage);
 
         return ResultData.dataResult("success", "获取成功", recordMap);
     }
@@ -2110,10 +2211,10 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
                 "IF( c.addr IS NULL, '', c.addr ) addr" + " FROM (\n" +
                 "select id,IF(userId=" + userId + ",visitorId,userId) visitorId,startDate,endDate,companyId,orgCode\n" +
                 "from tbl_visitor_record\n" +
-                "where userId=" + userId + " or visitorId=" + userId + ")vr\n" +
+                "where   pid is null and (userId=" + userId + " or visitorId=" + userId + "))vr\n" +
                 "LEFT JOIN " + TableList.USER + " u ON vr.visitorId = u.id\n" +
                 "LEFT JOIN " + TableList.COMPANY + " c ON c.id = vr.companyId\n" +
-                " where u.realName is not null\n" +
+                " where u.realName is not null \n" +
                 "GROUP BY visitorId order by startDate desc)x";
         logger.info(coloumSql + fromSql);
         PageModel page = findPage(coloumSql, fromSql, pageNum, pageSize);
