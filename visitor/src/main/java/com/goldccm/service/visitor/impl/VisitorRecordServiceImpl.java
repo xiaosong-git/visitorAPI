@@ -1203,7 +1203,7 @@ public class VisitorRecordServiceImpl extends BaseServiceImpl implements IVisito
            // update = update(TableList.VISITOR_RECORD, visitorRecord);
 
             setSql.append(",orgCode =  '"+orgCode+"'");
-            setSql.append(",isCompanyFlag = '"+cstatus+"'");
+            setSql.append(",cstatus = '"+cstatus+"'");
             update = this.deleteOrUpdate("update "+TableList.VISITOR_RECORD+" set "+setSql.toString() + whereSql);
         }
         if (update > 0) {
