@@ -39,9 +39,9 @@ public class DevelopDataSourceConfig {
 //         dataSource.setUrl("jdbc:mysql://121.37.25.161:3306/visitor?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&autoReconnect=true");
 //         dataSource.setUsername("root");
 //         dataSource.setPassword("123456");
-         dataSource.setUrl("jdbc:mysql://192.168.1.54:3306/visitor?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&autoReconnect=true&useSSL=false");
+         dataSource.setUrl("jdbc:mysql://localhost:3306/visitor?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&autoReconnect=true&useSSL=false");
          dataSource.setUsername("root");
-         dataSource.setPassword("flzxsqc!11");
+         dataSource.setPassword("root");
 //            dataSource.setUrl("jdbc:mysql://134.175.44.10:3306/vistor?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&autoReconnect=true");
 //            dataSource.setUsername("test");
 //            dataSource.setPassword("pd123456");
